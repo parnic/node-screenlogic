@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"license": "MIT",
 	"repository": "https://github.com/parnic/ScreenLogicConnect-NodeJS.git",
+	"main": "index.js",
 	"dependencies": {
 		"smart-buffer": "~4.0.1"
 	}

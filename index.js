@@ -1,45 +1,7 @@
 var dgram = require('dgram');
 var net = require('net');
-const SmartBuffer = require('smart-buffer').SmartBuffer;
 const EventEmitter = require('events');
-
-class SLMessage extends SmartBuffer {
-  constructor(senderId, messageId) {
-    super();
-    this.writeUInt16LE(senderId);
-    this.writeUInt16LE(messageId);
-
-    this._wroteSize = false;
-  }
-
-  toBuffer() {
-    if (this._wroteSize === false) {
-      this.insertInt32LE(this.length - 4, 4);
-      this._wroteSize = true;
-    } else {
-      this.writeInt32LE(this.length - 8, 4);
-    }
-
-    return super.toBuffer();
-  }
-
-  writeSLString(str) {
-    this.writeInt32LE(str.length);
-    this.writeString(str);
-    this.skip(4 - (str.length % 4));
-  }
-
-  writeSLBuffer(buf) {
-    this.writeInt32LE(buf.length);
-    this.writeBuffer(buf);
-  }
-
-  skip(num) {
-    if (num > 0) {
-      this.writeBuffer(Buffer.alloc(num));
-    }
-  }
-}
+const messages = require('./messages');
 
 class FindUnits extends EventEmitter {
   constructor() {
@@ -124,44 +86,22 @@ class UnitConnection extends EventEmitter {
     this.client.write('CONNECTSERVERHOST\r\n\r\n');
 
     console.log('sending challenge message...');
-    var buf = new SLMessage(0, 14);
-    this.client.write(buf.toBuffer());
+    this.client.write(new messages.SLChallengeMessage().toBuffer());
   }
 
   login() {
     console.log('sending login message...');
-    var buf = new SLMessage(0, 27);
-    buf.writeInt32LE(348); // schema
-    buf.writeInt32LE(0); // connection type
-    buf.writeSLString('ScreenLogicConnect library'); // version
-    buf.writeSLBuffer(Buffer.alloc(16)); // encoded password. empty/unused for local connections
-    buf.writeInt32LE(2); // procID
-    this.client.write(buf.toBuffer());
+    this.client.write(new messages.SLLoginMessage().toBuffer());
   }
 
   getPoolStatus() {
     console.log('sending pool status query...');
-    var buf = new SLMessage(0, 12526);
-    buf.writeInt32LE(0);
-    this.client.write(buf.toBuffer());
-  }
-
-  parsePoolStatus(msg) {
-    // todo: actually parse the message
-    this.emit('poolStatus', {});
+    this.client.write(new messages.SLPoolStatusMessage().toBuffer());
   }
 
   getControllerConfig() {
     console.log('sending controller config query...');
-    var buf = new SLMessage(0, 12532);
-    buf.writeInt32LE(0);
-    buf.writeInt32LE(0);
-    this.client.write(buf.toBuffer());
-  }
-
-  parseControllerConfig(msg) {
-    // todo: actually parse the message
-    this.emit('controllerConfig', {});
+    this.client.write(new messages.SLControllerConfigMessage().toBuffer());
   }
 
   onClientMessage(msg) {
@@ -175,10 +115,10 @@ class UnitConnection extends EventEmitter {
       this.emit('loggedIn');
     } else if (msgType === 12527) {
       console.log("  it's pool status");
-      this.parsePoolStatus(msg);
+      this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
     } else if (msgType === 12533) {
       console.log("  it's controller configuration");
-      this.parseControllerConfig(msg);
+      this.emit('controllerConfig', new messages.SLControllerConfigMessage(msg));
     }
   }
 }
@@ -191,6 +131,5 @@ for (const value of buf.values()) {
 
 module.exports = {
   FindUnits,
-  SLMessage,
   UnitConnection
 }
