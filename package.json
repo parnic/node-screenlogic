@@ -1,7 +1,7 @@
 {
 	"name": "screen-logic-connect",
 	"description": "Tool for connecting to Pentair ScreenLogic systems on the local network",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"main": "index.js",
 	"license": "MIT",
 	"repository": "https://github.com/parnic/ScreenLogicConnect-NodeJS.git",
