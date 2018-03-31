@@ -26,7 +26,7 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
       this.maxSetPoint[i] = this.readUInt8();
     }
 
-    this.degC = this.readUInt8();
+    this.degC = this.readUInt8() !== 0;
     this.controllerType = this.readUInt8();
     this.hwType = this.readUInt8();
     this.controllerData = this.readUInt8();
@@ -47,10 +47,9 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
         colorPos: this.readUInt8(),
         colorStagger: this.readUInt8(),
         deviceId: this.readUInt8(),
-        dfaultRt: this.readUInt16LE(),
-        pad1: this.readUInt8(),
-        pad2: this.readUInt8()
+        dfaultRt: this.readUInt16LE()
       }
+      this._readOffset += 2;
     }
 
     let colorCount = this.readInt32LE();
