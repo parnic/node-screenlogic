@@ -18,6 +18,8 @@ exports.SLChemDataMessage = class SLChemDataMessage extends SLMessage {
   decode() {
     super.decode();
 
+    this.isValid = false;
+
     let sentinel = this.readInt32LE();
     if (sentinel === 42) {
       this.isValid = true;
