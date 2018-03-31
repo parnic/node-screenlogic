@@ -181,12 +181,12 @@ Returns a bool indicating whether the pool is currently active or not.
 * `coolSetPoint` - array of size 0-2 holding the cooling set point for each body as an integer (spa/pool) (check controller config to see if it's in celsius or fahrenheit)
 * `heatMode` - array of size 0-2 indicating whether heating is enabled or not for each body as an integer (spa/pool)
 * `circuitArray` - array holding all circuits in the system
-** `id` - integer representing the circuit's ID (spa is 500, pool is 505)
-** `state` - integer indicating whether the circuit is on or not (0/1)
-** `colorSet` - byte
-** `colorPos` - byte
-** `colorStagger` - byte
-** `delay` - byte
+  * `id` - integer representing the circuit's ID (spa is 500, pool is 505)
+  * `state` - integer indicating whether the circuit is on or not (0/1)
+  * `colorSet` - byte
+  * `colorPos` - byte
+  * `colorStagger` - byte
+  * `delay` - byte
 * `pH` - float indicating the current pH level (e.g.: 7.62)
 * `orp` - integer indicating the current ORP value if available (e.g.: 650)
 * `saturation` - float indicating the water balance/saturation level (e.g.: -0.13)
@@ -248,20 +248,20 @@ Passed as an argument to the emitted `controllerConfig` event handler.
 * `equipFlags` - integer
 * `genCircuitName` - string indicating the circuit name
 * `bodyArray` - array (size number-of-circuits) holding circuit data
-** `circuitId` - integer indicating circuit ID (e.g.: 500 is spa, 505 is pool)
-** `name` - string representing the name of the circuit
-** `nameIndex` - byte
-** `function` - byte
-** `interface` - byte
-** `flags` - byte
-** `colorSet` - byte
-** `colorPos` - byte
-** `colorStagger` - byte
-** `deviceId` - byte
-** `dfaultRt` - short
+  * `circuitId` - integer indicating circuit ID (e.g.: 500 is spa, 505 is pool)
+  * `name` - string representing the name of the circuit
+  * `nameIndex` - byte
+  * `function` - byte
+  * `interface` - byte
+  * `flags` - byte
+  * `colorSet` - byte
+  * `colorPos` - byte
+  * `colorStagger` - byte
+  * `deviceId` - byte
+  * `dfaultRt` - short
 * `colorArray` - array (size number-of-colors) holding data about available light colors
-** `name` - color name
-** `color` - object containing `r`/`g`/`b` properties as bytes (values from 0-255) indicating the color
+  * `name` - color name
+  * `color` - object containing `r`/`g`/`b` properties as bytes (values from 0-255) indicating the color
 * `pumpCircArray` - array (size 8) holding data about pumps attached to the system
 * `interfaceTabFlags` - integer
 * `showAlarms` - integer
