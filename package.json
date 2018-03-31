@@ -1,5 +1,5 @@
 {
-	"name": "screen-logic-connect",
+	"name": "node-screenlogic",
 	"description": "Tool for connecting to Pentair ScreenLogic systems on the local network",
 	"version": "1.0.0",
 	"main": "index.js",
