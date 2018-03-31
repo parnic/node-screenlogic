@@ -2,7 +2,14 @@ const ScreenLogic = require('./index');
 
 var finder = new ScreenLogic.FindUnits();
 finder.on('serverFound', function(server) {
-  var client = new ScreenLogic.UnitConnection(server);
+  connect(new ScreenLogic.UnitConnection(server));
+});
+
+finder.search();
+
+//connect(new ScreenLogic.UnitConnection(80, '10.0.0.85'));
+
+function connect(client) {
   client.on('loggedIn', function() {
     this.getVersion();
     this.getPoolStatus();
@@ -32,6 +39,4 @@ finder.on('serverFound', function(server) {
   });
 
   client.connect();
-});
-
-finder.search();
+}
