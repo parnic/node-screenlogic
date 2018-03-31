@@ -104,6 +104,21 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLControllerConfigMessage().toBuffer());
   }
 
+  getChemicalData() {
+    console.log('sending chemical data query...');
+    this.client.write(new messages.SLChemDataMessage().toBuffer());
+  }
+
+  getSaltCellConfig() {
+    console.log('sending salt cell config query...');
+    this.client.write(new messages.SLSaltCellConfigMessage().toBuffer());
+  }
+
+  getVersion() {
+    console.log('sending version query...');
+    this.client.write(new messages.SLVersionMessage().toBuffer());
+  }
+
   onClientMessage(msg) {
     console.log('received message of length ' + msg.length);
     var msgType = msg.readInt16LE(2);
@@ -119,6 +134,17 @@ class UnitConnection extends EventEmitter {
     } else if (msgType === 12533) {
       console.log("  it's controller configuration");
       this.emit('controllerConfig', new messages.SLControllerConfigMessage(msg));
+    } else if (msgType === 12593) {
+      console.log("  it's chem data");
+      this.emit('chemicalData', new messages.SLChemDataMessage(msg));
+    } else if (msgType === 12573) {
+      console.log("  it's salt cell config");
+      this.emit('saltCellConfig', new messages.SLSaltCellConfigMessage(msg));
+    } else if (msgType === 8121) {
+      console.log("  it's version");
+      this.emit('version', new messages.SLVersionMessage(msg));
+    } else {
+      console.log("  it's unknown. type: " + msgType);
     }
   }
 }

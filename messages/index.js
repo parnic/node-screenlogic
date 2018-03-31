@@ -2,3 +2,6 @@ exports.SLPoolStatusMessage = require("./SLPoolStatusMessage.js").SLPoolStatusMe
 exports.SLControllerConfigMessage = require("./SLControllerConfigMessage.js").SLControllerConfigMessage;
 exports.SLChallengeMessage = require("./SLChallengeMessage.js").SLChallengeMessage;
 exports.SLLoginMessage = require("./SLLoginMessage.js").SLLoginMessage;
+exports.SLChemDataMessage = require("./SLChemDataMessage.js").SLChemDataMessage;
+exports.SLSaltCellConfigMessage = require("./SLSaltCellConfigMessage.js").SLSaltCellConfigMessage;
+exports.SLVersionMessage = require("./SLVersionMessage.js").SLVersionMessage;

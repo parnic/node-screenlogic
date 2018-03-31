@@ -59,10 +59,10 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
       }
     }
 
-    this.pH = this.readInt32LE();
+    this.pH = this.readInt32LE() / 100;
     this.orp = this.readInt32LE();
-    this.saturation = this.readInt32LE();
-    this.saltPPM = this.readInt32LE();
+    this.saturation = this.readInt32LE() / 100;
+    this.saltPPM = this.readInt32LE() * 50;
     this.pHTank = this.readInt32LE();
     this.orpTank = this.readInt32LE();
     this.alarms = this.readInt32LE();
