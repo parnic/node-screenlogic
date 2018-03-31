@@ -134,6 +134,15 @@ Requests controller configuration from the connected unit. Emits the `controller
 * `saltCellConfig` - Indicates that a response to `getSaltCellConfig()` has been received. Event handler receives a [`SLSaltCellConfigMessage`](#slsaltcellconfigmessage) object.
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 
+### Properties
+
+* `address` - string representing the IPv4 address of the found server
+* `type` - integer representing the type of server found (will always be 2)
+* `port` - short representing the port to use for TCP connections to this server
+* `gatewayType` - byte
+* `gatewaySubtype` - byte
+* `gatewayName` - string representing the server's name. Will be in the format Pentair: xx-xx-xx
+
 ## SLVersionMessage
 
 Passed as an argument to the emitted `version` event handler.
