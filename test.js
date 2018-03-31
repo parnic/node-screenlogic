@@ -15,6 +15,8 @@ finder.on('serverFound', function(server) {
     console.log(" salt ppm=" + status.saltPPM);
     console.log(" pH=" + status.pH);
     console.log(" saturation=" + status.saturation);
+    console.log(" spa active=" + status.isSpaActive());
+    console.log(" pool active=" + status.isPoolActive());
   }).on('controllerConfig', function(config) {
     console.log(" controller is in celsius=" + config.degC);
     client.close();

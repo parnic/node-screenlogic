@@ -1,5 +1,8 @@
 const SLMessage = require('./SLMessage.js').SLMessage;
 
+const SPA_CIRCUIT_ID = 500;
+const POOL_CIRCUIT_ID = 505;
+
 exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
   constructor(buf) {
     super(0, 12526);
@@ -66,5 +69,33 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
     this.pHTank = this.readInt32LE();
     this.orpTank = this.readInt32LE();
     this.alarms = this.readInt32LE();
+  }
+
+  isDeviceReady() {
+    return this.ok === 1;
+  }
+
+  isDeviceSync() {
+    return this.ok === 2;
+  }
+
+  isDeviceServiceMode() {
+    return this.ok === 3;
+  }
+
+  isSpaActive() {
+    for (let i = 0; i < this.circuitArray.length; i++) {
+      if (this.circuitArray[i].id === SPA_CIRCUIT_ID) {
+        return this.circuitArray[i].state === 1;
+      }
+    }
+  }
+
+  isPoolActive() {
+    for (let i = 0; i < this.circuitArray.length; i++) {
+      if (this.circuitArray[i].id === POOL_CIRCUIT_ID) {
+        return this.circuitArray[i].state === 1;
+      }
+    }
   }
 }
