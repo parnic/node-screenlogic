@@ -54,7 +54,7 @@ Pull requests to document undocumented properties are most welcome.
 
 Examples:
 ```javascript
-const ScreenLogic = require('./index');
+const ScreenLogic = require('node-screenlogic');
 
 var finder = new ScreenLogic.FindUnits();
 ```
