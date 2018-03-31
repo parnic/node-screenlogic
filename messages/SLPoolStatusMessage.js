@@ -1,11 +1,13 @@
 const SLMessage = require('./SLMessage.js').SLMessage;
 
+const MSG_ID = 12526;
+
 const SPA_CIRCUIT_ID = 500;
 const POOL_CIRCUIT_ID = 505;
 
 exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
   constructor(buf) {
-    super(0, 12526);
+    super(0, MSG_ID);
     if (!buf) {
       this.writeInt32LE(0);
     } else {
@@ -97,5 +99,9 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
         return this.circuitArray[i].state === 1;
       }
     }
+  }
+
+  static getResponseId() {
+    return MSG_ID + 1;
   }
 }

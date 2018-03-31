@@ -1,8 +1,10 @@
 const SLMessage = require('./SLMessage.js').SLMessage;
 
+const MSG_ID = 12592;
+
 exports.SLChemDataMessage = class SLChemDataMessage extends SLMessage {
   constructor(buf) {
-    super(0, 12592);
+    super(0, MSG_ID);
     if (!buf) {
       this.writeInt32LE(0); // controller index
     } else {
@@ -44,5 +46,9 @@ exports.SLChemDataMessage = class SLChemDataMessage extends SLMessage {
       this.scaling = (balance & 2) !== 0;
       this.error = (salt & 128) !== 0;
     }
+  }
+
+  static getResponseId() {
+    return MSG_ID + 1;
   }
 }

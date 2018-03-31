@@ -1,8 +1,10 @@
 const SLMessage = require('./SLMessage.js').SLMessage;
 
+const MSG_ID = 12532;
+
 exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMessage {
   constructor(buf) {
-    super(0, 12532);
+    super(0, MSG_ID);
     if (!buf) {
       this.writeInt32LE(0);
       this.writeInt32LE(0);
@@ -73,5 +75,9 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
 
     this.interfaceTabFlags = this.readInt32LE();
     this.showAlarms = this.readInt32LE();
+  }
+
+  static getResponseId() {
+    return MSG_ID + 1;
   }
 }
