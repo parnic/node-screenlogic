@@ -91,6 +91,15 @@ finder.on('serverFound', function(server) {
 })
 ```
 
+### constructor(port, address)
+
+Port is an integer. Address is an IPv4 address of the server as a string.
+
+Examples:
+```javascript
+var client = new ScreenLogic.UnitConnection(80, '10.0.0.85')
+```
+
 ### connect()
 
 Connects to the server passed to its constructor.

@@ -56,9 +56,15 @@ class FindUnits extends EventEmitter {
 }
 
 class UnitConnection extends EventEmitter {
-  constructor(server) {
+  constructor(server, address) {
     super();
-    this.server = server;
+    if (typeof server === 'object') {
+      this.serverPort = server.port;
+      this.serverAddress = server.address;
+    } else {
+      this.serverPort = server;
+      this.serverAddress = address;
+    }
 
     this.client = new net.Socket();
     var _this = this;
@@ -76,7 +82,7 @@ class UnitConnection extends EventEmitter {
   connect() {
     //console.log("connecting...");
     var _this = this;
-    this.client.connect(this.server.port, this.server.address, function() {
+    this.client.connect(this.serverPort, this.serverAddress, function() {
       _this.onConnected();
     });
   }
