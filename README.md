@@ -136,7 +136,7 @@ Requests controller configuration from the connected unit. Emits the `controller
 
 ### Events
 
-* `loggedIn`
+* `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
 * `version` - Indicates that a response to `getVersion()` has been received. Event handler receives a [`SLVersionMessage`](#slversionmessage) object.
 * `poolStatus` - Indicates that a response to `getPoolStatus()` has been received. Event handler receives a [`SLPoolStatusMessage`](#slpoolstatusmessage) object.
 * `chemicalData` - Indicates that a response to `getChemicalData()` has been received. Event handler receives a [`SLChemDataMessage`](#slchemdatamessage) object.
@@ -193,11 +193,11 @@ Returns a bool indicating whether the pool is currently active or not.
 * `spaDelay` - byte
 * `cleanerDelay` - byte
 * `airTemp` - integer representing the current temperature (check controller config to see if it's in celsius or fahrenheit)
-* `currentTemp` - array of size 0-2 indicating current temperature of each body as an integer (spa/pool) (check controller config to see if it's in celsius or fahrenheit)
-* `heatStatus` - array of size 0-2 indicating whether heat is active or not for each body as an integer (spa/pool)
-* `setPoint` - array of size 0-2 holding the heating set point for each body as an integer (spa/pool) (check controller config to see if it's in celsius or fahrenheit)
-* `coolSetPoint` - array of size 0-2 holding the cooling set point for each body as an integer (spa/pool) (check controller config to see if it's in celsius or fahrenheit)
-* `heatMode` - array of size 0-2 indicating whether heating is enabled or not for each body as an integer (spa/pool)
+* `currentTemp` - array of size 0-2 indicating current temperature of each body as an integer (pool: 0, spa: 1) (check controller config to see if it's in celsius or fahrenheit)
+* `heatStatus` - array of size 0-2 indicating whether heat is active or not for each body as an integer (pool: 0, spa: 1)
+* `setPoint` - array of size 0-2 holding the heating set point for each body as an integer (pool: 0, spa: 1) (check controller config to see if it's in celsius or fahrenheit)
+* `coolSetPoint` - array of size 0-2 holding the cooling set point for each body as an integer (pool: 0, spa: 1) (check controller config to see if it's in celsius or fahrenheit)
+* `heatMode` - array of size 0-2 indicating whether heating is enabled or not for each body as an integer (pool: 0, spa: 1)
 * `circuitArray` - array holding all circuits in the system
   * `id` - integer representing the circuit's ID (spa is 500, pool is 505)
   * `state` - integer indicating whether the circuit is on or not (0/1)
@@ -257,8 +257,8 @@ Passed as an argument to the emitted `controllerConfig` event handler.
 ### Properties
 
 * `controllerId` - integer indicating the controller's ID
-* `minSetPoint` - array (size 2) indicating the minimum setpoint available for the pool or spa
-* `maxSetPoint` - array (size 2) indicating the maximum setpoint available for the pool or spa
+* `minSetPoint` - array (size 2) indicating the minimum setpoint available for the pool (index 0) or spa (index 1)
+* `maxSetPoint` - array (size 2) indicating the maximum setpoint available for the pool (index 0) or spa (index 1)
 * `degC` - boolean indicating whether the system is using the centigrade scale for temperatures or not
 * `controllerType` - byte
 * `hwType` - byte
