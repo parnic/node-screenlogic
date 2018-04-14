@@ -10,6 +10,8 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
   }
 
   toBuffer() {
+    this.encode();
+
     if (this._wroteSize === false) {
       this.insertInt32LE(this.length - 4, 4);
       this._wroteSize = true;
@@ -53,5 +55,9 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.senderId = this.readUInt16LE();
     this.messageId = this.readUInt16LE();
     this.dataLength = this.readInt32LE();
+  }
+
+  encode() {
+
   }
 }

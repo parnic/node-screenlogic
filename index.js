@@ -127,6 +127,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLVersionMessage().toBuffer());
   }
 
+  setCircuitState(controllerId, circuitId, circuitState) {
+    this.client.write(new messages.SLSetCircuitStateMessage(controllerId, circuitId, circuitState).toBuffer());
+  }
+
   onClientMessage(msg) {
     //console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
@@ -162,6 +166,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLVersionMessage.getResponseId():
         //console.log("  it's version");
         this.emit('version', new messages.SLVersionMessage(msg));
+        break;
+      case messages.SLSetCircuitStateMessage.getResponseId():
+        //console.log("  it's circuit toggle ack");
+        this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage());
         break;
       default:
         //console.log("  it's unknown. type: " + msgType);
