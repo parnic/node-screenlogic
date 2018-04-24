@@ -134,6 +134,10 @@ Requests salt cell status/configuration from the connected unit (requires an Int
 
 Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back.
 
+### setCircuitState(controllerId, circuitId, circuitState)
+
+Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged.
+
 ### Events
 
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
@@ -142,6 +146,7 @@ Requests controller configuration from the connected unit. Emits the `controller
 * `chemicalData` - Indicates that a response to `getChemicalData()` has been received. Event handler receives a [`SLChemDataMessage`](#slchemdatamessage) object.
 * `saltCellConfig` - Indicates that a response to `getSaltCellConfig()` has been received. Event handler receives a [`SLSaltCellConfigMessage`](#slsaltcellconfigmessage) object.
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
+* `circuitStateChanged` - Indicates that a response to `setCircuitState()` has been received. Event handler receives a [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) object.
 
 ### Properties
 
@@ -283,3 +288,15 @@ Passed as an argument to the emitted `controllerConfig` event handler.
 * `pumpCircArray` - array (size 8) holding data about pumps attached to the system
 * `interfaceTabFlags` - integer
 * `showAlarms` - integer
+
+## SLSetCircuitStateMessage
+
+Passed as an argument to the emitted `circuitStateChanged`. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+
+### Properties
+
+* `controllerId` - integer indicating the ID of the controller to send this command to.
+  * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
+* `circuitId` - integer indicating the ID of the circuit to set the state of.
+  * This ID can be retrieved from `SLControllerConfigMessage`'s `bodyArray` property.
+* `circuitState` - integer indicating whether to switch the circuit on (`1`) or off (`0`).
