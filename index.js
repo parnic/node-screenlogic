@@ -44,7 +44,7 @@ class FindUnits extends EventEmitter {
   }
 
   sendServerBroadcast() {
-    var message = new Uint8Array(8);
+    var message = Buffer.alloc(8);
     message[0] = 1;
     this.finder.send(message, 0, message.length, 1444, "255.255.255.255");
     //console.log("Looking for ScreenLogic hosts...");
