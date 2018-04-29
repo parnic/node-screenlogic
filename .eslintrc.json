@@ -1,0 +1,12 @@
+{
+  "extends": "strongloop",
+  "rules": {
+    "max-len": [2, 120, 8]
+  },
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
+  "env": {
+    "mocha": true
+  }
+}

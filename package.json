@@ -15,9 +15,12 @@
 		"smart-buffer": "~4.0.1"
 	},
 	"devDependencies": {
+		"eslint": "^4.19.1",
+		"eslint-config-strongloop": "^2.1.0",
 		"mocha": "^5.1.1"
 	},
 	"scripts": {
-		"test": "mocha test/*.spec.js"
+		"test": "mocha test/*.spec.js",
+		"pretest": "eslint --ignore-path .gitignore ."
 	}
 }
