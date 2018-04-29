@@ -1,3 +1,5 @@
+'use strict';
+
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12532;
@@ -49,8 +51,8 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
         colorPos: this.readUInt8(),
         colorStagger: this.readUInt8(),
         deviceId: this.readUInt8(),
-        dfaultRt: this.readUInt16LE()
-      }
+        dfaultRt: this.readUInt16LE(),
+      };
       this._readOffset += 2;
     }
 
@@ -60,11 +62,11 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
       this.colorArray[i] = {
         name: this.readSLString(),
         color: {
-          r: this.readInt32LE() & 0xFF,
-          g: this.readInt32LE() & 0xFF,
-          b: this.readInt32LE() & 0xFF
-        }
-      }
+          r: this.readInt32LE() & 0xff,
+          g: this.readInt32LE() & 0xff,
+          b: this.readInt32LE() & 0xff,
+        },
+      };
     }
 
     let pumpCircCount = 8;
@@ -80,4 +82,4 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
   static getResponseId() {
     return MSG_ID + 1;
   }
-}
+};

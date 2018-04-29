@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const ScreenLogic = require('../index');
 
@@ -7,9 +7,9 @@ describe('Finder', () => {
   it('finds a server', done => {
     let finder = new ScreenLogic.FindUnits();
     finder.on('serverFound', server => {
-      finder.close()
-      done()
-    })
+      finder.close();
+      done();
+    });
     finder.search();
-  })
-})
+  });
+});

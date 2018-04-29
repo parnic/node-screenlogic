@@ -1,3 +1,5 @@
+'use strict';
+
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12572;
@@ -30,4 +32,4 @@ exports.SLSaltCellConfigMessage = class SLSaltCellConfigMessage extends SLMessag
   static getResponseId() {
     return MSG_ID + 1;
   }
-}
+};

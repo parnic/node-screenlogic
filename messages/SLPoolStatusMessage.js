@@ -1,3 +1,5 @@
+'use strict';
+
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12526;
@@ -60,8 +62,8 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
         colorSet: this.readUInt8(),
         colorPos: this.readUInt8(),
         colorStagger: this.readUInt8(),
-        delay: this.readUInt8()
-      }
+        delay: this.readUInt8(),
+      };
     }
 
     this.pH = this.readInt32LE() / 100;
@@ -104,4 +106,4 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
   static getResponseId() {
     return MSG_ID + 1;
   }
-}
+};

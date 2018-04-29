@@ -1,3 +1,5 @@
+'use strict';
+
 const SmartBuffer = require('smart-buffer').SmartBuffer;
 
 exports.SLMessage = class SLMessage extends SmartBuffer {
@@ -25,16 +27,16 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
   writeSLString(str) {
     this.writeInt32LE(str.length);
     this.writeString(str);
-    if (str.length % 4 != 0) {
-      this.skipWrite(4 - (str.length % 4));
+    if (str.length % 4 !== 0) {
+      this.skipWrite(4 - str.length % 4);
     }
   }
 
   readSLString() {
     var len = this.readInt32LE();
     var str = this.readString(len);
-    if (len % 4 != 0) {
-      this.readOffset += 4 - (len % 4);
+    if (len % 4 !== 0) {
+      this.readOffset += 4 - len % 4;
     }
     return str;
   }
@@ -57,7 +59,5 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.dataLength = this.readInt32LE();
   }
 
-  encode() {
-
-  }
-}
+  encode() {}
+};

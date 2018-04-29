@@ -1,3 +1,5 @@
+'use strict';
+
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 27;
@@ -15,4 +17,4 @@ exports.SLLoginMessage = class SLLoginMessage extends SLMessage {
   static getResponseId() {
     return MSG_ID + 1;
   }
-}
+};

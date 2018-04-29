@@ -1,14 +1,16 @@
+'use strict';
+
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12530;
 
 exports.SLSetCircuitStateMessage = class SLSetCircuitStateMessage extends SLMessage {
   constructor(controllerId, circuitId, circuitState) {
-  	super(0, MSG_ID);
+    super(0, MSG_ID);
 
-  	this.controllerId = controllerId;
-  	this.circuitId = circuitId;
-  	this.circuitState = circuitState;
+    this.controllerId = controllerId;
+    this.circuitId = circuitId;
+    this.circuitState = circuitState;
   }
 
   encode() {
@@ -22,4 +24,4 @@ exports.SLSetCircuitStateMessage = class SLSetCircuitStateMessage extends SLMess
   static getResponseId() {
     return MSG_ID + 1;
   }
-}
+};

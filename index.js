@@ -1,3 +1,5 @@
+'use strict';
+
 var dgram = require('dgram');
 var net = require('net');
 const EventEmitter = require('events');
@@ -8,10 +10,10 @@ class FindUnits extends EventEmitter {
     super();
     this.finder = dgram.createSocket('udp4');
     var _this = this;
-    this.finder.on('message', function (message, remote) {
+    this.finder.on('message', function(message, remote) {
       _this.foundServer(message, remote);
     }).on('close', function() {
-      //console.log('finder closed');
+      // console.log('finder closed');
     });
   }
 
@@ -25,7 +27,7 @@ class FindUnits extends EventEmitter {
   }
 
   foundServer(message, remote) {
-    //console.log('Found something');
+    // console.log('Found something');
     if (message.length >= 40) {
       var server = {
         address: remote.address,
@@ -33,10 +35,11 @@ class FindUnits extends EventEmitter {
         port: message.readInt16LE(8),
         gatewayType: message.readUInt8(10),
         gatewaySubtype: message.readUInt8(11),
-        gatewayName: message.toString('utf8', 12, 28)
+        gatewayName: message.toString('utf8', 12, 28),
       };
 
-      //console.log('  type: ' + server.type + ', host: ' + server.address + ':' + server.port + ', identified as ' + server.gatewayName);
+      // console.log('  type: ' + server.type + ', host: ' + server.address + ':' + server.port + ',
+      //   identified as ' + server.gatewayName);
       if (server.type === 2) {
         this.emit('serverFound', server);
       }
@@ -46,8 +49,8 @@ class FindUnits extends EventEmitter {
   sendServerBroadcast() {
     var message = Buffer.alloc(8);
     message[0] = 1;
-    this.finder.send(message, 0, message.length, 1444, "255.255.255.255");
-    //console.log("Looking for ScreenLogic hosts...");
+    this.finder.send(message, 0, message.length, 1444, '255.255.255.255');
+    // console.log("Looking for ScreenLogic hosts...");
   }
 
   close() {
@@ -71,7 +74,7 @@ class UnitConnection extends EventEmitter {
     this.client.on('data', function(msg) {
       _this.onClientMessage(msg);
     }).on('close', function(had_error) {
-      //console.log('unit connection closed');
+      // console.log('unit connection closed');
     });
   }
 
@@ -80,7 +83,7 @@ class UnitConnection extends EventEmitter {
   }
 
   connect() {
-    //console.log("connecting...");
+    // console.log("connecting...");
     var _this = this;
     this.client.connect(this.serverPort, this.serverAddress, function() {
       _this.onConnected();
@@ -88,42 +91,42 @@ class UnitConnection extends EventEmitter {
   }
 
   onConnected() {
-    //console.log('connected');
+    // console.log('connected');
 
-    //console.log('sending init message...');
+    // console.log('sending init message...');
     this.client.write('CONNECTSERVERHOST\r\n\r\n');
 
-    //console.log('sending challenge message...');
+    // console.log('sending challenge message...');
     this.client.write(new messages.SLChallengeMessage().toBuffer());
   }
 
   login() {
-    //console.log('sending login message...');
+    // console.log('sending login message...');
     this.client.write(new messages.SLLoginMessage().toBuffer());
   }
 
   getPoolStatus() {
-    //console.log('sending pool status query...');
+    // console.log('sending pool status query...');
     this.client.write(new messages.SLPoolStatusMessage().toBuffer());
   }
 
   getControllerConfig() {
-    //console.log('sending controller config query...');
+    // console.log('sending controller config query...');
     this.client.write(new messages.SLControllerConfigMessage().toBuffer());
   }
 
   getChemicalData() {
-    //console.log('sending chemical data query...');
+    // console.log('sending chemical data query...');
     this.client.write(new messages.SLChemDataMessage().toBuffer());
   }
 
   getSaltCellConfig() {
-    //console.log('sending salt cell config query...');
+    // console.log('sending salt cell config query...');
     this.client.write(new messages.SLSaltCellConfigMessage().toBuffer());
   }
 
   getVersion() {
-    //console.log('sending version query...');
+    // console.log('sending version query...');
     this.client.write(new messages.SLVersionMessage().toBuffer());
   }
 
@@ -132,7 +135,7 @@ class UnitConnection extends EventEmitter {
   }
 
   onClientMessage(msg) {
-    //console.log('received message of length ' + msg.length);
+    // console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
       return;
     }
@@ -140,39 +143,39 @@ class UnitConnection extends EventEmitter {
     var msgType = msg.readInt16LE(2);
     switch (msgType) {
       case messages.SLChallengeMessage.getResponseId():
-        //console.log("  it's a challenge response");
+        // console.log("  it's a challenge response");
         this.login();
         break;
       case messages.SLLoginMessage.getResponseId():
-        //console.log("  it's a login response");
+        // console.log("  it's a login response");
         this.emit('loggedIn');
         break;
       case messages.SLPoolStatusMessage.getResponseId():
-        //console.log("  it's pool status");
+        // console.log("  it's pool status");
         this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
         break;
       case messages.SLControllerConfigMessage.getResponseId():
-        //console.log("  it's controller configuration");
+        // console.log("  it's controller configuration");
         this.emit('controllerConfig', new messages.SLControllerConfigMessage(msg));
         break;
       case messages.SLChemDataMessage.getResponseId():
-        //console.log("  it's chem data");
+        // console.log("  it's chem data");
         this.emit('chemicalData', new messages.SLChemDataMessage(msg));
         break;
       case messages.SLSaltCellConfigMessage.getResponseId():
-        //console.log("  it's salt cell config");
+        // console.log("  it's salt cell config");
         this.emit('saltCellConfig', new messages.SLSaltCellConfigMessage(msg));
         break;
       case messages.SLVersionMessage.getResponseId():
-        //console.log("  it's version");
+        // console.log("  it's version");
         this.emit('version', new messages.SLVersionMessage(msg));
         break;
       case messages.SLSetCircuitStateMessage.getResponseId():
-        //console.log("  it's circuit toggle ack");
+        // console.log("  it's circuit toggle ack");
         this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage());
         break;
       default:
-        //console.log("  it's unknown. type: " + msgType);
+        // console.log("  it's unknown. type: " + msgType);
         break;
     }
   }
@@ -186,5 +189,5 @@ for (const value of buf.values()) {
 
 module.exports = {
   FindUnits,
-  UnitConnection
-}
+  UnitConnection,
+};

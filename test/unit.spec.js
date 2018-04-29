@@ -1,62 +1,72 @@
-'use strict'
+'use strict';
 
 const ScreenLogic = require('../index');
 
 // you'll need a ScreenLogic-enabled device on your network for this to succeed
 describe('Unit', () => {
-  let unit
+  let unit;
   before(done => {
     let finder = new ScreenLogic.FindUnits();
     finder.on('serverFound', server => {
-      finder.close()
+      finder.close();
 
-      unit = new ScreenLogic.UnitConnection(server)
+      unit = new ScreenLogic.UnitConnection(server);
       unit.on('loggedIn', () => {
-        done()
-      })
+        done();
+      });
 
-      unit.connect()
-    })
+      unit.connect();
+    });
 
     finder.search();
-  })
+  });
 
   after(() => {
-    unit.close()
-  })
+    unit.close();
+  });
 
-  let circuit
+  let circuit;
   it('gets pool status', done => {
     unit.on('poolStatus', status => {
-      circuit = status.circuitArray[0]
-      done()
-    })
+      circuit = status.circuitArray[0];
+      done();
+    });
 
-    unit.getPoolStatus()
-  })
+    unit.getPoolStatus();
+  });
 
   it('gets controller config', done => {
-    unit.on('controllerConfig', config => { done() })
-    unit.getControllerConfig()
-  })
+    unit.on('controllerConfig', config => {
+      done();
+    });
+    unit.getControllerConfig();
+  });
 
   it('gets chemical data', done => {
-    unit.on('chemicalData', () => { done() })
-    unit.getChemicalData()
-  })
+    unit.on('chemicalData', () => {
+      done();
+    });
+    unit.getChemicalData();
+  });
 
   it('gets salt cell config', done => {
-    unit.on('saltCellConfig', () => { done() })
-    unit.getSaltCellConfig()
-  })
+    unit.on('saltCellConfig', () => {
+      done();
+    });
+    unit.getSaltCellConfig();
+  });
 
   it('gets version', done => {
-    unit.on('version', () => { done() })
-    unit.getVersion()
-  })
+    unit.on('version', () => {
+      done();
+    });
+    unit.getVersion();
+  });
 
   it('sets circuit state', done => {
-    unit.on('circuitStateChanged', () => { done() })
-    unit.setCircuitState(0, circuit.id, circuit.state)
-  })
-})
+    unit.on('circuitStateChanged', () => {
+      done();
+    });
+    unit.setCircuitState(0, circuit.id, circuit.state);
+  });
+});
