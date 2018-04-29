@@ -291,7 +291,7 @@ Passed as an argument to the emitted `controllerConfig` event handler.
 
 ## SLSetCircuitStateMessage
 
-Passed as an argument to the emitted `circuitStateChanged`. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `circuitStateChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
 ### Properties
 
