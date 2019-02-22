@@ -4,6 +4,7 @@ var dgram = require('dgram');
 var net = require('net');
 const EventEmitter = require('events');
 const messages = require('./messages');
+const Encoder = require('./PasswordEncoder').HLEncoder;
 
 class FindUnits extends EventEmitter {
   constructor() {
@@ -58,8 +59,59 @@ class FindUnits extends EventEmitter {
   }
 }
 
+class RemoteLogin extends EventEmitter {
+  constructor(systemName) {
+    super();
+
+    this.systemName = systemName;
+    this.client = new net.Socket();
+    var _this = this;
+    this.client.on('data', function(msg) {
+      _this.onClientMessage(msg);
+    }).on('close', function(had_error) {
+      // console.log('remote login server connection closed');
+    });
+  }
+
+  connect() {
+    // console.log('connecting to dispatcher...');
+    var _this = this;
+    this.client.connect(500, 'screenlogicserver.pentair.com', function() {
+      _this.onConnected();
+    });
+  }
+
+  onConnected() {
+    // console.log('connected to dispatcher');
+
+    this.client.write(new messages.SLGetGatewayDataMessage(this.systemName).toBuffer());
+  }
+
+  onClientMessage(msg) {
+    // console.log('received message of length ' + msg.length);
+    if (msg.length < 4) {
+      return;
+    }
+
+    var msgType = msg.readInt16LE(2);
+    switch (msgType) {
+      case messages.SLGetGatewayDataMessage.getResponseId():
+        // console.log("  it's a gateway response");
+        this.emit('gatewayFound', new messages.SLGetGatewayDataMessage(msg));
+        break;
+      default:
+        // console.log("  it's unknown. type: " + msgType);
+        break;
+    }
+  }
+
+  close() {
+    this.client.end();
+  }
+}
+
 class UnitConnection extends EventEmitter {
-  constructor(server, address) {
+  constructor(server, address, password) {
     super();
     if (typeof server === 'object') {
       this.serverPort = server.port;
@@ -69,6 +121,7 @@ class UnitConnection extends EventEmitter {
       this.serverAddress = address;
     }
 
+    this.password = password;
     this.client = new net.Socket();
     var _this = this;
     this.client.on('data', function(msg) {
@@ -102,7 +155,8 @@ class UnitConnection extends EventEmitter {
 
   login() {
     // console.log('sending login message...');
-    this.client.write(new messages.SLLoginMessage().toBuffer());
+    var password = new Encoder(this.password).getEncryptedPassword(this.challengeString);
+    this.client.write(new messages.SLLoginMessage(password).toBuffer());
   }
 
   getPoolStatus() {
@@ -144,6 +198,7 @@ class UnitConnection extends EventEmitter {
     switch (msgType) {
       case messages.SLChallengeMessage.getResponseId():
         // console.log("  it's a challenge response");
+        this.challengeString = new messages.SLChallengeMessage(msg).challengeString;
         this.login();
         break;
       case messages.SLLoginMessage.getResponseId():
@@ -174,6 +229,10 @@ class UnitConnection extends EventEmitter {
         // console.log("  it's circuit toggle ack");
         this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage());
         break;
+      case 13:
+        // console.log("  it's a login failure.");
+        this.emit('loginFailed');
+        break;
       default:
         // console.log("  it's unknown. type: " + msgType);
         break;
@@ -189,5 +248,6 @@ for (const value of buf.values()) {
 
 module.exports = {
   FindUnits,
+  RemoteLogin,
   UnitConnection,
 };

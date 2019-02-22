@@ -46,6 +46,13 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.writeBuffer(buf);
   }
 
+  writeSLArray(arr) {
+    this.writeInt32LE(arr.length);
+    for (var i = 0; i < arr.length; i++) {
+      this.writeUInt8(arr[i]);
+    }
+  }
+
   skipWrite(num) {
     if (num > 0) {
       this.writeBuffer(Buffer.alloc(num));
