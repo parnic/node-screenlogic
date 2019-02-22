@@ -1,8 +1,8 @@
 # node-screenlogic
 
-This is a Node.JS library for interfacing with Pentair ScreenLogic systems over your local network. It requires a Pentair ScreenLogic device on the same network (a network which supports UDP broadcasts).
+This is a Node.JS library for interfacing with Pentair ScreenLogic systems over your local network or remotely through the Pentair dispatcher. Local connections require a Pentair ScreenLogic device on the same network (a network which supports UDP broadcasts).
 
-Tested on node v8.11.1 with a system on firmware version 5.2 Build 736.0 Rel
+Tested on node v8.11.1, v10.15.1 with a system on firmware version 5.2 Build 736.0 Rel
 
 # Usage
 
@@ -12,7 +12,7 @@ See example.js for an example of interfacing with the library. Broadly, import t
 const ScreenLogic = require('node-screenlogic');
 ```
 
-then create a new ScreenLogic unit finder with
+then for local connections create a new ScreenLogic unit finder with
 
 ```javascript
 new ScreenLogic.FindUnits();
@@ -26,11 +26,32 @@ Hook its `serverFound` event with
 
 and call it via `search()`. This performs a UDP broadcast on 255.255.255.255, port 1444, so ensure your network supports UDP broadcasts and the device is on the same subnet.
 
-When a server is found, create a new UnitConnection with
+Alternatively, to find a unit remotely, create a new ScreenLogic remote login with
+
+```javascript
+new ScreenLogic.RemoteLogin('Pentair: xx-xx-xx')
+```
+
+Hook its `gatewayFound` event with
+
+```javascript
+.on('gatewayFound', function(unit) { })
+```
+
+and call it via `connect()`. This opens a TCP connection to screenlogicserver.pentair.com, port 500.
+
+When a local or remote server is found, create a new UnitConnection with
 
 ```javascript
 new ScreenLogic.UnitConnection(server);
 ```
+
+or
+
+```javascript
+new ScreenLogic.UnitConnection(unit.port, unit.ipAddr, '1234')
+```
+where `'1234'` is the remote login password.
 
 Once you've connected with `connect()`, there are a number of methods available and corresponding events for when they've completed successfully. See [UnitConnection](#unitconnection) API reference.
 
@@ -78,6 +99,31 @@ finder.on('serverFound', function(server) {
 })
 ```
 
+## RemoteLogin
+
+### constructor(systemName)
+
+Argument is the name of a system to connect to in "Pentair: xx-xx-xx" format.
+
+Example:
+```javascript
+const ScreenLogic = require('./index');
+
+var remoteLogin = new ScreenLogic.RemoteLogin('Pentair: xx-xx-xx');
+```
+
+### connect()
+
+Connects to the dispatcher service and searches for the unit passed to its constructor.
+
+### close()
+
+Closes the connection
+
+### Events
+
+* `gatewayFound` - Indicates that the search for the named unit has completed (may or may not be successful). Event handler receives a [`SLGetGatewayDataMessage`](#slgetgatewaydatamessage) argument.
+
 ## UnitConnection
 
 ### constructor(server)
@@ -91,13 +137,21 @@ finder.on('serverFound', function(server) {
 })
 ```
 
-### constructor(port, address)
+```javascript
+remoteLogin.on('gatewayFound', function(unit) {
+  if (unit && unit.gatewayFound) {
+    var client = new ScreenLogic.UnitConnection(unit.port, unit.ipAddr, '1234'));
+  }
+});
+```
 
-Port is an integer. Address is an IPv4 address of the server as a string.
+### constructor(port, address, password)
+
+Port is an integer. Address is an IPv4 address of the server as a string. Password is optional; should be the 4-digit password in string form, e.g. `'1234'`.
 
 Examples:
 ```javascript
-var client = new ScreenLogic.UnitConnection(80, '10.0.0.85')
+var client = new ScreenLogic.UnitConnection(80, '10.0.0.85', '1234')
 ```
 
 ### connect()
@@ -301,11 +355,15 @@ Passed as an argument to the emitted `circuitStateChanged` event. The passed ver
   * This ID can be retrieved from `SLControllerConfigMessage`'s `bodyArray` property.
 * `circuitState` - integer indicating whether to switch the circuit on (`1`) or off (`0`).
 
-# Changelog
+## SLGetGatewayDataMessage
 
-## v1.0.1
-* Added direct connection support.
+Passed as an argument to the emitted `gatewayFound` event. Contains information about the remote unit's status and access properties.
 
-## v1.1.0
-* Added ability to set circuit state.
-* Fixed FindUnits.sendServerBroadcast() failing in certain environments.
+### Properties
+
+* `gatewayFound` - boolean indicating whether a unit was found
+* `licenseOK` - boolean indicating if the license is valid (I've never seen this be false)
+* `ipAddr` - string containing the ipv4 address to remotely connect to this unit
+* `port` - number containing the port to connect to the unit
+* `portOpen` - boolean indicating whether or not the port is open and able to be connected to
+* `relayOn` - boolean indicating whether the relay is on (unsure what exactly this indicates; it's always been false in my tests)
