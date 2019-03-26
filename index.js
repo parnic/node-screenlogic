@@ -126,17 +126,21 @@ class UnitConnection extends EventEmitter {
     var _this = this;
     var buffer = Buffer.alloc(1024);
     var bufferIdx = 0;
+    var expectedMsgLen = 0;
 
     this.client.on('data', function(msg) {
       if (buffer.length < msg.length + bufferIdx) {
         buffer = Buffer.alloc(msg.length + buffer.length, buffer);
       }
 
+      if (bufferIdx === 0) {
+        expectedMsgLen = msg.readInt32LE(4) + 8;
+      }
+
       msg.copy(buffer, bufferIdx);
       bufferIdx = bufferIdx + msg.length;
 
-      var expectedLen = msg.readInt32LE(4) + 8;
-      if (msg.length === expectedLen) {
+      if (bufferIdx === expectedMsgLen) {
         _this.onClientMessage(buffer);
         bufferIdx = 0;
       }
