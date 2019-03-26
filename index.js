@@ -124,8 +124,22 @@ class UnitConnection extends EventEmitter {
     this.password = password;
     this.client = new net.Socket();
     var _this = this;
+    var buffer = Buffer.alloc(1024);
+    var bufferIdx = 0;
+
     this.client.on('data', function(msg) {
-      _this.onClientMessage(msg);
+      if (buffer.length < msg.length + bufferIdx) {
+        buffer = Buffer.alloc(msg.length + buffer.length, buffer);
+      }
+
+      msg.copy(buffer, bufferIdx);
+      bufferIdx = bufferIdx + msg.length;
+
+      var expectedLen = msg.readInt32LE(4) + 8;
+      if (msg.length === expectedLen) {
+        _this.onClientMessage(buffer);
+        bufferIdx = 0;
+      }
     }).on('close', function(had_error) {
       // console.log('unit connection closed');
     });
