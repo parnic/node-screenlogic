@@ -141,7 +141,7 @@ class UnitConnection extends EventEmitter {
       bufferIdx = bufferIdx + msg.length;
 
       if (bufferIdx === expectedMsgLen) {
-        _this.onClientMessage(buffer);
+        _this.onClientMessage(buffer.slice(0, expectedMsgLen));
         bufferIdx = 0;
       }
     }).on('close', function(had_error) {
