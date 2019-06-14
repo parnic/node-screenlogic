@@ -87,20 +87,21 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
     return this.ok === 3;
   }
 
-  isSpaActive() {
+  circuitData(id) {
     for (let i = 0; i < this.circuitArray.length; i++) {
-      if (this.circuitArray[i].id === SPA_CIRCUIT_ID) {
-        return this.circuitArray[i].state === 1;
+      if (this.circuitArray[i].id === id) {
+        return this.circuitArray[i];
       }
     }
+    return undef;
+  }
+
+  isSpaActive() {
+    return this.circuitData(SPA_CIRCUIT_ID).state === 1;
   }
 
   isPoolActive() {
-    for (let i = 0; i < this.circuitArray.length; i++) {
-      if (this.circuitArray[i].id === POOL_CIRCUIT_ID) {
-        return this.circuitArray[i].state === 1;
-      }
-    }
+    return this.circuitData(POOL_CIRCUIT_ID).state === 1;
   }
 
   static getResponseId() {
