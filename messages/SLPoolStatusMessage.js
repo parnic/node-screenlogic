@@ -93,7 +93,7 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
         return this.circuitArray[i];
       }
     }
-    return undef;
+    return undefined;
   }
 
   isSpaActive() {
