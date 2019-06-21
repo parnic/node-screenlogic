@@ -192,6 +192,10 @@ Requests controller configuration from the connected unit. Emits the `controller
 
 Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged.
 
+### setSetPoint(controllerId, bodyType, temperature)
+
+Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged.
+
 ### Events
 
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
@@ -201,6 +205,7 @@ Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircu
 * `saltCellConfig` - Indicates that a response to `getSaltCellConfig()` has been received. Event handler receives a [`SLSaltCellConfigMessage`](#slsaltcellconfigmessage) object.
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 * `circuitStateChanged` - Indicates that a response to `setCircuitState()` has been received. Event handler receives a [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) object.
+* `setPointChanged` - Indicates that a response to `setSetPoint()` has been received. Event handler receives a [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) object.
 
 ### Properties
 
@@ -354,6 +359,17 @@ Passed as an argument to the emitted `circuitStateChanged` event. The passed ver
 * `circuitId` - integer indicating the ID of the circuit to set the state of.
   * This ID can be retrieved from `SLControllerConfigMessage`'s `bodyArray` property.
 * `circuitState` - integer indicating whether to switch the circuit on (`1`) or off (`0`).
+
+## SLSetHeatSetPointMessage
+
+Passed as an argument to the emitted `setPointChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+
+### Properties
+
+* `controllerId` - integer indicating the ID of the controller to send this command to.
+  * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
+* `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
+* `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
 
 ## SLGetGatewayDataMessage
 

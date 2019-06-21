@@ -206,6 +206,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLSetCircuitStateMessage(controllerId, circuitId, circuitState).toBuffer());
   }
 
+  setSetPoint(controllerId, bodyType, temperature) {
+    this.client.write(new messages.SLSetHeatSetPointMessage(controllerId, bodyType, temperature).toBuffer());
+  }
+
   onClientMessage(msg) {
     // console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
@@ -246,6 +250,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLSetCircuitStateMessage.getResponseId():
         // console.log("  it's circuit toggle ack");
         this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage());
+        break;
+      case messages.SLSetHeatSetPointMessage.getResponseId():
+        // console.log("  it's a setpoint ack");
+        this.emit('setPointChanged', new messages.SLSetHeatSetPointMessage());
         break;
       case 13:
         // console.log("  it's a login failure.");
