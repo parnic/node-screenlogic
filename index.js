@@ -259,6 +259,10 @@ class UnitConnection extends EventEmitter {
         // console.log("  it's a login failure.");
         this.emit('loginFailed');
         break;
+      case 31:
+        // console.log("  it's a parameter failure.");
+        this.emit('badParameter');
+        break;
       default:
         // console.log("  it's unknown. type: " + msgType);
         break;
