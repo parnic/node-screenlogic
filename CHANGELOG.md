@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 * Ability to set heat setpoint.
+* Event for supplying incorrect parameters to `set` functions.
 
 ## v1.2.1 - 2019-03-26
 ### Fixed
