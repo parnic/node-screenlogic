@@ -10,3 +10,4 @@ exports.SLVersionMessage = require('./SLVersionMessage.js').SLVersionMessage;
 exports.SLSetCircuitStateMessage = require('./SLSetCircuitStateMessage.js').SLSetCircuitStateMessage;
 exports.SLGetGatewayDataMessage = require('./SLGetGatewayDataMessage.js').SLGetGatewayDataMessage;
 exports.SLSetHeatSetPointMessage = require('./SLSetHeatSetPoint.js').SLSetHeatSetPoint;
+exports.SLLightControlMessage = require('./SLLightControl.js').SLLightControl;

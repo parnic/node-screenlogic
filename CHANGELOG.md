@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Ability to set heat setpoint.
 * Event for supplying incorrect parameters to `set` functions.
+* Ability to send limited selection of light commands.
 
 ## v1.2.1 - 2019-03-26
 ### Fixed

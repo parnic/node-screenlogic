@@ -196,6 +196,12 @@ Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircu
 
 Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged.
 
+### sendLightCommand(controllerId, command)
+
+Sends a lighting command. See [`SLLightControlMessage`](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged.
+
+Note that better/more complete handling of lighting is desired, but I have yet to find all the commands I need to implement to make that happen. This currently sends each command to all lights and there is no ability to send to an individual light. Pull requests adding more functionality here would be most welcome.
+
 ### Events
 
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
@@ -206,6 +212,7 @@ Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slseth
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 * `circuitStateChanged` - Indicates that a response to `setCircuitState()` has been received. Event handler receives a [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) object.
 * `setPointChanged` - Indicates that a response to `setSetPoint()` has been received. Event handler receives a [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) object.
+* `sentLightCommand` - Indicates that a response to `sendLightCommand()` has been received. Event handler receives a [`SLLightControlMessage`](#sllightcontrolmessage) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 
@@ -372,6 +379,34 @@ Passed as an argument to the emitted `setPointChanged` event. The passed version
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
 * `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
 * `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
+
+## SLLightControlMessage
+
+Passed as an argument to the emitted `sentLightCommand` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the light command.
+
+### Properties
+
+* `controllerId` - integer indicating the ID of the controller to send this command to.
+  * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
+* `command` - integer indicating which command to send to the lights. Valid values are:
+  * ScreenLogic.LIGHT_CMD_LIGHTS_OFF
+  * ScreenLogic.LIGHT_CMD_LIGHTS_ON
+  * ScreenLogic.LIGHT_CMD_COLOR_SET
+  * ScreenLogic.LIGHT_CMD_COLOR_SYNC
+  * ScreenLogic.LIGHT_CMD_COLOR_SWIM
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_PARTY
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_ROMANCE
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_CARRIBEAN
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_AMERICAN
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_SUNSET
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_ROYAL
+  * ScreenLogic.LIGHT_CMD_COLOR_SET_SAVE
+  * ScreenLogic.LIGHT_CMD_COLOR_SET_RECALL
+  * ScreenLogic.LIGHT_CMD_COLOR_BLUE
+  * ScreenLogic.LIGHT_CMD_COLOR_GREEN
+  * ScreenLogic.LIGHT_CMD_COLOR_RED
+  * ScreenLogic.LIGHT_CMD_COLOR_WHITE
+  * ScreenLogic.LIGHT_CMD_COLOR_PURPLE
 
 ## SLGetGatewayDataMessage
 

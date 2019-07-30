@@ -210,6 +210,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLSetHeatSetPointMessage(controllerId, bodyType, temperature).toBuffer());
   }
 
+  sendLightCommand(controllerId, command) {
+    this.client.write(new messages.SLLightControlMessage(controllerId, command).toBuffer());
+  }
+
   onClientMessage(msg) {
     // console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
@@ -255,6 +259,10 @@ class UnitConnection extends EventEmitter {
         // console.log("  it's a setpoint ack");
         this.emit('setPointChanged', new messages.SLSetHeatSetPointMessage());
         break;
+      case messages.SLLightControlMessage.getResponseId():
+        // console.log("  it's a light control ack");
+        this.emit('sentLightCommand', new messages.SLLightControlMessage());
+        break;
       case 13:
         // console.log("  it's a login failure.");
         this.emit('loginFailed');
@@ -280,4 +288,22 @@ module.exports = {
   FindUnits,
   RemoteLogin,
   UnitConnection,
+  LIGHT_CMD_LIGHTS_OFF: 0,
+  LIGHT_CMD_LIGHTS_ON: 1,
+  LIGHT_CMD_COLOR_SET: 2,
+  LIGHT_CMD_COLOR_SYNC: 3,
+  LIGHT_CMD_COLOR_SWIM: 4,
+  LIGHT_CMD_COLOR_MODE_PARTY: 5,
+  LIGHT_CMD_COLOR_MODE_ROMANCE: 6,
+  LIGHT_CMD_COLOR_MODE_CARRIBEAN: 7,
+  LIGHT_CMD_COLOR_MODE_AMERICAN: 8,
+  LIGHT_CMD_COLOR_MODE_SUNSET: 9,
+  LIGHT_CMD_COLOR_MODE_ROYAL: 10,
+  LIGHT_CMD_COLOR_SET_SAVE: 11,
+  LIGHT_CMD_COLOR_SET_RECALL: 12,
+  LIGHT_CMD_COLOR_BLUE: 13,
+  LIGHT_CMD_COLOR_GREEN: 14,
+  LIGHT_CMD_COLOR_RED: 15,
+  LIGHT_CMD_COLOR_WHITE: 16,
+  LIGHT_CMD_COLOR_PURPLE: 17,
 };
