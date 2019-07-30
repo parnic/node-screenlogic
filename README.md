@@ -396,7 +396,7 @@ Passed as an argument to the emitted `sentLightCommand` event. The passed versio
   * ScreenLogic.LIGHT_CMD_COLOR_SWIM
   * ScreenLogic.LIGHT_CMD_COLOR_MODE_PARTY
   * ScreenLogic.LIGHT_CMD_COLOR_MODE_ROMANCE
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_CARRIBEAN
+  * ScreenLogic.LIGHT_CMD_COLOR_MODE_CARIBBEAN
   * ScreenLogic.LIGHT_CMD_COLOR_MODE_AMERICAN
   * ScreenLogic.LIGHT_CMD_COLOR_MODE_SUNSET
   * ScreenLogic.LIGHT_CMD_COLOR_MODE_ROYAL
