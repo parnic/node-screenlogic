@@ -210,6 +210,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLSetHeatSetPointMessage(controllerId, bodyType, temperature).toBuffer());
   }
 
+  setHeatMode(controllerId, bodyType, heatMode) {
+    this.client.write(new messages.SLSetHeatModeMessage(controllerId, bodyType, heatMode).toBuffer());
+  }
+
   sendLightCommand(controllerId, command) {
     this.client.write(new messages.SLLightControlMessage(controllerId, command).toBuffer());
   }
@@ -258,6 +262,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLSetHeatSetPointMessage.getResponseId():
         // console.log("  it's a setpoint ack");
         this.emit('setPointChanged', new messages.SLSetHeatSetPointMessage());
+        break;
+      case messages.SLSetHeatModeMessage.getResponseId():
+        // console.log("  it's a heater mode ack");
+        this.emit('heatModeChanged', new messages.SLSetHeatModeMessage());
         break;
       case messages.SLLightControlMessage.getResponseId():
         // console.log("  it's a light control ack");
