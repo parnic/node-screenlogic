@@ -36,7 +36,7 @@ function connect(client) {
   client.on('loggedIn', function() {
     this.getVersion();
   }).on('version', function(version) {
-    this.setHeatMode(0, 0, 0);
+    this.setHeatMode(0, 0, 3);
     console.log(' version=' + version.version);
   }).on('heatModeChanged', function() {
     client.close();
