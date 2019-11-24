@@ -196,6 +196,10 @@ Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircu
 
 Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged.
 
+### setHeatMode(controllerId, bodyType, heatMode)
+
+Sets the preferred heat mode. See [`SLSetHeatModeMessage`](#slsetheatmodemessage) documentation for argument values. Emits the `heatModeChanged` event when response is acknowledged.
+
 ### sendLightCommand(controllerId, command)
 
 Sends a lighting command. See [`SLLightControlMessage`](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged.
@@ -379,6 +383,17 @@ Passed as an argument to the emitted `setPointChanged` event. The passed version
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
 * `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
 * `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
+
+## SLSetHeatModeMessage
+
+Passed as an argument to the emitted `setHeatMode` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+
+### Properties
+
+* `controllerId` - integer indicating the ID of the controller to send this command to.
+  * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
+* `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
+* `heatMode` - integer indicating the desired heater mode. Valid values are: 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
 
 ## SLLightControlMessage
 
