@@ -36,7 +36,7 @@ class FindUnits extends EventEmitter {
         port: message.readInt16LE(8),
         gatewayType: message.readUInt8(10),
         gatewaySubtype: message.readUInt8(11),
-        gatewayName: message.toString('utf8', 12, 28),
+        gatewayName: message.toString('utf8', 12, 29),
       };
 
       // console.log('  type: ' + server.type + ', host: ' + server.address + ':' + server.port + ',
