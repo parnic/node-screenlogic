@@ -331,6 +331,26 @@ Passed as an argument to the emitted `saltCellConfig` event handler.
 
 Passed as an argument to the emitted `controllerConfig` event handler.
 
+### hasSolar()
+
+Returns a bool indicating whether the system has solar present. (Helper method for interpreting the value in `equipFlags`.)
+
+### hasSolarAsHeatpump()
+
+Returns a bool indicating whether the system has a solar heatpump (UltraTemp, ThermalFlo) present. (Helper method for interpreting the value in `equipFlags`.)
+
+### hasChlorinator()
+
+Returns a bool indicating whether the system has a chlorinator present. (Helper method for interpreting the value in `equipFlags`.)
+
+### hasCooling()
+
+Returns a bool indicating whether the system has a cooler present. (Helper method for interpreting the value in `equipFlags`.)
+
+### hasIntellichem()
+
+Returns a bool indicating whether the system has an IntelliChem chemical management system present. (Helper method for interpreting the value in `equipFlags`.)
+
 ### Properties
 
 * `controllerId` - integer indicating the controller's ID
@@ -340,7 +360,7 @@ Passed as an argument to the emitted `controllerConfig` event handler.
 * `controllerType` - byte
 * `hwType` - byte
 * `controllerData` - byte
-* `equipFlags` - integer
+* `equipFlags` - integer indicating the type(s) of equipment present in the system (see helper methods above for interpreting these values)
 * `genCircuitName` - string indicating the circuit name
 * `bodyArray` - array (size number-of-circuits) holding circuit data
   * `circuitId` - integer indicating circuit ID (e.g.: 500 is spa, 505 is pool)

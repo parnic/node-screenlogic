@@ -82,4 +82,24 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
   static getResponseId() {
     return MSG_ID + 1;
   }
+
+  hasSolar() {
+    return !!(this.equipFlags & 0x1)
+  }
+
+  hasSolarAsHeatpump() {
+    return !!(this.equipFlags & 0x2)
+  }
+
+  hasChlorinator() {
+    return !!(this.equipFlags & 0x4)
+  }
+
+  hasCooling() {
+    return !!(this.equipFlags & 0x800)
+  }
+
+  hasIntellichem() {
+    return !!(this.equipFlags & 0x8000)
+  }
 };
