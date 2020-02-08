@@ -206,6 +206,10 @@ Sends a lighting command. See [`SLLightControlMessage`](#sllightcontrolmessage) 
 
 Note that better/more complete handling of lighting is desired, but I have yet to find all the commands I need to implement to make that happen. This currently sends each command to all lights and there is no ability to send to an individual light. Pull requests adding more functionality here would be most welcome.
 
+### setSaltCellOutput(controllerId, poolOutput, spaOutput)
+
+Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) documentation for argument values. Emits the `setSaltCellConfig` event when response is acknowledged.
+
 ### Events
 
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
@@ -320,12 +324,23 @@ Passed as an argument to the emitted `saltCellConfig` event handler.
 ### Properties
 
 * `installed` - boolean indicating whether a salt cell is installed or not
-* `status` - integer
-* `level1` - integer
-* `level2` - integer
+* `status` - integer bitmask
+* `level1` - integer indicating the output level of the salt cell for the pool. I believe this operates on a 0-100 scale
+* `level2` - integer indicating the output level of the salt cell for the spa. I believe this operates on a 0-100 scale
 * `salt` - integer indicating salt level in parts-per-million
-* `flags` - integer
+* `flags` - integer bitmask
 * `superChlorTimer` - integer
+
+## SLSetSaltCellConfigMessage
+
+Passed as an argument to the emitted `setSaltCellConfig` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+
+### Properties
+
+* `controllerId` - integer indicating the ID of the controller to send this command to.
+  * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
+* `poolOutput` - integer indicating the output level of the salt cell for the pool. I believe this operates on a 0-100 scale.
+* `spaOutput` - integer indicating the output level of the salt cell for the spa. I believe this operates on a 0-100 scale.
 
 ## SLControllerConfigMessage
 

@@ -12,3 +12,4 @@ exports.SLGetGatewayDataMessage = require('./SLGetGatewayDataMessage.js').SLGetG
 exports.SLSetHeatSetPointMessage = require('./SLSetHeatSetPoint.js').SLSetHeatSetPoint;
 exports.SLSetHeatModeMessage = require('./SLSetHeatMode.js').SLSetHeatMode;
 exports.SLLightControlMessage = require('./SLLightControl.js').SLLightControl;
+exports.SLSetSaltCellConfigMessage = require('./SLSetSaltCellConfigMessage.js').SLSetSaltCellConfigMessage;

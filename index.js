@@ -218,6 +218,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLLightControlMessage(controllerId, command).toBuffer());
   }
 
+  setSaltCellOutput(controllerId, poolOutput, spaOutput) {
+    this.client.write(new messages.SLSetSaltCellConfigMessage(controllerId, poolOutput, spaOutput).toBuffer());
+  }
+
   onClientMessage(msg) {
     // console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
@@ -270,6 +274,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLLightControlMessage.getResponseId():
         // console.log("  it's a light control ack");
         this.emit('sentLightCommand', new messages.SLLightControlMessage());
+        break;
+      case messages.SLSetSaltCellConfigMessage.getResponseId():
+        // console.log("  it's a set salt cell config ack");
+        this.emit('setSaltCellConfig', new messages.SLSetSaltCellConfigMessage());
         break;
       case 13:
         // console.log("  it's a login failure.");
