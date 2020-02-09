@@ -61,6 +61,19 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.skipWrite(SLMessage.slackForAlignment(arr.length));
   }
 
+  readSLArray() {
+    var len = this.readInt32LE();
+
+    var retval = new Array(len);
+    for (var i = 0; i < len; i++) {
+      retval[i] = this.readUInt8();
+    }
+
+    this.readOffset += SLMessage.slackForAlignment(len);
+
+    return retval;
+  }
+
   skipWrite(num) {
     if (num > 0) {
       this.writeBuffer(Buffer.alloc(num));
