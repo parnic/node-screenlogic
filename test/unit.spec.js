@@ -25,10 +25,10 @@ describe('Unit', () => {
     unit.close();
   });
 
-  let circuit;
+  // let circuit;
   it('gets pool status', done => {
     unit.on('poolStatus', status => {
-      circuit = status.circuitArray[0];
+      /* circuit = */status.circuitArray[0];
       done();
     });
 
@@ -63,10 +63,12 @@ describe('Unit', () => {
     unit.getVersion();
   });
 
+  /* uncomment this and the `circuit` stuff above to test setting state
   it('sets circuit state', done => {
     unit.on('circuitStateChanged', () => {
       done();
     });
     unit.setCircuitState(0, circuit.id, circuit.state);
   });
+  */
 });
