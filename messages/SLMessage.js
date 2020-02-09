@@ -27,17 +27,13 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
   writeSLString(str) {
     this.writeInt32LE(str.length);
     this.writeString(str);
-    if (str.length % 4 !== 0) {
-      this.skipWrite(4 - str.length % 4);
-    }
+    this.skipWrite(SLMessage.slackForAlignment(str.length));
   }
 
   readSLString() {
     var len = this.readInt32LE();
     var str = this.readString(len);
-    if (len % 4 !== 0) {
-      this.readOffset += 4 - len % 4;
-    }
+    this.readOffset += SLMessage.slackForAlignment(len);
     return str;
   }
 
@@ -48,9 +44,12 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
 
   writeSLArray(arr) {
     this.writeInt32LE(arr.length);
+
     for (var i = 0; i < arr.length; i++) {
       this.writeUInt8(arr[i]);
     }
+
+    this.skipWrite(SLMessage.slackForAlignment(arr.length));
   }
 
   skipWrite(num) {
@@ -64,6 +63,10 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.senderId = this.readUInt16LE();
     this.messageId = this.readUInt16LE();
     this.dataLength = this.readInt32LE();
+  }
+
+  static slackForAlignment(val) {
+    return (4 - val % 4) % 4;
   }
 
   encode() {}
