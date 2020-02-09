@@ -5,10 +5,19 @@ const SmartBuffer = require('smart-buffer').SmartBuffer;
 exports.SLMessage = class SLMessage extends SmartBuffer {
   constructor(senderId, messageId) {
     super();
-    this.writeUInt16LE(senderId);
-    this.writeUInt16LE(messageId);
 
-    this._wroteSize = false;
+    if (typeof senderId === 'number' || typeof senderId === 'undefined') {
+      this.writeUInt16LE(senderId || 0);
+      this.writeUInt16LE(messageId || 0);
+
+      this._wroteSize = false;
+    } else if (senderId) {
+      this._wroteSize = true;
+      var buffer = senderId;
+      this.writeBuffer(buffer, 0);
+
+      this.decode();
+    }
   }
 
   toBuffer() {
