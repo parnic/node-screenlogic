@@ -84,22 +84,22 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
   }
 
   hasSolar() {
-    return !!(this.equipFlags & 0x1)
+    return !!(this.equipFlags & 0x1);
   }
 
   hasSolarAsHeatpump() {
-    return !!(this.equipFlags & 0x2)
+    return !!(this.equipFlags & 0x2);
   }
 
   hasChlorinator() {
-    return !!(this.equipFlags & 0x4)
+    return !!(this.equipFlags & 0x4);
   }
 
   hasCooling() {
-    return !!(this.equipFlags & 0x800)
+    return !!(this.equipFlags & 0x800);
   }
 
   hasIntellichem() {
-    return !!(this.equipFlags & 0x8000)
+    return !!(this.equipFlags & 0x8000);
   }
 };
