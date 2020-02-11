@@ -6,7 +6,11 @@ const MSG_ID = 18003;
 
 exports.SLGetGatewayDataMessage = class SLGetGatewayDataMessage extends SLMessage {
   constructor(buf) {
-    super(0, MSG_ID);
+    var size;
+    if (buf) {
+      size = buf.readInt32LE(4) + 8;
+    }
+    super(0, MSG_ID, size);
 
     if (typeof buf === 'string') {
       this.writeSLString(buf);

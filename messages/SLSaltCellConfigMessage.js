@@ -6,7 +6,12 @@ const MSG_ID = 12572;
 
 exports.SLSaltCellConfigMessage = class SLSaltCellConfigMessage extends SLMessage {
   constructor(buf) {
-    super(0, MSG_ID);
+    var size;
+    if (buf) {
+      size = buf.readInt32LE(4) + 8;
+    }
+    super(0, MSG_ID, size);
+
     if (!buf) {
       this.writeInt32LE(0); // controller index
     } else {

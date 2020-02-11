@@ -9,7 +9,12 @@ const POOL_CIRCUIT_ID = 505;
 
 exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
   constructor(buf) {
-    super(0, MSG_ID);
+    var size;
+    if (buf) {
+      size = buf.readInt32LE(4) + 8;
+    }
+    super(0, MSG_ID, size);
+
     if (!buf) {
       this.writeInt32LE(0);
     } else {
