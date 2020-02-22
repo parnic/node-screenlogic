@@ -107,4 +107,24 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
   hasIntellichem() {
     return !!(this.equipFlags & 0x8000);
   }
+
+  isEasyTouch() {
+    return this.controllerType === 14 || this.controllerType === 13;
+  }
+
+  isIntelliTouch() {
+    return this.controllerType !== 14 && this.controllerType !== 13 && this.controllerType !== 10;
+  }
+
+  isEasyTouchLite() {
+    return this.controllerType === 13 && (this.hwType & 4) !== 0;
+  }
+
+  isDualBody() {
+    return this.controllerType === 5;
+  }
+
+  isChem2() {
+    return this.controllerType === 252 && this.hwType === 2;
+  }
 };
