@@ -202,6 +202,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLVersionMessage().toBuffer());
   }
 
+  getEquipmentConfiguration() {
+    this.client.write(new messages.SLEquipmentConfigurationMessage().toBuffer());
+  }
+
   setCircuitState(controllerId, circuitId, circuitState) {
     this.client.write(new messages.SLSetCircuitStateMessage(controllerId, circuitId, circuitState).toBuffer());
   }
@@ -278,6 +282,9 @@ class UnitConnection extends EventEmitter {
       case messages.SLSetSaltCellConfigMessage.getResponseId():
         // console.log("  it's a set salt cell config ack");
         this.emit('setSaltCellConfig', new messages.SLSetSaltCellConfigMessage());
+        break;
+      case messages.SLEquipmentConfigurationMessage.getResponseId():
+        this.emit('equipmentConfiguration', new messages.SLEquipmentConfigurationMessage(msg));
         break;
       case 13:
         // console.log("  it's a login failure.");

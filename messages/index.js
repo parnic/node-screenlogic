@@ -13,3 +13,5 @@ exports.SLSetHeatSetPointMessage = require('./SLSetHeatSetPoint.js').SLSetHeatSe
 exports.SLSetHeatModeMessage = require('./SLSetHeatMode.js').SLSetHeatMode;
 exports.SLLightControlMessage = require('./SLLightControl.js').SLLightControl;
 exports.SLSetSaltCellConfigMessage = require('./SLSetSaltCellConfigMessage.js').SLSetSaltCellConfigMessage;
+exports.SLEquipmentConfigurationMessage =
+    require('./SLEquipmentConfigurationMessage.js').SLEquipmentConfigurationMessage;
