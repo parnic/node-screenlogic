@@ -220,7 +220,9 @@ Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsal
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 * `circuitStateChanged` - Indicates that a response to `setCircuitState()` has been received. Event handler receives a [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) object.
 * `setPointChanged` - Indicates that a response to `setSetPoint()` has been received. Event handler receives a [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) object.
+* `heatModeChanged` - Indicates that a response to `setHeatMode()` has been received. Event handler receives a [`SLSetHeatModeMessage`](#slsetheatmodemessage) object.
 * `sentLightCommand` - Indicates that a response to `sendLightCommand()` has been received. Event handler receives a [`SLLightControlMessage`](#sllightcontrolmessage) object.
+* `setSaltCellConfig` - Indicates that a response to `setSaltCellOutput()` has been received. Event handler receives a [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 
@@ -421,7 +423,7 @@ Passed as an argument to the emitted `setPointChanged` event. The passed version
 
 ## SLSetHeatModeMessage
 
-Passed as an argument to the emitted `setHeatMode` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `heatModeChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
 ### Properties
 
