@@ -99,6 +99,8 @@ finder.on('serverFound', function(server) {
 })
 ```
 
+* `error` - Indicates that an unhandled error was caught (such as the connection timing out)
+
 ## RemoteLogin
 
 ### constructor(systemName)
@@ -123,6 +125,7 @@ Closes the connection
 ### Events
 
 * `gatewayFound` - Indicates that the search for the named unit has completed (may or may not be successful). Event handler receives a [`SLGetGatewayDataMessage`](#slgetgatewaydatamessage) argument.
+* `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 
 ## UnitConnection
 
@@ -225,6 +228,7 @@ Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsal
 * `setSaltCellConfig` - Indicates that a response to `setSaltCellOutput()` has been received. Event handler receives a [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
+* `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 
 ### Properties
 
