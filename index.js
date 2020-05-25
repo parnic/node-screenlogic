@@ -15,6 +15,8 @@ class FindUnits extends EventEmitter {
       _this.foundServer(message, remote);
     }).on('close', function() {
       // console.log('finder closed');
+    }).on('error', function(e) {
+      _this.emit('error', e)
     });
   }
 
@@ -70,6 +72,8 @@ class RemoteLogin extends EventEmitter {
       _this.onClientMessage(msg);
     }).on('close', function(had_error) {
       // console.log('remote login server connection closed');
+    }).on('error', function(e) {
+      _this.emit('error', e)
     });
   }
 
@@ -146,6 +150,8 @@ class UnitConnection extends EventEmitter {
       }
     }).on('close', function(had_error) {
       // console.log('unit connection closed');
+    }).on('error', function(e) {
+      _this.emit('error', e)
     });
   }
 
