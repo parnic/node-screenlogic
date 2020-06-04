@@ -231,6 +231,22 @@ class UnitConnection extends EventEmitter {
   setSaltCellOutput(controllerId, poolOutput, spaOutput) {
     this.client.write(new messages.SLSetSaltCellConfigMessage(controllerId, poolOutput, spaOutput).toBuffer());
   }
+  
+  getScheduleData(scheduleType) {
+    this.client.write(new messages.SLGetScheduleData(null, scheduleType).toBuffer());
+  }
+  
+  addNewScheduleEvent(scheduleType) {
+    this.client.write(new messages.SLAddNewScheduleEvent(null, scheduleType).toBuffer());
+  }
+
+  deleteScheduleEventById(scheduleId) {
+    this.client.write(new messages.SLDeleteScheduleEventById(scheduleId).toBuffer());
+  }
+
+  setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
+    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint).toBuffer());
+  }
 
   onClientMessage(msg) {
     // console.log('received message of length ' + msg.length);
@@ -291,6 +307,18 @@ class UnitConnection extends EventEmitter {
         break;
       case messages.SLEquipmentConfigurationMessage.getResponseId():
         this.emit('equipmentConfiguration', new messages.SLEquipmentConfigurationMessage(msg));
+        break;
+      case messages.SLGetScheduleData.getResponseId():
+        this.emit('getScheduleData', new messages.SLGetScheduleData(msg));
+        break;
+      case messages.SLAddNewScheduleEvent.getResponseId():
+        this.emit('addNewScheduleEvent', new messages.SLAddNewScheduleEvent(msg));
+        break;
+      case messages.SLDeleteScheduleEventById.getResponseId():
+        this.emit('deleteScheduleEventById', new messages.SLDeleteScheduleEventById(msg));
+        break;
+      case messages.SLSetScheduleEventById.getResponseId():
+        this.emit('setScheduleEventById', new messages.SLSetScheduleEventById(msg));
         break;
       case 13:
         // console.log("  it's a login failure.");

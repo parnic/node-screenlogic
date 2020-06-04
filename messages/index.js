@@ -15,3 +15,7 @@ exports.SLLightControlMessage = require('./SLLightControl.js').SLLightControl;
 exports.SLSetSaltCellConfigMessage = require('./SLSetSaltCellConfigMessage.js').SLSetSaltCellConfigMessage;
 exports.SLEquipmentConfigurationMessage =
     require('./SLEquipmentConfigurationMessage.js').SLEquipmentConfigurationMessage;
+exports.SLGetScheduleData = require('./SLGetScheduleData.js').SLGetScheduleData;
+exports.SLAddNewScheduleEvent = require('./SLAddNewScheduleEvent.js').SLAddNewScheduleEvent;
+exports.SLDeleteScheduleEventById = require('./SLDeleteScheduleEventById.js').SLDeleteScheduleEventById;
+exports.SLSetScheduleEventById = require('./SLSetScheduleEventById.js').SLSetScheduleEventById;
