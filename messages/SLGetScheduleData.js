@@ -52,7 +52,7 @@ exports.SLGetScheduleData = class SLGetScheduleData extends SLMessage {
 
     retVal = Math.floor(rawTime / 60) * 100 + rawTime % 60;
 
-    retVal = String(retVal).padStart(4, "0");
+    retVal = String(retVal).padStart(4, '0');
 
     return retVal;
   }

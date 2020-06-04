@@ -245,7 +245,8 @@ class UnitConnection extends EventEmitter {
   }
 
   setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
-    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint).toBuffer());
+    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime,
+      dayMask, flags, heatCmd, heatSetPoint).toBuffer());
   }
 
   onClientMessage(msg) {
