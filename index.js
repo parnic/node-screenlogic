@@ -231,11 +231,11 @@ class UnitConnection extends EventEmitter {
   setSaltCellOutput(controllerId, poolOutput, spaOutput) {
     this.client.write(new messages.SLSetSaltCellConfigMessage(controllerId, poolOutput, spaOutput).toBuffer());
   }
-  
+
   getScheduleData(scheduleType) {
     this.client.write(new messages.SLGetScheduleData(null, scheduleType).toBuffer());
   }
-  
+
   addNewScheduleEvent(scheduleType) {
     this.client.write(new messages.SLAddNewScheduleEvent(null, scheduleType).toBuffer());
   }

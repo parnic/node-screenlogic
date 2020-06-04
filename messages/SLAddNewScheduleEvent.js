@@ -15,7 +15,7 @@ exports.SLAddNewScheduleEvent = class SLAddNewScheduleEvent extends SLMessage {
 
 
     if (!buf) {
-      console.log("Requested Schedule type = ", scheduleType)
+      // console.log('Requested Schedule type = ', scheduleType);
       this.writeInt32LE(0);
       this.writeInt32LE(scheduleType);
     } else {

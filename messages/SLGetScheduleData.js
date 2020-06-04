@@ -14,7 +14,7 @@ exports.SLGetScheduleData = class SLGetScheduleData extends SLMessage {
 
 
     if (!buf) {
-      console.log("Requested Schedule type = ", scheduleType)
+      // console.log('Requested Schedule type = ', scheduleType);
       this.writeInt32LE(0);
       this.writeInt32LE(scheduleType);
     } else {
@@ -30,10 +30,10 @@ exports.SLGetScheduleData = class SLGetScheduleData extends SLMessage {
 
     this.eventCount = this.readUInt32LE();
 
-    this.events = new Array(this.eventCount)
+    this.events = new Array(this.eventCount);
 
     for (var i = 0; i < this.events.length; i++) {
-      this.events[i] = {}
+      this.events[i] = {};
 
       this.events[i].scheduleId = this.readUInt32LE();
       this.events[i].circuitId = this.readUInt32LE();
@@ -48,13 +48,13 @@ exports.SLGetScheduleData = class SLGetScheduleData extends SLMessage {
   }
 
   readTime(rawTime) {
-    var retVal
+    var retVal;
 
-    retVal = Math.floor(rawTime / 60) * 100 + rawTime % 60
+    retVal = Math.floor(rawTime / 60) * 100 + rawTime % 60;
 
-    retVal = String(retVal).padStart(4, "0")
+    retVal = String(retVal).padStart(4, "0");
 
-    return retVal
+    return retVal;
   }
 
   static getResponseId() {
