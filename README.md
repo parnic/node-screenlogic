@@ -514,10 +514,16 @@ Configures an event with properties as described below
 
 * `scheduleId` - id of a schedule previously created, see [`SLAddNewScheduleEvent`](#sladdnewscheduleevent)
 * `circuitId` - id of the circuit to which this event applies to
-* `startTime` - the start time of the event, specified as minutes since midnight, example: 6am would be 360, 6:15am would be 375
+* `startTime` - the start time of the event, specified as minutes since midnight
+	* example: 6:00am would be 360
+	* example: 6:15am would be 375
 * `stopTime` - the stop time of the event, specified as minutes since midnight, format is the same as startTime
-* `dayMask` - 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
-* `flags` - bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once; bit 1 indicates wether heat setPoint should be changed - only valid values i've seen are 0,1,2,3
+* `dayMask`
+	* 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
+* `flags`
+	* bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
+	* bit 1 indicates wether heat setPoint should be changed 
+	* only valid values i've seen are 0,1,2,3
 * `heatCmd` - integer indicating the desired heater mode. Valid values are: 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
 * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
 
