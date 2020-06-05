@@ -490,7 +490,7 @@ Adds a new event to the specified schedule type, either 0 for regular events or 
 
 * `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates 
 
-##SLDeleteScheduleEventById
+## SLDeleteScheduleEventById
 
 Deletes a scheduled event with specified id
 
@@ -498,7 +498,7 @@ Deletes a scheduled event with specified id
 
 * `scheduleId` - the scheduleId of the schedule to be deleted
 
-##SLGetScheduleData
+## SLGetScheduleData
 
 Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events
 
@@ -506,7 +506,7 @@ Retrieves a list of schedule events of the specified type, either 0 for regular 
 
 * `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates 
 
-##SLSetScheduleEventById
+## SLSetScheduleEventById
 
 Configures an event with properties as described below
 
@@ -521,7 +521,7 @@ Configures an event with properties as described below
 * `heatCmd` - integer indicating the desired heater mode. Valid values are: 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
 * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
 
-##SLSetCircuitRuntimeById
+## SLSetCircuitRuntimeById
 
 Configures default run-time of a circuit, usually referred to as the 'egg timer', this also applies to 'run-once' programs as this will set the length of the program
 
