@@ -229,6 +229,7 @@ Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsal
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
+* `addNewScheduleEvent` - will return a [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) object. which contains the created `scheduleId` to be used later for setting up the properties
 
 ### Properties
 
@@ -476,3 +477,14 @@ Passed as an argument to the emitted `gatewayFound` event. Contains information 
 * `port` - number containing the port to connect to the unit
 * `portOpen` - boolean indicating whether or not the port is open and able to be connected to
 * `relayOn` - boolean indicating whether the relay is on (unsure what exactly this indicates; it's always been false in my tests)
+
+## SLAddNewScheduleEvent
+
+Adds a new event to the specified schedule type, either 0 for regular events or 1 for one-time events
+
+### Properties
+
+* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates 
+
+### Triggered Events
+* `addNewScheduleEvent` - will return an object which contains the created `scheduleId` to be used later for setting up the properties
