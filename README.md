@@ -488,7 +488,7 @@ Adds a new event to the specified schedule type, either 0 for regular events or 
 
 ### Properties
 
-* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates 
+* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates a run-once event
 
 ## SLDeleteScheduleEventById
 
@@ -504,7 +504,7 @@ Retrieves a list of schedule events of the specified type, either 0 for regular 
 
 ### Properties
 
-* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates 
+* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates a run-once event
 
 ## SLSetScheduleEventById
 
@@ -522,7 +522,7 @@ Configures an event with properties as described below
 	* 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
 * `flags`
 	* bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
-	* bit 1 indicates wether heat setPoint should be changed 
+	* bit 1 indicates whether heat setPoint should be changed 
 	* only valid values i've seen are 0,1,2,3
 * `heatCmd` - integer indicating the desired heater mode. Valid values are: 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
 * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
