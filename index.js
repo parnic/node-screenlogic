@@ -249,6 +249,10 @@ class UnitConnection extends EventEmitter {
       dayMask, flags, heatCmd, heatSetPoint).toBuffer());
   }
 
+  setCircuitRuntimebyId(circuitId, runTime) {
+    this.client.write(new messages.SLSetCircuitRuntimeById(circuitId, runTime).toBuffer());
+  }
+
   onClientMessage(msg) {
     // console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
@@ -320,6 +324,9 @@ class UnitConnection extends EventEmitter {
         break;
       case messages.SLSetScheduleEventById.getResponseId():
         this.emit('setScheduleEventById', new messages.SLSetScheduleEventById(msg));
+        break;
+      case messages.SLSetCircuitRuntimeById.getResponseId():
+        this.emit('setCircuitRuntimebyId', new messages.SLSetCircuitRuntimeById());
         break;
       case 13:
         // console.log("  it's a login failure.");

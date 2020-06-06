@@ -229,6 +229,11 @@ Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsal
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
+* `addNewScheduleEvent` - will return a [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) object. which contains the created `scheduleId` to be used later for setting up the properties
+* `deleteScheduleById` - Indicates a response to the `deleteScheduleById()` command has been received.
+* `getScheduleData` - will return a [`SLGetScheduleData`](#slgetscheduledata) object. which contains a list of events of the specified type
+* `setScheduleEventById` - Indicates a response to the `setScheduleEventById()` command has been received.
+* `setCircuitRuntimeById` - Indicates a response to the `setCircuitRuntimeById()` command has been received.
 
 ### Properties
 
@@ -476,3 +481,57 @@ Passed as an argument to the emitted `gatewayFound` event. Contains information 
 * `port` - number containing the port to connect to the unit
 * `portOpen` - boolean indicating whether or not the port is open and able to be connected to
 * `relayOn` - boolean indicating whether the relay is on (unsure what exactly this indicates; it's always been false in my tests)
+
+## SLAddNewScheduleEvent
+
+Adds a new event to the specified schedule type, either 0 for regular events or 1 for one-time events
+
+### Properties
+
+* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates a run-once event
+
+## SLDeleteScheduleEventById
+
+Deletes a scheduled event with specified id
+
+### Properties
+
+* `scheduleId` - the scheduleId of the schedule to be deleted
+
+## SLGetScheduleData
+
+Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events
+
+### Properties
+
+* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates a run-once event
+
+## SLSetScheduleEventById
+
+Configures an event with properties as described below
+
+### Properties
+
+* `scheduleId` - id of a schedule previously created, see [`SLAddNewScheduleEvent`](#sladdnewscheduleevent)
+* `circuitId` - id of the circuit to which this event applies to
+* `startTime` - the start time of the event, specified as minutes since midnight
+	* example: 6:00am would be 360
+	* example: 6:15am would be 375
+* `stopTime` - the stop time of the event, specified as minutes since midnight, format is the same as startTime
+* `dayMask`
+	* 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
+* `flags`
+	* bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
+	* bit 1 indicates whether heat setPoint should be changed 
+	* only valid values i've seen are 0,1,2,3
+* `heatCmd` - integer indicating the desired heater mode. Valid values are: 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
+* `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
+
+## SLSetCircuitRuntimeById
+
+Configures default run-time of a circuit, usually referred to as the 'egg timer', this also applies to 'run-once' programs as this will set the length of the program
+
+### Properties
+
+* `circuitId` - id of the circuit to which this event applies to
+* `runTime` - integer specifying the minutes of runTime

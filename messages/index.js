@@ -19,3 +19,4 @@ exports.SLGetScheduleData = require('./SLGetScheduleData.js').SLGetScheduleData;
 exports.SLAddNewScheduleEvent = require('./SLAddNewScheduleEvent.js').SLAddNewScheduleEvent;
 exports.SLDeleteScheduleEventById = require('./SLDeleteScheduleEventById.js').SLDeleteScheduleEventById;
 exports.SLSetScheduleEventById = require('./SLSetScheduleEventById.js').SLSetScheduleEventById;
+exports.SLSetCircuitRuntimeById = require('./SLSetCircuitRuntimeById.js').SLSetCircuitRuntimeById;
