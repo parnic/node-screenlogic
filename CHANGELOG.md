@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.5.0 - 2020-06-06
+### Added
+* Added support for adding, deleting, listing, and updating scheduled events
+* Added egg timer support
+
 ## v1.4.0 - 2020-05-25
 ### Added
 * Support for controlling the salt cell generator's output levels.
