@@ -20,3 +20,5 @@ exports.SLAddNewScheduleEvent = require('./SLAddNewScheduleEvent.js').SLAddNewSc
 exports.SLDeleteScheduleEventById = require('./SLDeleteScheduleEventById.js').SLDeleteScheduleEventById;
 exports.SLSetScheduleEventById = require('./SLSetScheduleEventById.js').SLSetScheduleEventById;
 exports.SLSetCircuitRuntimeById = require('./SLSetCircuitRuntimeById.js').SLSetCircuitRuntimeById;
+exports.SLGetPumpStatus = require('./SLGetPumpStatus.js').SLGetPumpStatus;
+exports.SLSetPumpFlow = require('./SLSetPumpFlow.js').SLSetPumpFlow;
