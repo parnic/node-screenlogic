@@ -551,9 +551,9 @@ Gets information about indicated pump
 * `pumpGPMs` - current GPMs of the pump
 * `pump_unknown` - unknown data
 * `pumpSetting` - Array of 8 items each containing
-	* circuitId - Circuit Id ( CirctuiId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage) bodyArray[i].deviceId)
-	* pumpSetPoint = the setPoint for this pump/circuit combo
-	* setPointType = 1 for RPMs; 0 for GPMs
+	* `circuitId` - Circuit Id ( CirctuiId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage) bodyArray[i].deviceId)
+	* `pumpSetPoint` = the setPoint for this pump/circuit combo
+	* `isRPMs` = 1 for RPMs; 0 for GPMs
 
 
 ## SLSetPumpFlow
