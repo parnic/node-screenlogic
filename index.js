@@ -282,6 +282,7 @@ class UnitConnection extends EventEmitter {
   }
 
   cancelDelay() {
+    debugUnit('sending cancel delay command...');
     this.client.write(new messages.SLCancelDelay().toBuffer());
   }
 
@@ -375,6 +376,7 @@ class UnitConnection extends EventEmitter {
         this.emit('setPumpFlow', new messages.SLSetPumpFlow());
         break;
       case messages.SLCancelDelay.getResponseId():
+        debugUnit("  it's a cancel delay ack");
         this.emit('cancelDelay', new messages.SLCancelDelay());
         break;
       case 13:

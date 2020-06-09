@@ -241,6 +241,9 @@ Gets information about the specified pump. See [`SLGetPumpStatus`](#slgetpumpsta
 
 Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpumpflow) documentation for argument values. Emits the `setPumpFlow` event when response is acknowledged.
 
+### cancelDelay()
+
+Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) documentation. Emits the `cancelDelay` event when response is acknowledged.
 
 ### Events
 
@@ -262,6 +265,7 @@ Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpu
 * `setCircuitRuntimeById` - Indicates that a response to `setCircuitRuntimeById()` has been received. Event handler receives a [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) object.
 * `getPumpStatus` - Indicates that a response to `getPumpStatus()` has been received. Event handler receives a [`SLGetPumpStatus`](#slgetpumpstatus) object.
 * `setPumpFlow` - Indicates that a response to `setPumpFlow()` has been received. Event handler receives a [`SLSetPumpFlow`](#slsetpumpflow) object.
+* `cancelDelay` - Indicates that a response to `cancelDelay()` has been received. Event handler receives a [`SLCancelDelay`](#slcanceldelay) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
@@ -635,3 +639,7 @@ Passed as an argument to the emitted `setPumpFlow` event. The passed version is 
 * `circuitId` - index of circuit for which to change the set point (index is relative to data returned by [`SLGetPumpStatus`](#slgetpumpstatus))
 * `setPoint` - the value for which to set the pump/circuit combo
 * `isRPMs` - boolean, `true` for RPMs, `false` for GPMs
+
+## SLCancelDelay
+
+Passed as an argument to the emitted `cancelDelay` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
