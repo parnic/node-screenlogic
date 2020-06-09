@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * ScreenLogic.HEAT_MODE_HEATPUMP
   * ScreenLogic.HEAT_MODE_DONTCHANGE
 * Debug logs using the "debug" NPM package. You'll need to run an `npm install` after updating to this version.
+* Ability to cancel delays in pool equipment. #20 - thanks @bshep
 
 ## v1.5.0 - 2020-06-06
 ### Added
