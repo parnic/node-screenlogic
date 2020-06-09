@@ -11,7 +11,10 @@
             "program": "${workspaceFolder}/example.js",
             "skipFiles": [
                 "<node_internals>/**"
-            ]
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            }
         }
     ]
 }

@@ -5,6 +5,9 @@ var net = require('net');
 const EventEmitter = require('events');
 const messages = require('./messages');
 const Encoder = require('./PasswordEncoder').HLEncoder;
+var debugFind = require('debug')('sl:find');
+var debugRemote = require('debug')('sl:remote');
+var debugUnit = require('debug')('sl:unit');
 
 class FindUnits extends EventEmitter {
   constructor() {
@@ -14,8 +17,9 @@ class FindUnits extends EventEmitter {
     this.finder.on('message', function(message, remote) {
       _this.foundServer(message, remote);
     }).on('close', function() {
-      // console.log('finder closed');
+      debugFind('closed');
     }).on('error', function(e) {
+      debugFind('error: %O', e);
       _this.emit('error', e);
     });
   }
@@ -30,7 +34,7 @@ class FindUnits extends EventEmitter {
   }
 
   foundServer(message, remote) {
-    // console.log('Found something');
+    debugFind('found something');
     if (message.length >= 40) {
       var server = {
         address: remote.address,
@@ -41,11 +45,12 @@ class FindUnits extends EventEmitter {
         gatewayName: message.toString('utf8', 12, 29),
       };
 
-      // console.log('  type: ' + server.type + ', host: ' + server.address + ':' + server.port + ',
-      //   identified as ' + server.gatewayName);
+      debugFind('  type: ' + server.type + ', host: ' + server.address + ':' + server.port + ', identified as ' + server.gatewayName);
       if (server.type === 2) {
         this.emit('serverFound', server);
       }
+    } else {
+      debugFind('  unexpected message');
     }
   }
 
@@ -53,7 +58,7 @@ class FindUnits extends EventEmitter {
     var message = Buffer.alloc(8);
     message[0] = 1;
     this.finder.send(message, 0, message.length, 1444, '255.255.255.255');
-    // console.log("Looking for ScreenLogic hosts...");
+    debugFind('Looking for ScreenLogic hosts...');
   }
 
   close() {
@@ -71,14 +76,15 @@ class RemoteLogin extends EventEmitter {
     this.client.on('data', function(msg) {
       _this.onClientMessage(msg);
     }).on('close', function(had_error) {
-      // console.log('remote login server connection closed');
+      debugRemote('remote login server connection closed');
     }).on('error', function(e) {
+      debugRemote('error: %o', e);
       _this.emit('error', e);
     });
   }
 
   connect() {
-    // console.log('connecting to dispatcher...');
+    debugRemote('connecting to dispatcher...');
     var _this = this;
     this.client.connect(500, 'screenlogicserver.pentair.com', function() {
       _this.onConnected();
@@ -86,13 +92,13 @@ class RemoteLogin extends EventEmitter {
   }
 
   onConnected() {
-    // console.log('connected to dispatcher');
+    debugRemote('connected to dispatcher');
 
     this.client.write(new messages.SLGetGatewayDataMessage(this.systemName).toBuffer());
   }
 
   onClientMessage(msg) {
-    // console.log('received message of length ' + msg.length);
+    debugRemote('received message of length ' + msg.length);
     if (msg.length < 4) {
       return;
     }
@@ -100,11 +106,11 @@ class RemoteLogin extends EventEmitter {
     var msgType = msg.readInt16LE(2);
     switch (msgType) {
       case messages.SLGetGatewayDataMessage.getResponseId():
-        // console.log("  it's a gateway response");
+        debugRemote("  it's a gateway response");
         this.emit('gatewayFound', new messages.SLGetGatewayDataMessage(msg));
         break;
       default:
-        // console.log("  it's unknown. type: " + msgType);
+        debugRemote("  it's unknown. type: " + msgType);
         break;
     }
   }
@@ -149,8 +155,9 @@ class UnitConnection extends EventEmitter {
         bufferIdx = 0;
       }
     }).on('close', function(had_error) {
-      // console.log('unit connection closed');
+      debugUnit('closed');
     }).on('error', function(e) {
+      debugUnit('error: %o', e);
       _this.emit('error', e);
     });
   }
@@ -160,7 +167,7 @@ class UnitConnection extends EventEmitter {
   }
 
   connect() {
-    // console.log("connecting...");
+    debugUnit('connecting...');
     var _this = this;
     this.client.connect(this.serverPort, this.serverAddress, function() {
       _this.onConnected();
@@ -168,101 +175,114 @@ class UnitConnection extends EventEmitter {
   }
 
   onConnected() {
-    // console.log('connected');
+    debugUnit('connected');
 
-    // console.log('sending init message...');
+    debugUnit('sending init message...');
     this.client.write('CONNECTSERVERHOST\r\n\r\n');
 
-    // console.log('sending challenge message...');
+    debugUnit('sending challenge message...');
     this.client.write(new messages.SLChallengeMessage().toBuffer());
   }
 
   login() {
-    // console.log('sending login message...');
+    debugUnit('sending login message...');
     var password = new Encoder(this.password).getEncryptedPassword(this.challengeString);
     this.client.write(new messages.SLLoginMessage(password).toBuffer());
   }
 
   getPoolStatus() {
-    // console.log('sending pool status query...');
+    debugUnit('sending pool status query...');
     this.client.write(new messages.SLPoolStatusMessage().toBuffer());
   }
 
   getControllerConfig() {
-    // console.log('sending controller config query...');
+    debugUnit('sending controller config query...');
     this.client.write(new messages.SLControllerConfigMessage().toBuffer());
   }
 
   getChemicalData() {
-    // console.log('sending chemical data query...');
+    debugUnit('sending chemical data query...');
     this.client.write(new messages.SLChemDataMessage().toBuffer());
   }
 
   getSaltCellConfig() {
-    // console.log('sending salt cell config query...');
+    debugUnit('sending salt cell config query...');
     this.client.write(new messages.SLSaltCellConfigMessage().toBuffer());
   }
 
   getVersion() {
-    // console.log('sending version query...');
+    debugUnit('sending version query...');
     this.client.write(new messages.SLVersionMessage().toBuffer());
   }
 
   getEquipmentConfiguration() {
+    debugUnit('sending equipment configuration query...');
     this.client.write(new messages.SLEquipmentConfigurationMessage().toBuffer());
   }
 
   setCircuitState(controllerId, circuitId, circuitState) {
+    debugUnit('sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', controllerId, circuitId, circuitState);
     this.client.write(new messages.SLSetCircuitStateMessage(controllerId, circuitId, circuitState).toBuffer());
   }
 
   setSetPoint(controllerId, bodyType, temperature) {
+    debugUnit('sending set setpoint command: controllerId: %d, bodyType: %d, temperature: %d...', controllerId, bodyType, temperature);
     this.client.write(new messages.SLSetHeatSetPointMessage(controllerId, bodyType, temperature).toBuffer());
   }
 
   setHeatMode(controllerId, bodyType, heatMode) {
+    debugUnit('sending set heatmode command: controllerId: %d, bodyType: %d, heatMode: %d...', controllerId, bodyType, heatMode);
     this.client.write(new messages.SLSetHeatModeMessage(controllerId, bodyType, heatMode).toBuffer());
   }
 
   sendLightCommand(controllerId, command) {
+    debugUnit('sending light command: controllerId: %d, command: %d...', controllerId, command);
     this.client.write(new messages.SLLightControlMessage(controllerId, command).toBuffer());
   }
 
   setSaltCellOutput(controllerId, poolOutput, spaOutput) {
+    debugUnit('sending set saltcell output command: controllerId: %d, poolOutput: %d, spaOutput: %d...', controllerId, poolOutput, spaOutput);
     this.client.write(new messages.SLSetSaltCellConfigMessage(controllerId, poolOutput, spaOutput).toBuffer());
   }
 
   getScheduleData(scheduleType) {
+    debugUnit('sending set schedule data query for scheduleType: %d...', scheduleType);
     this.client.write(new messages.SLGetScheduleData(null, scheduleType).toBuffer());
   }
 
   addNewScheduleEvent(scheduleType) {
+    debugUnit('sending add new schedule event command for scheduleType: %d...', scheduleType);
     this.client.write(new messages.SLAddNewScheduleEvent(null, scheduleType).toBuffer());
   }
 
   deleteScheduleEventById(scheduleId) {
+    debugUnit('sending delete schedule event command for scheduleId: %d...', scheduleId);
     this.client.write(new messages.SLDeleteScheduleEventById(scheduleId).toBuffer());
   }
 
+  // todo: should this just accept a SLSetScheduleEventById message instead of all these args?
   setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
-    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime,
-      dayMask, flags, heatCmd, heatSetPoint).toBuffer());
+    debugUnit('sending set schedule event command for scheduleId: %d, circuitId: %d, startTime: %d, stopTime: %d, dayMask: %d, flags: %d, heatCmd: %d, heatSetPoint: %d...', scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
+    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint).toBuffer());
   }
 
   setCircuitRuntimebyId(circuitId, runTime) {
+    debugUnit('sending set circuit runtime command for circuitId: %d, runTime: %d...', circuitId, runTime);
     this.client.write(new messages.SLSetCircuitRuntimeById(circuitId, runTime).toBuffer());
   }
 
   getPumpStatus(pumpId) {
+    debugUnit('sending get pump status command for pumpId: %d...', pumpId);
     this.client.write(new messages.SLGetPumpStatus(null, pumpId).toBuffer());
   }
 
   setPumpFlow(pumpId, circuitId, setPoint, isRPMs) {
+    debugUnit('sending set pump flow command for pumpId: %d, circuitId: %d, setPoint: %d, isRPMs: %d...', pumpId, circuitId, setPoint, isRPMs);
     this.client.write(new messages.SLSetPumpFlow(pumpId, circuitId, setPoint, isRPMs).toBuffer());
   }
 
   onClientMessage(msg) {
-    // console.log('received message of length ' + msg.length);
+    debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
       return;
     }
@@ -270,92 +290,100 @@ class UnitConnection extends EventEmitter {
     var msgType = msg.readInt16LE(2);
     switch (msgType) {
       case messages.SLChallengeMessage.getResponseId():
-        // console.log("  it's a challenge response");
+        debugUnit("  it's a challenge response");
         this.challengeString = new messages.SLChallengeMessage(msg).challengeString;
         this.login();
         break;
       case messages.SLLoginMessage.getResponseId():
-        // console.log("  it's a login response");
+        debugUnit("  it's a login response");
         this.emit('loggedIn');
         break;
       case messages.SLPoolStatusMessage.getResponseId():
-        // console.log("  it's pool status");
+        debugUnit("  it's pool status");
         this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
         break;
       case messages.SLControllerConfigMessage.getResponseId():
-        // console.log("  it's controller configuration");
+        debugUnit("  it's controller configuration");
         this.emit('controllerConfig', new messages.SLControllerConfigMessage(msg));
         break;
       case messages.SLChemDataMessage.getResponseId():
-        // console.log("  it's chem data");
+        debugUnit("  it's chem data");
         this.emit('chemicalData', new messages.SLChemDataMessage(msg));
         break;
       case messages.SLSaltCellConfigMessage.getResponseId():
-        // console.log("  it's salt cell config");
+        debugUnit("  it's salt cell config");
         this.emit('saltCellConfig', new messages.SLSaltCellConfigMessage(msg));
         break;
       case messages.SLVersionMessage.getResponseId():
-        // console.log("  it's version");
+        debugUnit("  it's version");
         this.emit('version', new messages.SLVersionMessage(msg));
         break;
       case messages.SLSetCircuitStateMessage.getResponseId():
-        // console.log("  it's circuit toggle ack");
+        debugUnit("  it's circuit toggle ack");
         this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage());
         break;
       case messages.SLSetHeatSetPointMessage.getResponseId():
-        // console.log("  it's a setpoint ack");
+        debugUnit("  it's a setpoint ack");
         this.emit('setPointChanged', new messages.SLSetHeatSetPointMessage());
         break;
       case messages.SLSetHeatModeMessage.getResponseId():
-        // console.log("  it's a heater mode ack");
+        debugUnit("  it's a heater mode ack");
         this.emit('heatModeChanged', new messages.SLSetHeatModeMessage());
         break;
       case messages.SLLightControlMessage.getResponseId():
-        // console.log("  it's a light control ack");
+        debugUnit("  it's a light control ack");
         this.emit('sentLightCommand', new messages.SLLightControlMessage());
         break;
       case messages.SLSetSaltCellConfigMessage.getResponseId():
-        // console.log("  it's a set salt cell config ack");
+        debugUnit("  it's a set salt cell config ack");
         this.emit('setSaltCellConfig', new messages.SLSetSaltCellConfigMessage());
         break;
       case messages.SLEquipmentConfigurationMessage.getResponseId():
+        debugUnit("  it's equipment configuration");
         this.emit('equipmentConfiguration', new messages.SLEquipmentConfigurationMessage(msg));
         break;
       case messages.SLGetScheduleData.getResponseId():
+        debugUnit("  it's schedule data");
         this.emit('getScheduleData', new messages.SLGetScheduleData(msg));
         break;
       case messages.SLAddNewScheduleEvent.getResponseId():
+        debugUnit("  it's a new schedule event ack");
         this.emit('addNewScheduleEvent', new messages.SLAddNewScheduleEvent(msg));
         break;
       case messages.SLDeleteScheduleEventById.getResponseId():
+        debugUnit("  it's a delete schedule event ack");
         this.emit('deleteScheduleEventById', new messages.SLDeleteScheduleEventById(msg));
         break;
       case messages.SLSetScheduleEventById.getResponseId():
+        debugUnit("  it's a set schedule event ack");
         this.emit('setScheduleEventById', new messages.SLSetScheduleEventById(msg));
         break;
       case messages.SLSetCircuitRuntimeById.getResponseId():
+        debugUnit("  it's a set circuit runtime ack");
         this.emit('setCircuitRuntimebyId', new messages.SLSetCircuitRuntimeById());
         break;
       case messages.SLGetPumpStatus.getResponseId():
+        debugUnit("  it's pump status");
         this.emit('getPumpStatus', new messages.SLGetPumpStatus(msg));
         break;
       case messages.SLSetPumpFlow.getResponseId():
+        debugUnit("  it's a set pump flow ack");
         this.emit('setPumpFlow', new messages.SLSetPumpFlow());
         break;
       case 13:
-        // console.log("  it's a login failure.");
+        debugUnit("  it's a login failure.");
         this.emit('loginFailed');
         break;
       case 30:
-        // console.log("unknown command");
+        debugUnit("  it's an unknown command.");
         this.emit('unknownCommand');
         break;
       case 31:
-        // console.log("  it's a parameter failure.");
+        debugUnit("  it's a parameter failure.");
         this.emit('badParameter');
         break;
       default:
-        // console.log("  it's unknown. type: " + msgType);
+        debugUnit("  it's an unknown type: %d", msgType);
         break;
     }
   }
