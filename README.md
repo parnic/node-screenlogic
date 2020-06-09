@@ -545,15 +545,17 @@ Gets information about indicated pump
 * `pumpId` - id of pump to get information about, first pump is 0
 
 ### Return Values
-
+* `isRunning` - boolean that says if pump is running
+* `pumpType` - 1 for IntelliFloVF (presumably), 2 for IntelliflowVS, 3 for IntelliflowVSF
 * `pumpWatts` - current Watts usage of the pump
 * `pumpRPMs` - current RPMs of the pump
 * `pumpGPMs` - current GPMs of the pump
-* `pump_unknown` - unknown data
 * `pumpSetting` - Array of 8 items each containing
 	* `circuitId` - Circuit Id ( CirctuiId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage) bodyArray[i].deviceId)
 	* `pumpSetPoint` = the setPoint for this pump/circuit combo
 	* `isRPMs` = 1 for RPMs; 0 for GPMs
+* `pumpUnknown1` - unknown data -- always 0
+* `pumpUnknown2` - unknown data -- always 255
 
 
 ## SLSetPumpFlow
