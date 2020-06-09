@@ -19,15 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v1.5.0 - 2020-06-06
 ### Added
-* Added support for adding, deleting, listing, and updating scheduled events
-* Added egg timer support
+* Added support for adding, deleting, listing, and updating scheduled events - thanks @bshep
+* Added egg timer support - thanks @bshep
 
 ## v1.4.0 - 2020-05-25
 ### Added
 * Support for controlling the salt cell generator's output levels.
 * Helper methods for interpreting `controllerType`.
 * Experimental support for an Equipment Configuration message (not documented as of yet - `SLEquipmentConfigurationMessage` / `getEquipmentConfiguration()`). This message returns arrays of various information about the equipment, but I don't know how to interpret the information in those arrays yet. Any assistance with decoding this information would be hugely helpful.
-* `error` handler on all objects for reacting to unhandled node errors.
+* `error` handler on all objects for reacting to unhandled node errors - thanks @schemers
 
 ### Fixed
 * VSCode "Example" configuration can now be launched on non-Windows platforms.
