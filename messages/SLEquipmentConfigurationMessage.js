@@ -45,6 +45,60 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
     this.spaFlowDataArray = this.readSLArray();
   }
 
+  getVersion() {
+    if (this.versionDataArray === null || this.versionDataArray.length < 2) {
+      return 0;
+    }
+
+    return (this.versionDataArray[0] * 1000) + (this.versionDataArray[1]);
+  }
+
+  getSecondariesCount() {
+    return (this.controllerData & 0x11000000) >> 6;
+  }
+
+  getPumpType(pumpIndex) {
+    if (typeof (pumpIndex) !== 'number') {
+      return 0;
+    }
+
+    if (this.flowDataArray === null || this.flowDataArray.length < (pumpIndex + 1) * 45) {
+      return 0;
+    }
+
+    let pumpType = this.flowDataArray[(45 * pumpIndex) + 2];
+    if (pumpType <= 3) {
+      return pumpType;
+    }
+
+    return 0;
+  }
+
+  getCircuitRPMs(pumpIndex, circuitDeviceId) {
+    if (typeof (pumpIndex) !== 'number' || typeof (circuitDeviceId) !== 'number') {
+      return 0;
+    }
+
+    if (pumpIndex < 0 || pumpIndex >= 8) {
+      return 0;
+    }
+
+    if (this.flowDataArray === null || this.flowDataArray.length < (pumpIndex + 1) * 45) {
+      return 0;
+    }
+
+    for (var i = 0; i < 8; i++) {
+      let offset = (45 * pumpIndex) + 4 + (i * 2);
+      if (this.flowDataArray[offset] === circuitDeviceId) {
+        let upperBits = this.flowDataArray[offset + 1];
+        let lowerBits = this.flowDataArray[offset + (16 - (i * 2)) + 1 + i];
+        return (upperBits << 8) + lowerBits;
+      }
+    }
+
+    return 0;
+  }
+
   static getResponseId() {
     return MSG_ID + 1;
   }
