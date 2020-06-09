@@ -99,6 +99,21 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
     return 0;
   }
 
+  getNumPumps() {
+    if (this.flowDataArray === null) {
+      return 0;
+    }
+
+    let numPumps = 0;
+    for (var i = 0; i < this.flowDataArray.length; i += 45) {
+      if (this.flowDataArray[i + 2] !== 0) {
+        numPumps++;
+      }
+    }
+
+    return numPumps;
+  }
+
   static getResponseId() {
     return MSG_ID + 1;
   }
