@@ -253,6 +253,14 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLSetCircuitRuntimeById(circuitId, runTime).toBuffer());
   }
 
+  getPumpStatus(pumpId) {
+    this.client.write(new messages.SLGetPumpStatus(null, pumpId).toBuffer());
+  }
+
+  setPumpFlow(pumpId, circuitId, setPoint, isRPMs) {
+    this.client.write(new messages.SLSetPumpFlow(pumpId, circuitId, setPoint, isRPMs).toBuffer());
+  }
+
   onClientMessage(msg) {
     // console.log('received message of length ' + msg.length);
     if (msg.length < 4) {
@@ -328,9 +336,19 @@ class UnitConnection extends EventEmitter {
       case messages.SLSetCircuitRuntimeById.getResponseId():
         this.emit('setCircuitRuntimebyId', new messages.SLSetCircuitRuntimeById());
         break;
+      case messages.SLGetPumpStatus.getResponseId():
+        this.emit('getPumpStatus', new messages.SLGetPumpStatus(msg));
+        break;
+      case messages.SLSetPumpFlow.getResponseId():
+        this.emit('setPumpFlow', new messages.SLSetPumpFlow());
+        break;
       case 13:
         // console.log("  it's a login failure.");
         this.emit('loginFailed');
+        break;
+      case 30:
+        // console.log("unknown command");
+        this.emit('unknownCommand');
         break;
       case 31:
         // console.log("  it's a parameter failure.");

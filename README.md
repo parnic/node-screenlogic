@@ -535,3 +535,36 @@ Configures default run-time of a circuit, usually referred to as the 'egg timer'
 
 * `circuitId` - id of the circuit to which this event applies to
 * `runTime` - integer specifying the minutes of runTime
+
+## SLGetPumpStatus
+
+Gets information about indicated pump
+
+### Properties
+
+* `pumpId` - id of pump to get information about, first pump is 0
+
+### Return Values
+* `isRunning` - boolean that says if pump is running
+* `pumpType` - 1 for IntelliFloVF (presumably), 2 for IntelliflowVS, 3 for IntelliflowVSF
+* `pumpWatts` - current Watts usage of the pump
+* `pumpRPMs` - current RPMs of the pump
+* `pumpGPMs` - current GPMs of the pump
+* `pumpSetting` - Array of 8 items each containing
+	* `circuitId` - Circuit Id ( CirctuiId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage) bodyArray[i].deviceId)
+	* `pumpSetPoint` = the setPoint for this pump/circuit combo
+	* `isRPMs` = 1 for RPMs; 0 for GPMs
+* `pumpUnknown1` - unknown data -- always 0
+* `pumpUnknown2` - unknown data -- always 255
+
+
+## SLSetPumpFlow
+  
+Sets Flow Setting for a Pump/Circuit combination
+
+### Properties
+
+* `pumpId` - id of pump to get information about, first pump is 0
+* `circuitId` - index of circuit for which to change the setpoint ( index is relative to data returned by [`SLGetPumpStatus`](#slgetpumpstatus) )
+* `setPoint` - the value for which to set the pump/circuit combo
+* `isRPMs` - boolean, TRUE for RPMs, FALSE for GPMs
