@@ -40,7 +40,7 @@ exports.SLGetPumpStatus = class SLGetPumpStatus extends SLMessage {
       this.pumpSetting[i] = {};
       this.pumpSetting[i].circuitId = this.readUInt32LE();
       this.pumpSetting[i].pumpSetPoint = this.readUInt32LE();
-      this.pumpSetting[i].isRPMs = this.readUInt32LE(); // 1 for RPMs; 0 for GPMs
+      this.pumpSetting[i].isRPMs = this.readUInt32LE() !== 0; // 1 for RPMs; 0 for GPMs
     }
   }
 

@@ -624,4 +624,4 @@ Passed as an argument to the emitted `setPumpFlow` event. The passed version is 
 * `pumpId` - id of pump to get information about, first pump is 0
 * `circuitId` - index of circuit for which to change the set point (index is relative to data returned by [`SLGetPumpStatus`](#slgetpumpstatus))
 * `setPoint` - the value for which to set the pump/circuit combo
-* `isRPMs` - boolean, TRUE for RPMs, FALSE for GPMs
+* `isRPMs` - boolean, `true` for RPMs, `false` for GPMs
