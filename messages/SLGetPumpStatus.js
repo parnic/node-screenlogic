@@ -29,7 +29,7 @@ exports.SLGetPumpStatus = class SLGetPumpStatus extends SLMessage {
     this.pumpSetting = new Array(8);
 
     this.pumpType = this.readUInt32LE();
-    this.isRunning = this.readUInt32LE() !== 0; // Sometimes 1, sometimes 4294967295 (FF FF FF FF)
+    this.isRunning = this.readUInt32LE() !== 0; // 0, 1, or 4294967295 (FF FF FF FF)
     this.pumpWatts = this.readUInt32LE();
     this.pumpRPMs = this.readUInt32LE();
     this.pumpUnknown1 = this.readUInt32LE(); // Always 0

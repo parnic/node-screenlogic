@@ -213,6 +213,35 @@ Note that better/more complete handling of lighting is desired, but I have yet t
 
 Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) documentation for argument values. Emits the `setSaltCellConfig` event when response is acknowledged.
 
+### getScheduleData(scheduleType)
+
+Retrieves a list of schedule events of the specified type. See [`SLGetScheduleData`](#slgetscheduledata) documentation for argument values. Emits the `getScheduleData` event when response is acknowledged.
+
+### addNewScheduleEvent(scheduleType)
+
+Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) documentation for argument values. Emits the `addNewScheduleEvent` event when response is acknowledged.
+
+### deleteScheduleEventById(scheduleId)
+
+Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` event when response is acknowledged.
+
+### setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint)
+
+Configures a schedule event. See [`SLSetScheduleEventById`](#slsetscheduleeventbyid) documentation for argument values. Emits the `setScheduleEventById` event when response is acknowledged.
+
+### setCircuitRuntimebyId(circuitId, runTime)
+
+Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program. See [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) documentation for argument values. Emits the `setCircuitRuntimeById` event when response is acknowledged.
+
+### getPumpStatus(pumpId)
+
+Gets information about the specified pump. See [`SLGetPumpStatus`](#slgetpumpstatus) documentation for argument values. Emits the `getPumpStatus` event when response is acknowledged.
+
+### setPumpFlow(pumpId, circuitId, setPoint, isRPMs)
+
+Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpumpflow) documentation for argument values. Emits the `setPumpFlow` event when response is acknowledged.
+
+
 ### Events
 
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
@@ -226,14 +255,17 @@ Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsal
 * `heatModeChanged` - Indicates that a response to `setHeatMode()` has been received. Event handler receives a [`SLSetHeatModeMessage`](#slsetheatmodemessage) object.
 * `sentLightCommand` - Indicates that a response to `sendLightCommand()` has been received. Event handler receives a [`SLLightControlMessage`](#sllightcontrolmessage) object.
 * `setSaltCellConfig` - Indicates that a response to `setSaltCellOutput()` has been received. Event handler receives a [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) object.
+* `getScheduleData` - Indicates that a response to `getScheduleData()` has been received. Event handler receives a [`SLGetScheduleData`](#slgetscheduledata) object.
+* `addNewScheduleEvent` - Indicates that a response to `addNewScheduleEvent()` has been received which contains the created `scheduleId` to be used later for setting up the properties. Event handler receives a [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) object.
+* `deleteScheduleById` - Indicates that a response to `deleteScheduleById()` has been received. Event handler receives a [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) object.
+* `setScheduleEventById` - Indicates that a response to `setScheduleEventById()` has been received. Event handler receives a [`SLSetScheduleEventById`](#slsetscheduleeventbyid) object.
+* `setCircuitRuntimeById` - Indicates that a response to `setCircuitRuntimeById()` has been received. Event handler receives a [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) object.
+* `getPumpStatus` - Indicates that a response to `getPumpStatus()` has been received. Event handler receives a [`SLGetPumpStatus`](#slgetpumpstatus) object.
+* `setPumpFlow` - Indicates that a response to `setPumpFlow()` has been received. Event handler receives a [`SLSetPumpFlow`](#slsetpumpflow) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
-* `addNewScheduleEvent` - will return a [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) object. which contains the created `scheduleId` to be used later for setting up the properties
-* `deleteScheduleById` - Indicates a response to the `deleteScheduleById()` command has been received.
-* `getScheduleData` - will return a [`SLGetScheduleData`](#slgetscheduledata) object. which contains a list of events of the specified type
-* `setScheduleEventById` - Indicates a response to the `setScheduleEventById()` command has been received.
-* `setCircuitRuntimeById` - Indicates a response to the `setCircuitRuntimeById()` command has been received.
+* `unknownCommand` - Indicates that an unknown command was issued to ScreenLogic (should not be possible to trigger when using the supplied `UnitConnection` methods).
 
 ### Properties
 
@@ -377,6 +409,30 @@ Returns a bool indicating whether the system has a cooler present. (Helper metho
 
 Returns a bool indicating whether the system has an IntelliChem chemical management system present. (Helper method for interpreting the value in `equipFlags`.)
 
+### isEasyTouch()
+
+Returns a bool indicating whether the system is an EasyTouch system or not. (Helper method for interpreting the value in `controllerType`.)
+
+### isIntelliTouch()
+
+Returns a bool indicating whether the system is an IntelliTouch system or not. (Helper method for interpreting the value in `controllerType`.)
+
+### isEasyTouchLite()
+
+Returns a bool indicating whether the system is an EasyTouch Lite system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
+
+### isDualBody()
+
+Returns a bool indicating whether the system is dual-body or not. (Helper method for interpreting the value in `controllerType`.)
+
+### isChem2()
+
+Returns a bool indicating whether the system is a Chem2 system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
+
+### getCircuitByDeviceId(deviceId)
+
+Returns the `bodyArray` entry for the circuit matching the given device id. This is most useful with an [`SLGetPumpStatus`](#slgetpumpstatus) message.
+
 ### Properties
 
 * `controllerId` - integer indicating the controller's ID
@@ -484,15 +540,15 @@ Passed as an argument to the emitted `gatewayFound` event. Contains information 
 
 ## SLAddNewScheduleEvent
 
-Adds a new event to the specified schedule type, either 0 for regular events or 1 for one-time events
+Passed as an argument to the emitted `addNewScheduleEvent` event. Adds a new event to the specified schedule type, either 0 for regular events or 1 for one-time events.
 
 ### Properties
 
-* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates a run-once event
+* `scheduleType` - 0 indicates regular scheduled events, 1 indicates a run-once event
 
 ## SLDeleteScheduleEventById
 
-Deletes a scheduled event with specified id
+Passed as an argument to the emitted `deleteScheduleEventById` event. Deletes a scheduled event with specified id.
 
 ### Properties
 
@@ -500,45 +556,44 @@ Deletes a scheduled event with specified id
 
 ## SLGetScheduleData
 
-Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events
+Passed as an argument to the emitted `getScheduleData` event. Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events.
 
 ### Properties
 
-* `scheduleType` - 0 - indicates regular scheduled events, 1 - indicates a run-once event
+* `scheduleType` - 0 indicates regular scheduled events, 1 indicates a run-once event
 
 ## SLSetScheduleEventById
 
-Configures an event with properties as described below
+Passed as an argument to the emitted `setScheduleEventById` event. Configures an event with properties as described below.
 
 ### Properties
 
 * `scheduleId` - id of a schedule previously created, see [`SLAddNewScheduleEvent`](#sladdnewscheduleevent)
-* `circuitId` - id of the circuit to which this event applies to
+* `circuitId` - id of the circuit to which this event applies
 * `startTime` - the start time of the event, specified as minutes since midnight
 	* example: 6:00am would be 360
 	* example: 6:15am would be 375
-* `stopTime` - the stop time of the event, specified as minutes since midnight, format is the same as startTime
+* `stopTime` - the stop time of the event, specified as minutes since midnight
 * `dayMask`
 	* 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
 * `flags`
 	* bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
 	* bit 1 indicates whether heat setPoint should be changed 
-	* only valid values i've seen are 0,1,2,3
 * `heatCmd` - integer indicating the desired heater mode. Valid values are: 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
 * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
 
 ## SLSetCircuitRuntimeById
 
-Configures default run-time of a circuit, usually referred to as the 'egg timer', this also applies to 'run-once' programs as this will set the length of the program
+Passed as an argument to the emitted `setCircuitRuntimebyId` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command. Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program.
 
 ### Properties
 
 * `circuitId` - id of the circuit to which this event applies to
-* `runTime` - integer specifying the minutes of runTime
+* `runTime` - integer specifying the run time in minutes
 
 ## SLGetPumpStatus
 
-Gets information about indicated pump
+Passed as an argument to the emitted `getPumpStatus` event. Gets information about the specified pump.
 
 ### Properties
 
@@ -546,25 +601,27 @@ Gets information about indicated pump
 
 ### Return Values
 * `isRunning` - boolean that says if pump is running
-* `pumpType` - 1 for IntelliFloVF (presumably), 2 for IntelliflowVS, 3 for IntelliflowVSF
+* `pumpType` - 0 if invalid pump id or one of the IntelliFlo constants:
+  * ScreenLogic.PUMP_TYPE_INTELLIFLOVF
+  * ScreenLogic.PUMP_TYPE_INTELLIFLOVS
+  * ScreenLogic.PUMP_TYPE_INTELLIFLOVSF
 * `pumpWatts` - current Watts usage of the pump
 * `pumpRPMs` - current RPMs of the pump
 * `pumpGPMs` - current GPMs of the pump
 * `pumpSetting` - Array of 8 items each containing
-	* `circuitId` - Circuit Id ( CirctuiId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage) bodyArray[i].deviceId)
-	* `pumpSetPoint` = the setPoint for this pump/circuit combo
-	* `isRPMs` = 1 for RPMs; 0 for GPMs
-* `pumpUnknown1` - unknown data -- always 0
-* `pumpUnknown2` - unknown data -- always 255
-
+	* `circuitId` - Circuit Id (CircuitId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage)'s `getCircuitByDeviceId()`)
+	* `pumpSetPoint` - the set point for this pump/circuit combo (in either RPMs or GPMs depending on the value of `isRPMs`)
+	* `isRPMs` - boolean indicating if the set point is in RPMs (false means it's in GPMs)
+* `pumpUnknown1` - unknown data; always 0
+* `pumpUnknown2` - unknown data; always 255
 
 ## SLSetPumpFlow
-  
-Sets Flow Setting for a Pump/Circuit combination
+
+Passed as an argument to the emitted `setPumpFlow` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command. Sets flow setting for a pump/circuit combination.
 
 ### Properties
 
 * `pumpId` - id of pump to get information about, first pump is 0
-* `circuitId` - index of circuit for which to change the setpoint ( index is relative to data returned by [`SLGetPumpStatus`](#slgetpumpstatus) )
+* `circuitId` - index of circuit for which to change the set point (index is relative to data returned by [`SLGetPumpStatus`](#slgetpumpstatus))
 * `setPoint` - the value for which to set the pump/circuit combo
 * `isRPMs` - boolean, TRUE for RPMs, FALSE for GPMs
