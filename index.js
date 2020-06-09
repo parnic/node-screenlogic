@@ -348,7 +348,7 @@ class UnitConnection extends EventEmitter {
         break;
       case 30:
         // console.log("unknown command");
-        this.emit('unknown command');
+        this.emit('unknownCommand');
         break;
       case 31:
         // console.log("  it's a parameter failure.");
