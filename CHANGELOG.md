@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+* Fleshed out the still-undocumented `SLEquipmentConfigurationMessage` with a few more helper methods for interpreting the data inside.
+* Helper method for getting a circuit from its device ID on an `SLControllerConfigMessage`.
+* Support for getting the status of pumps and setting flow speeds per-pump-per-circuit.
+* Constants for interpreting heat command/mode properties on various messages:
+  * ScreenLogic.HEAT_MODE_OFF
+  * ScreenLogic.HEAT_MODE_SOLAR
+  * ScreenLogic.HEAT_MODE_SOLARPREFERRED
+  * ScreenLogic.HEAT_MODE_HEATPUMP
+  * ScreenLogic.HEAT_MODE_DONTCHANGE
+* Debug logs using the "debug" NPM package. You'll need to run an `npm install` after updating to this version.
+
 ## v1.5.0 - 2020-06-06
 ### Added
 * Added support for adding, deleting, listing, and updating scheduled events
