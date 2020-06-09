@@ -1,5 +1,3 @@
-/* eslint max-len: "off" */
-
 'use strict';
 
 const BLOCK_SIZE = 16;

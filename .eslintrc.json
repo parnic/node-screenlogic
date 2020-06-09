@@ -1,7 +1,7 @@
 {
   "extends": "strongloop",
   "rules": {
-    "max-len": [2, 120, 8]
+    "max-len": "off"
   },
   "parserOptions": {
     "ecmaVersion": 6
