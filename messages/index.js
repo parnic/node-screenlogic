@@ -23,3 +23,5 @@ exports.SLSetCircuitRuntimeById = require('./SLSetCircuitRuntimeById.js').SLSetC
 exports.SLGetPumpStatus = require('./SLGetPumpStatus.js').SLGetPumpStatus;
 exports.SLSetPumpFlow = require('./SLSetPumpFlow.js').SLSetPumpFlow;
 exports.SLCancelDelay = require('./SLCancelDelay.js').SLCancelDelay;
+exports.SLAddClient = require('./SLAddClient.js').SLAddClient;
+exports.SLRemoveClient = require('./SLRemoveClient.js').SLRemoveClient;

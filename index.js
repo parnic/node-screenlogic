@@ -286,6 +286,16 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLCancelDelay().toBuffer());
   }
 
+  addClient() {
+    debugUnit('sending add client command...');
+    this.client.write(new messages.SLAddClient().toBuffer());
+  }
+
+  removeClient() {
+    debugUnit('sending remove client command...');
+    this.client.write(new messages.SLRemoveClient().toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -378,6 +388,18 @@ class UnitConnection extends EventEmitter {
       case messages.SLCancelDelay.getResponseId():
         debugUnit("  it's a cancel delay ack");
         this.emit('cancelDelay', new messages.SLCancelDelay());
+        break;
+      case messages.SLAddClient.getResponseId():
+        debugUnit("  it's an add client ack");
+        this.emit('addClient', new messages.SLCancelDelay());
+        break;
+      case messages.SLRemoveClient.getResponseId():
+        debugUnit("  it's a remove client ack");
+        this.emit('removeClient', new messages.SLCancelDelay());
+        break;
+      case 12500: // This is the message received when you are registered as a client, the data is the same as a pool status message
+        debugUnit("  it's pool status");
+        this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
         break;
       case 13:
         debugUnit("  it's a login failure.");
