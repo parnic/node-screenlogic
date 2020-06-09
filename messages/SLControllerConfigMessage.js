@@ -127,4 +127,16 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
   isChem2() {
     return this.controllerType === 252 && this.hwType === 2;
   }
+
+  getCircuitByDeviceId(deviceId) {
+    if (this.bodyArray) {
+      for (var i = 0; i < this.bodyArray.length; i++) {
+        if (this.bodyArray[i].deviceId === deviceId) {
+          return this.bodyArray[i];
+        }
+      }
+    }
+
+    return null;
+  }
 };
