@@ -281,6 +281,10 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLSetPumpFlow(pumpId, circuitId, setPoint, isRPMs).toBuffer());
   }
 
+  cancelDelay() {
+    this.client.write(new messages.SLCancelDelay().toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -369,6 +373,9 @@ class UnitConnection extends EventEmitter {
       case messages.SLSetPumpFlow.getResponseId():
         debugUnit("  it's a set pump flow ack");
         this.emit('setPumpFlow', new messages.SLSetPumpFlow());
+        break;
+      case messages.SLCancelDelay.getResponseId():
+        this.emit('cancelDelay', new messages.SLCancelDelay());
         break;
       case 13:
         debugUnit("  it's a login failure.");
