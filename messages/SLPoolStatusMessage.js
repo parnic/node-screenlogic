@@ -113,3 +113,8 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
   static getResponseId() {
     return MSG_ID + 1;
   }
+
+  static getAsyncResponseId() {
+    return ASYNC_MSG_ID;
+  }
+};

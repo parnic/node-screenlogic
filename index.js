@@ -397,7 +397,7 @@ class UnitConnection extends EventEmitter {
         debugUnit("  it's a remove client ack");
         this.emit('removeClient', new messages.SLCancelDelay());
         break;
-      case messages.SLPoolStatusMessage.ASYNC_MSG_ID:
+      case messages.SLPoolStatusMessage.getAsyncResponseId():
         debugUnit("  it's async pool status");
         this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
         break;
