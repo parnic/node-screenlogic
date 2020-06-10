@@ -5,14 +5,15 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12524;
 
 exports.SLRemoveClient = class SLRemoveClient extends SLMessage {
-  constructor() {
+  constructor(senderId) {
     super(0, MSG_ID);
 
+    this.senderId = senderId;
   }
 
   encode() {
     this.writeInt32LE(0);
-    this.writeInt32LE(9001); // This is supposed to be a random number, i guess to identify clients, but i dont see how it makes a difference
+    this.writeInt32LE(this.senderId);
 
     super.encode();
   }

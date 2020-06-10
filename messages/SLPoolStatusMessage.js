@@ -3,6 +3,7 @@
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12526;
+const ASYNC_MSG_ID = 12500;
 
 const SPA_CIRCUIT_ID = 500;
 const POOL_CIRCUIT_ID = 505;
@@ -112,4 +113,3 @@ exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
   static getResponseId() {
     return MSG_ID + 1;
   }
-};

@@ -245,13 +245,13 @@ Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpu
 
 Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) documentation. Emits the `cancelDelay` event when response is acknowledged.
 
-### addClien()
+### addClient(senderId)
 
-Registers to receive updates from controller when something changes. Emits the `poolStatus` event when something changes on the controller.
+Registers to receive updates from controller when something changes. Takes a random number `senderId` to identify the client. Emits the `poolStatus` event when something changes on the controller.
 
-### removeClient()
+### removeClient(senderId)
 
-No longer receive `poolStatus` messages from controller.
+No longer receive `poolStatus` messages from controller. Takes a random number `senderId` that should match a previously registered client with `addClient`.
 
 
 ### Events
