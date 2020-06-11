@@ -117,4 +117,74 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
   static getResponseId() {
     return MSG_ID + 1;
   }
+
+  decodeValveData() {
+    var slaves = this.getSecondariesCount();
+    var bEnable1 = true;
+    var bEnable2 = true;
+
+    var sensor1 = this.sensorDataArray[0];
+    var sensor3 = this.sensorDataArray[2];
+    var bSolar1 = ((sensor1 >> 1) & 0x1) !== 0;
+    var bHPump1 = ((sensor3 >> 4) & 0x1) !== 0;
+
+    if (bSolar1 && !bHPump1) {
+      bEnable1 = false;
+    }
+
+    if (this.isDualBody()) {
+      var bSolar2 = ((sensor1 >> 4) & 0x1) !== 0;
+      var bHPump2 = ((sensor3 >> 5) & 0x1) !== 0;
+
+      if (bSolar2 && !bHPump2) {
+        bEnable2 = false;
+      }
+    }
+
+    var valveArray = [];
+
+    for (var loadCenterIndex = 0; loadCenterIndex <= slaves; loadCenterIndex++) {
+      var byByte = this.valveDataArray[loadCenterIndex];
+      var valveIndex = 0;
+      var valveObject = {};
+
+      while (valveIndex < 5) {
+        var bEnable = true;
+        if (loadCenterIndex === 0) {
+          if (valveIndex === 0 && !bEnable1) {
+            bEnable = false;
+          }
+          if (valveIndex === 1 && !bEnable2) {
+            bEnable = false;
+          }
+        }
+        var bPresent = valveIndex < 2 ? true : (byByte & (1 << valveIndex)) !== 0;
+        if (bPresent) {
+          var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
+          var deviceId = this.valveDataArray[valveDataIndex];
+          if (deviceId === 0) {
+            // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
+          } else if (bEnable === false){
+            // console.log('used by solar');
+          } else {
+            valveObject.loadCenterIndex = loadCenterIndex;
+            valveObject.valveIndex = valveIndex;
+            valveObject.valveName = String.fromCharCode(65 + valveIndex);
+            valveObject.loadCenterName = (loadCenterIndex + 1).toString();
+            valveObject.deviceId = deviceId;
+            valveArray.push(valveObject);
+          }
+        }
+
+        valveIndex++;
+      }
+
+    }
+    console.log(valveArray);
+
+  }
+
+  isDualBody() {
+    return this.controllerType === 5;
+  }
 };
