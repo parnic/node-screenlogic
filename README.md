@@ -4,7 +4,7 @@ This is a Node.JS library for interfacing with Pentair ScreenLogic systems over 
 
 Tested on node v8.11.1, v10.15.1 with a system on firmware versions 5.2 Build 736.0 Rel, 5.2 Build 738.0 Rel
 
-# Usage
+## Usage
 
 See example.js for an example of interfacing with the library. Broadly, import the library with
 
@@ -51,48 +51,51 @@ or
 ```javascript
 new ScreenLogic.UnitConnection(unit.port, unit.ipAddr, '1234')
 ```
+
 where `'1234'` is the remote login password.
 
 Once you've connected with `connect()`, there are a number of methods available and corresponding events for when they've completed successfully. See [UnitConnection](#unitconnection) API reference.
 
 All communication with a ScreenLogic unit is done via TCP, so responses will come back in the order they were requested.
 
-# Notes
+## Notes
 
 Contributions welcome. There are lots of available messages supported by ScreenLogic that the app doesn't support yet, but can be added pretty easily as needed.
 
-# Packet format
+## Packet format
 
 All ScreenLogic packets are sent with an 8-byte header. The first 2 bytes are a little-endian-encoded sender ID (which is normally specified when making the original request). The second 2 bytes are a little-endian-encoded message ID. The final 4 bytes are a little-endian-encoded length of the data payload on the packet. The data payload is handled per-message.
 
-# API Reference
+## API Reference
 
 Pull requests to document undocumented properties are most welcome.
 
-## FindUnits
+### FindUnits
 
-### constructor()
+#### constructor()
 
 Examples:
+
 ```javascript
 const ScreenLogic = require('node-screenlogic');
 
 var finder = new ScreenLogic.FindUnits();
 ```
 
-### search()
+#### search()
 
 Begins a UDP broadcast search for available units.
 
-### close()
+#### close()
 
 Closes the socket.
 
-### Events
+#### Events
 
 * `serverFound` - Indicates that a ScreenLogic unit has been found. Event handler receives a [`UnitConnection`](#unitconnection) object.
 
 Examples:
+
 ```javascript
 finder.on('serverFound', function(server) {
   var client = new ScreenLogic.UnitConnection(server);
@@ -101,39 +104,41 @@ finder.on('serverFound', function(server) {
 
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 
-## RemoteLogin
+### RemoteLogin
 
-### constructor(systemName)
+#### constructor(systemName)
 
 Argument is the name of a system to connect to in "Pentair: xx-xx-xx" format.
 
 Example:
+
 ```javascript
 const ScreenLogic = require('./index');
 
 var remoteLogin = new ScreenLogic.RemoteLogin('Pentair: xx-xx-xx');
 ```
 
-### connect()
+#### connect()
 
 Connects to the dispatcher service and searches for the unit passed to its constructor.
 
-### close()
+#### close()
 
 Closes the connection
 
-### Events
+#### Events
 
 * `gatewayFound` - Indicates that the search for the named unit has completed (may or may not be successful). Event handler receives a [`SLGetGatewayDataMessage`](#slgetgatewaydatamessage) argument.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 
-## UnitConnection
+### UnitConnection
 
-### constructor(server)
+#### constructor(server)
 
 Argument is a server returned from [`FindUnits`](#findunits) `serverFound` event.
 
 Examples:
+
 ```javascript
 finder.on('serverFound', function(server) {
   var client = new ScreenLogic.UnitConnection(server);
@@ -148,111 +153,112 @@ remoteLogin.on('gatewayFound', function(unit) {
 });
 ```
 
-### constructor(port, address, password)
+#### constructor(port, address, password)
 
 Port is an integer. Address is an IPv4 address of the server as a string. Password is optional; should be the 4-digit password in string form, e.g. `'1234'`.
 
 Examples:
+
 ```javascript
 var client = new ScreenLogic.UnitConnection(80, '10.0.0.85', '1234')
 ```
 
-### connect()
+#### connect()
 
 Connects to the server passed to its constructor.
 
 Examples:
+
 ```javascript
 var client = new ScreenLogic.UnitConnection(server);
 client.connect();
 ```
 
-### close()
+#### close()
 
 Closes the connection.
 
-### getVersion()
+#### getVersion()
 
 Requests the system version string from the connected unit. Emits the `version` event when the response comes back.
 
-### getPoolStatus()
+#### getPoolStatus()
 
 Requests pool status from the connected unit. Emits the `poolStatus` event when the response comes back.
 
-### getChemicalData()
+#### getChemicalData()
 
 Requests chemical data from the connected unit (may require an IntelliChem or similar). Emits the `chemicalData` event when the response comes back.
 
-### getSaltCellConfig()
+#### getSaltCellConfig()
 
 Requests salt cell status/configuration from the connected unit (requires an IntelliChlor or compatible salt cell). Emits the `saltCellConfig` event when the response comes back.
 
-### getControllerConfig()
+#### getControllerConfig()
 
 Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back.
 
-### setCircuitState(controllerId, circuitId, circuitState)
+#### setCircuitState(controllerId, circuitId, circuitState)
 
 Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged.
 
-### setSetPoint(controllerId, bodyType, temperature)
+#### setSetPoint(controllerId, bodyType, temperature)
 
 Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged.
 
-### setHeatMode(controllerId, bodyType, heatMode)
+#### setHeatMode(controllerId, bodyType, heatMode)
 
 Sets the preferred heat mode. See [`SLSetHeatModeMessage`](#slsetheatmodemessage) documentation for argument values. Emits the `heatModeChanged` event when response is acknowledged.
 
-### sendLightCommand(controllerId, command)
+#### sendLightCommand(controllerId, command)
 
 Sends a lighting command. See [`SLLightControlMessage`](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged.
 
 Note that better/more complete handling of lighting is desired, but I have yet to find all the commands I need to implement to make that happen. This currently sends each command to all lights and there is no ability to send to an individual light. Pull requests adding more functionality here would be most welcome.
 
-### setSaltCellOutput(controllerId, poolOutput, spaOutput)
+#### setSaltCellOutput(controllerId, poolOutput, spaOutput)
 
 Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) documentation for argument values. Emits the `setSaltCellConfig` event when response is acknowledged.
 
-### getScheduleData(scheduleType)
+#### getScheduleData(scheduleType)
 
 Retrieves a list of schedule events of the specified type. See [`SLGetScheduleData`](#slgetscheduledata) documentation for argument values. Emits the `getScheduleData` event when response is acknowledged.
 
-### addNewScheduleEvent(scheduleType)
+#### addNewScheduleEvent(scheduleType)
 
 Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) documentation for argument values. Emits the `addNewScheduleEvent` event when response is acknowledged.
 
-### deleteScheduleEventById(scheduleId)
+#### deleteScheduleEventById(scheduleId)
 
 Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` event when response is acknowledged.
 
-### setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint)
+#### setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint)
 
 Configures a schedule event. See [`SLSetScheduleEventById`](#slsetscheduleeventbyid) documentation for argument values. Emits the `setScheduleEventById` event when response is acknowledged.
 
-### setCircuitRuntimebyId(circuitId, runTime)
+#### setCircuitRuntimebyId(circuitId, runTime)
 
 Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program. See [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) documentation for argument values. Emits the `setCircuitRuntimeById` event when response is acknowledged.
 
-### getPumpStatus(pumpId)
+#### getPumpStatus(pumpId)
 
 Gets information about the specified pump. See [`SLGetPumpStatus`](#slgetpumpstatus) documentation for argument values. Emits the `getPumpStatus` event when response is acknowledged.
 
-### setPumpFlow(pumpId, circuitId, setPoint, isRPMs)
+#### setPumpFlow(pumpId, circuitId, setPoint, isRPMs)
 
 Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpumpflow) documentation for argument values. Emits the `setPumpFlow` event when response is acknowledged.
 
-### cancelDelay()
+#### cancelDelay()
 
 Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) documentation. Emits the `cancelDelay` event when response is acknowledged.
 
-### addClient(senderId)
+#### addClient(senderId)
 
 Registers to receive updates from controller when something changes. Takes a random number `senderId` to identify the client. Emits the `poolStatus` event when something changes on the controller.
 
-### removeClient(senderId)
+#### removeClient(senderId)
 
 No longer receive `poolStatus` messages from controller. Takes a random number `senderId` that should match a previously registered client with `addClient`.
-
 
 ### Events
 
@@ -280,7 +286,7 @@ No longer receive `poolStatus` messages from controller. Takes a random number `
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 * `unknownCommand` - Indicates that an unknown command was issued to ScreenLogic (should not be possible to trigger when using the supplied `UnitConnection` methods).
 
-### Properties
+#### Properties
 
 * `address` - string representing the IPv4 address of the found server
 * `type` - integer representing the type of server found (will always be 2)
@@ -289,39 +295,39 @@ No longer receive `poolStatus` messages from controller. Takes a random number `
 * `gatewaySubtype` - byte
 * `gatewayName` - string representing the server's name. Will be in the format Pentair: xx-xx-xx
 
-## SLVersionMessage
+### SLVersionMessage
 
 Passed as an argument to the emitted `version` event handler.
 
-### Properties
+#### Properties
 
 * `version` - a string representing the system's version
 
-## SLPoolStatusMessage
+### SLPoolStatusMessage
 
 Passed as an argument to the emitted `poolStatus` event handler.
 
-### isDeviceReady()
+#### isDeviceReady()
 
 Returns a bool indicating whether the device is in a normal operating state.
 
-### isDeviceSync()
+#### isDeviceSync()
 
 Returns a bool.
 
-### isDeviceServiceMode()
+#### isDeviceServiceMode()
 
 Returns a bool indicating whether the device is in service mode or not.
 
-### isSpaActive()
+#### isSpaActive()
 
 Returns a bool indicating whether the spa is currently active or not.
 
-### isPoolActive()
+#### isPoolActive()
 
 Returns a bool indicating whether the pool is currently active or not.
 
-### Properties
+#### Properties
 
 * `ok` - can be interpreted with `isDevice...` methods.
 * `freezeMode` - byte representing whether the device is in freeze mode or not.
@@ -350,11 +356,11 @@ Returns a bool indicating whether the pool is currently active or not.
 * `orpTank` - integer indicating the fill level of the ORP tank
 * `alarms` - integer indicating how many alarms are currently active
 
-## SLChemDataMessage
+### SLChemDataMessage
 
 Passed as an argument to the emitted `chemicalData` event handler.
 
-### Properties
+#### Properties
 
 * `isValid` - boolean indicating whether we got a valid response back or not
 * `pH` - float indicating the current pH level
@@ -373,11 +379,11 @@ Passed as an argument to the emitted `chemicalData` event handler.
 * `scaling` - boolean indicating whether the water balance is scaling or not
 * `error` - boolean indicating whether there's currently an error in the chem system or not
 
-## SLSaltCellConfigMessage
+### SLSaltCellConfigMessage
 
 Passed as an argument to the emitted `saltCellConfig` event handler.
 
-### Properties
+#### Properties
 
 * `installed` - boolean indicating whether a salt cell is installed or not
 * `status` - integer bitmask
@@ -387,66 +393,66 @@ Passed as an argument to the emitted `saltCellConfig` event handler.
 * `flags` - integer bitmask
 * `superChlorTimer` - integer
 
-## SLSetSaltCellConfigMessage
+### SLSetSaltCellConfigMessage
 
 Passed as an argument to the emitted `setSaltCellConfig` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
-### Properties
+#### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
 * `poolOutput` - integer indicating the output level of the salt cell for the pool. I believe this operates on a 0-100 scale.
 * `spaOutput` - integer indicating the output level of the salt cell for the spa. I believe this operates on a 0-100 scale.
 
-## SLControllerConfigMessage
+### SLControllerConfigMessage
 
 Passed as an argument to the emitted `controllerConfig` event handler.
 
-### hasSolar()
+#### hasSolar()
 
 Returns a bool indicating whether the system has solar present. (Helper method for interpreting the value in `equipFlags`.)
 
-### hasSolarAsHeatpump()
+#### hasSolarAsHeatpump()
 
 Returns a bool indicating whether the system has a solar heatpump (UltraTemp, ThermalFlo) present. (Helper method for interpreting the value in `equipFlags`.)
 
-### hasChlorinator()
+#### hasChlorinator()
 
 Returns a bool indicating whether the system has a chlorinator present. (Helper method for interpreting the value in `equipFlags`.)
 
-### hasCooling()
+#### hasCooling()
 
 Returns a bool indicating whether the system has a cooler present. (Helper method for interpreting the value in `equipFlags`.)
 
-### hasIntellichem()
+#### hasIntellichem()
 
 Returns a bool indicating whether the system has an IntelliChem chemical management system present. (Helper method for interpreting the value in `equipFlags`.)
 
-### isEasyTouch()
+#### isEasyTouch()
 
 Returns a bool indicating whether the system is an EasyTouch system or not. (Helper method for interpreting the value in `controllerType`.)
 
-### isIntelliTouch()
+#### isIntelliTouch()
 
 Returns a bool indicating whether the system is an IntelliTouch system or not. (Helper method for interpreting the value in `controllerType`.)
 
-### isEasyTouchLite()
+#### isEasyTouchLite()
 
 Returns a bool indicating whether the system is an EasyTouch Lite system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
 
-### isDualBody()
+#### isDualBody()
 
 Returns a bool indicating whether the system is dual-body or not. (Helper method for interpreting the value in `controllerType`.)
 
-### isChem2()
+#### isChem2()
 
 Returns a bool indicating whether the system is a Chem2 system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
 
-### getCircuitByDeviceId(deviceId)
+#### getCircuitByDeviceId(deviceId)
 
 Returns the `bodyArray` entry for the circuit matching the given device id. This is most useful with an [`SLGetPumpStatus`](#slgetpumpstatus) message.
 
-### Properties
+#### Properties
 
 * `controllerId` - integer indicating the controller's ID
 * `minSetPoint` - array (size 2) indicating the minimum setpoint available for the pool (index 0) or spa (index 1)
@@ -476,11 +482,11 @@ Returns the `bodyArray` entry for the circuit matching the given device id. This
 * `interfaceTabFlags` - integer
 * `showAlarms` - integer
 
-## SLSetCircuitStateMessage
+### SLSetCircuitStateMessage
 
 Passed as an argument to the emitted `circuitStateChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
-### Properties
+#### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
@@ -488,22 +494,22 @@ Passed as an argument to the emitted `circuitStateChanged` event. The passed ver
   * This ID can be retrieved from `SLControllerConfigMessage`'s `bodyArray` property.
 * `circuitState` - integer indicating whether to switch the circuit on (`1`) or off (`0`).
 
-## SLSetHeatSetPointMessage
+### SLSetHeatSetPointMessage
 
 Passed as an argument to the emitted `setPointChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
-### Properties
+#### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
 * `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
 * `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
 
-## SLSetHeatModeMessage
+### SLSetHeatModeMessage
 
 Passed as an argument to the emitted `heatModeChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
-### Properties
+#### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
@@ -515,11 +521,11 @@ Passed as an argument to the emitted `heatModeChanged` event. The passed version
   * ScreenLogic.HEAT_MODE_HEATPUMP
   * ScreenLogic.HEAT_MODE_DONTCHANGE
 
-## SLLightControlMessage
+### SLLightControlMessage
 
 Passed as an argument to the emitted `sentLightCommand` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the light command.
 
-### Properties
+#### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfigMessage` includes a controllerId, this ID, in my experience, should always be 0.
@@ -543,11 +549,11 @@ Passed as an argument to the emitted `sentLightCommand` event. The passed versio
   * ScreenLogic.LIGHT_CMD_COLOR_WHITE
   * ScreenLogic.LIGHT_CMD_COLOR_PURPLE
 
-## SLGetGatewayDataMessage
+### SLGetGatewayDataMessage
 
 Passed as an argument to the emitted `gatewayFound` event. Contains information about the remote unit's status and access properties.
 
-### Properties
+#### Properties
 
 * `gatewayFound` - boolean indicating whether a unit was found
 * `licenseOK` - boolean indicating if the license is valid (I've never seen this be false)
@@ -556,47 +562,47 @@ Passed as an argument to the emitted `gatewayFound` event. Contains information 
 * `portOpen` - boolean indicating whether or not the port is open and able to be connected to
 * `relayOn` - boolean indicating whether the relay is on (unsure what exactly this indicates; it's always been false in my tests)
 
-## SLAddNewScheduleEvent
+### SLAddNewScheduleEvent
 
 Passed as an argument to the emitted `addNewScheduleEvent` event. Adds a new event to the specified schedule type, either 0 for regular events or 1 for one-time events.
 
-### Properties
+#### Properties
 
 * `scheduleType` - 0 indicates regular scheduled events, 1 indicates a run-once event
 
-## SLDeleteScheduleEventById
+### SLDeleteScheduleEventById
 
 Passed as an argument to the emitted `deleteScheduleEventById` event. Deletes a scheduled event with specified id.
 
-### Properties
+#### Properties
 
 * `scheduleId` - the scheduleId of the schedule to be deleted
 
-## SLGetScheduleData
+### SLGetScheduleData
 
 Passed as an argument to the emitted `getScheduleData` event. Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events.
 
-### Properties
+#### Properties
 
 * `scheduleType` - 0 indicates regular scheduled events, 1 indicates a run-once event
 
-## SLSetScheduleEventById
+### SLSetScheduleEventById
 
 Passed as an argument to the emitted `setScheduleEventById` event. Configures an event with properties as described below.
 
-### Properties
+#### Properties
 
 * `scheduleId` - id of a schedule previously created, see [`SLAddNewScheduleEvent`](#sladdnewscheduleevent)
 * `circuitId` - id of the circuit to which this event applies
 * `startTime` - the start time of the event, specified as minutes since midnight
-	* example: 6:00am would be 360
-	* example: 6:15am would be 375
+  * example: 6:00am would be 360
+  * example: 6:15am would be 375
 * `stopTime` - the stop time of the event, specified as minutes since midnight
 * `dayMask`
-	* 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
+  * 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
 * `flags`
-	* bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
-	* bit 1 indicates whether heat setPoint should be changed 
+  * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
+  * bit 1 indicates whether heat setPoint should be changed
 * `heatCmd` - integer indicating the desired heater mode. Valid values are:
   * ScreenLogic.HEAT_MODE_OFF
   * ScreenLogic.HEAT_MODE_SOLAR
@@ -605,24 +611,25 @@ Passed as an argument to the emitted `setScheduleEventById` event. Configures an
   * ScreenLogic.HEAT_MODE_DONTCHANGE
 * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
 
-## SLSetCircuitRuntimeById
+### SLSetCircuitRuntimeById
 
 Passed as an argument to the emitted `setCircuitRuntimebyId` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command. Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program.
 
-### Properties
+#### Properties
 
 * `circuitId` - id of the circuit to which this event applies to
 * `runTime` - integer specifying the run time in minutes
 
-## SLGetPumpStatus
+### SLGetPumpStatus
 
 Passed as an argument to the emitted `getPumpStatus` event. Gets information about the specified pump.
 
-### Properties
+#### Properties
 
 * `pumpId` - id of pump to get information about, first pump is 0
 
-### Return Values
+#### Return Values
+
 * `isRunning` - boolean that says if pump is running
 * `pumpType` - 0 if invalid pump id or one of the IntelliFlo constants:
   * ScreenLogic.PUMP_TYPE_INTELLIFLOVF
@@ -632,24 +639,24 @@ Passed as an argument to the emitted `getPumpStatus` event. Gets information abo
 * `pumpRPMs` - current RPMs of the pump
 * `pumpGPMs` - current GPMs of the pump
 * `pumpSetting` - Array of 8 items each containing
-	* `circuitId` - Circuit Id (CircuitId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage)'s `getCircuitByDeviceId()`)
-	* `pumpSetPoint` - the set point for this pump/circuit combo (in either RPMs or GPMs depending on the value of `isRPMs`)
-	* `isRPMs` - boolean indicating if the set point is in RPMs (false means it's in GPMs)
+  * `circuitId` - Circuit Id (CircuitId matched data returned by [`SLControllerConfigMessage`](#slcontrollerconfigmessage)'s `getCircuitByDeviceId()`)
+  * `pumpSetPoint` - the set point for this pump/circuit combo (in either RPMs or GPMs depending on the value of `isRPMs`)
+  * `isRPMs` - boolean indicating if the set point is in RPMs (false means it's in GPMs)
 * `pumpUnknown1` - unknown data; always 0
 * `pumpUnknown2` - unknown data; always 255
 
-## SLSetPumpFlow
+### SLSetPumpFlow
 
 Passed as an argument to the emitted `setPumpFlow` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command. Sets flow setting for a pump/circuit combination.
 
-### Properties
+#### Properties
 
 * `pumpId` - id of pump to get information about, first pump is 0
 * `circuitId` - index of circuit for which to change the set point (index is relative to data returned by [`SLGetPumpStatus`](#slgetpumpstatus))
 * `setPoint` - the value for which to set the pump/circuit combo
 * `isRPMs` - boolean, `true` for RPMs, `false` for GPMs
 
-## SLCancelDelay
+### SLCancelDelay
 
 Passed as an argument to the emitted `cancelDelay` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
