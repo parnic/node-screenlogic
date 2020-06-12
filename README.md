@@ -660,10 +660,10 @@ Passed as an argument to the emitted `setPumpFlow` event. The passed version is 
 
 Passed as an argument to the emitted `cancelDelay` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
 
-## SLAddClient
+### SLAddClient
 
 Passed as an argument to the emitted `addClient` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the command.
 
-## SLRemoveClient
+### SLRemoveClient
 
 Passed as an argument to the emitted `removeClient` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the command.
