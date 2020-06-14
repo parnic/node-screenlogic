@@ -125,16 +125,16 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
 
     var sensor1 = this.sensorDataArray[0];
     var sensor3 = this.sensorDataArray[2];
-    var bSolar1 = ((sensor1 >> 1) & 0x1) !== 0;
-    var bHPump1 = ((sensor3 >> 4) & 0x1) !== 0;
+    var bSolar1 = ((sensor1 >> 1) & 0x1) !== 0; // Is solar present for the pool
+    var bHPump1 = ((sensor3 >> 4) & 0x1) !== 0; // Is solar heat pump present
 
     if (bSolar1 && !bHPump1) {
       bEnable1 = false;
     }
 
     if (this.isDualBody()) {
-      var bSolar2 = ((sensor1 >> 4) & 0x1) !== 0;
-      var bHPump2 = ((sensor3 >> 5) & 0x1) !== 0;
+      var bSolar2 = ((sensor1 >> 4) & 0x1) !== 0; // Is solar present for the spa
+      var bHPump2 = ((sensor3 >> 5) & 0x1) !== 0; // Is thermal flo present
 
       if (bSolar2 && !bHPump2) {
         bEnable2 = false;
