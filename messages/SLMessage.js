@@ -93,6 +93,10 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.dataLength = this.readInt32LE();
   }
 
+  isBitSet(value, bit) {
+    return ((value >> bit) & 0x1) === 1;
+  }
+
   static slackForAlignment(val) {
     return (4 - val % 4) % 4;
   }

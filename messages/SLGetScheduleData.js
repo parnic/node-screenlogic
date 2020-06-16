@@ -11,8 +11,8 @@ const DAY_VALUES = [
   ['Thu', 8 ],
   ['Fri', 16 ],
   ['Sat', 32 ],
-  ['Sun', 64 ]  
-]
+  ['Sun', 64 ],
+];
 
 exports.SLGetScheduleData = class SLGetScheduleData extends SLMessage {
   constructor(buf, scheduleType) {
@@ -66,38 +66,34 @@ exports.SLGetScheduleData = class SLGetScheduleData extends SLMessage {
 
     return retVal;
   }
-  
+
   decodeDayMask(dayMask) {
-    var days = []
+    var days = [];
 
     for (var i = 0; i < 7; i++) {
-      if (this.isBitSet(dayMask,i)) {
+      if (this.isBitSet(dayMask, i)) {
         days.push(DAY_VALUES[i][0]);
       }
     }
     return days;
   }
-  
+
   encodeDayMask(daysArray) {
     var dayMask = 0;
-    
+
     for (var i = 0; i < daysArray.length; i++) {
       dayMask += this.getDayValue(daysArray[i]);
     }
     return dayMask;
   }
-  
+
   getDayValue(dayName) {
     for (var i = 0; i < DAY_VALUES.length; i++) {
       if (DAY_VALUES[i][0] === dayName) {
-        return DAY_VALUES[i][1]
+        return DAY_VALUES[i][1];
       }
     }
     return 0;
-  }
-  
-  isBitSet(value, bit) {
-    return ((value >> bit) & 0x1 ) === 1;
   }
 
   static getResponseId() {
