@@ -33,12 +33,12 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
     this.controllerData = this.readInt32LE();
     this.versionDataArray = this.readSLArray();
     this.speedDataArray = this.readSLArray();
-    this.valveDataArray = this.readSLArray();
+    this.valveDataArray = this.readSLArray(); // decodeValveData()
     this.remoteDataArray = this.readSLArray();
-    this.sensorDataArray = this.readSLArray();
-    this.delayDataArray = this.readSLArray();
+    this.sensorDataArray = this.readSLArray(); // decodeSensorData()
+    this.delayDataArray = this.readSLArray(); // decodeDelayData()
     this.macroDataArray = this.readSLArray();
-    this.miscDataArray = this.readSLArray();
+    this.miscDataArray = this.readSLArray(); // decodeMiscData()
     this.lightDataArray = this.readSLArray();
     this.flowDataArray = this.readSLArray();
     this.sgDataArray = this.readSLArray();
@@ -118,25 +118,33 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
     return MSG_ID + 1;
   }
 
+  decodeSensorData() {
+    var sensors = this.sensorDataArray;
+
+    this.sensors = {};
+
+    this.sensors.poolSolarPresent = this.isBitSet(sensors[0], 1);
+    this.sensors.spaSolarPresent = this.isBitSet(sensors[0], 4);
+    this.sensors.thermaFloCoolPresent = this.isBitSet(sensors[1], 1);
+    this.sensors.solarHeatPumpPresent = this.isBitSet(sensors[2], 4);
+    this.sensors.thermaFloPresent = this.isBitSet(sensors[2], 5);
+  }
+
   decodeValveData() {
     var slaves = this.getSecondariesCount();
     var bEnable1 = true;
     var bEnable2 = true;
 
-    var sensor1 = this.sensorDataArray[0];
-    var sensor3 = this.sensorDataArray[2];
-    var bSolar1 = ((sensor1 >> 1) & 0x1) !== 0; // Is solar present for the pool
-    var bHPump1 = ((sensor3 >> 4) & 0x1) !== 0; // Is solar heat pump present
+    if (!this.sensors) {
+      this.decodeSensorData();
+    }
 
-    if (bSolar1 && !bHPump1) {
+    if (this.sensors.poolSolarPresent && !this.sensors.solarHeatPumpPresent) {
       bEnable1 = false;
     }
 
     if (this.isDualBody()) {
-      var bSolar2 = ((sensor1 >> 4) & 0x1) !== 0; // Is solar present for the spa
-      var bHPump2 = ((sensor3 >> 5) & 0x1) !== 0; // Is thermal flo present
-
-      if (bSolar2 && !bHPump2) {
+      if (this.sensors.spaSolarPresent && !this.sensors.thermaFloPresent) {
         bEnable2 = false;
       }
     }
@@ -180,8 +188,29 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
       }
 
     }
-    console.log(valveArray);
+    this.valves = valveArray;
+  }
 
+  decodeDelayData() {
+    this.delays = {};
+
+    this.delays.poolPumpCooldown = this.isBitSet(this.delayDataArray[0], 0);
+    this.delays.spaPumpCooldown = this.isBitSet(this.delayDataArray[0], 1);
+    this.delays.pumpOff = this.isBitSet(this.delayDataArray[0], 7);
+  }
+
+  decodeMiscData() {
+    this.misc = {};
+
+    if (this.isBitSet(this.miscDataArray[3], 0) === false) {
+      this.misc.intelliChem = false;
+    }
+
+    if (this.miscDataArray[4] !== 0) {
+      this.misc.spaManual = true;
+    } else {
+      this.misc.spaManuel = false;
+    }
   }
 
   isDualBody() {
