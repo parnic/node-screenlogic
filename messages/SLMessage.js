@@ -2,6 +2,16 @@
 
 const SmartBuffer = require('smart-buffer').SmartBuffer;
 
+const DAY_VALUES = [
+  ['Mon', 0x1 ],
+  ['Tue', 0x2 ],
+  ['Wed', 0x4 ],
+  ['Thu', 0x8 ],
+  ['Fri', 0x10 ],
+  ['Sat', 0x20 ],
+  ['Sun', 0x40 ],
+];
+
 exports.SLMessage = class SLMessage extends SmartBuffer {
   constructor(senderId, messageId, size) {
     var options;
@@ -91,6 +101,53 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.senderId = this.readUInt16LE();
     this.messageId = this.readUInt16LE();
     this.dataLength = this.readInt32LE();
+  }
+
+  isBitSet(value, bit) {
+    return ((value >> bit) & 0x1) === 1;
+  }
+
+  decodeTime(rawTime) { // Takes 'rawTime' in mins past midnight and returns military time as a string
+    var retVal;
+
+    retVal = Math.floor(rawTime / 60) * 100 + rawTime % 60;
+
+    retVal = String(retVal).padStart(4, '0');
+
+    return retVal;
+  }
+
+  encodeTime(stringTime) { // Takes 'stringTime' as military time and returns mins past midnight
+    return Number(stringTime.substr(0, 2) * 60) + Number(stringTime.substr(2, 2));
+  }
+
+  decodeDayMask(dayMask) {
+    var days = [];
+
+    for (var i = 0; i < 7; i++) {
+      if (this.isBitSet(dayMask, i)) {
+        days.push(DAY_VALUES[i][0]);
+      }
+    }
+    return days;
+  }
+
+  encodeDayMask(daysArray) {
+    var dayMask = 0;
+
+    for (var i = 0; i < daysArray.length; i++) {
+      dayMask += this.getDayValue(daysArray[i]);
+    }
+    return dayMask;
+  }
+
+  getDayValue(dayName) {
+    for (var i = 0; i < DAY_VALUES.length; i++) {
+      if (DAY_VALUES[i][0] === dayName) {
+        return DAY_VALUES[i][1];
+      }
+    }
+    return 0;
   }
 
   static slackForAlignment(val) {
