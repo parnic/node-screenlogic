@@ -414,7 +414,7 @@ class UnitConnection extends EventEmitter {
         this.emit('badParameter');
         break;
       default:
-        debugUnit("  it's an unknown type: %d", msgType, msg);
+        debugUnit("  it's an unknown type: %d", msgType);
         break;
     }
   }
