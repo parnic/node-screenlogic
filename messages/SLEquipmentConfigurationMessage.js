@@ -131,48 +131,46 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
   }
 
   decodeValveData() {
-    var slaves = this.getSecondariesCount();
-    var bEnable1 = true;
-    var bEnable2 = true;
+    var secondaries = this.getSecondariesCount();
+    var isSolarValve0 = false;
+    var isSolarValve1 = false;
 
     if (!this.sensors) {
       this.decodeSensorData();
     }
 
     if (this.sensors.poolSolarPresent && !this.sensors.solarHeatPumpPresent) {
-      bEnable1 = false;
+      isSolarValve0 = true;
     }
 
     if (this.isDualBody()) {
       if (this.sensors.spaSolarPresent && !this.sensors.thermaFloPresent) {
-        bEnable2 = false;
+        isSolarValve1 = true;
       }
     }
 
     var valveArray = [];
 
-    for (var loadCenterIndex = 0; loadCenterIndex <= slaves; loadCenterIndex++) {
-      var byByte = this.valveDataArray[loadCenterIndex];
-      var valveIndex = 0;
+    for (var loadCenterIndex = 0; loadCenterIndex <= secondaries; loadCenterIndex++) {
+      var loadCenterValveData = this.valveDataArray[loadCenterIndex];
       var valveObject = {};
 
-      while (valveIndex < 5) {
-        var bEnable = true;
+      for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
+        var isSolarValve = false;
         if (loadCenterIndex === 0) {
-          if (valveIndex === 0 && !bEnable1) {
-            bEnable = false;
+          if (valveIndex === 0 && isSolarValve0) {
+            isSolarValve = true;
           }
-          if (valveIndex === 1 && !bEnable2) {
-            bEnable = false;
+          if (valveIndex === 1 && isSolarValve1) {
+            isSolarValve = true;
           }
         }
-        var bPresent = valveIndex < 2 ? true : (byByte & (1 << valveIndex)) !== 0;
-        if (bPresent) {
+        if (this.isValvePresent(valveIndex, loadCenterValveData)) {
           var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
           var deviceId = this.valveDataArray[valveDataIndex];
           if (deviceId === 0) {
             // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
-          } else if (bEnable === false){
+          } else if (isSolarValve === true){
             // console.log('used by solar');
           } else {
             valveObject.loadCenterIndex = loadCenterIndex;
@@ -183,12 +181,18 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
             valveArray.push(valveObject);
           }
         }
-
-        valveIndex++;
       }
 
     }
     this.valves = valveArray;
+  }
+
+  isValvePresent(valveIndex, loadCenterValveData) {
+    if (valveIndex < 2) {
+      return true;
+    } else {
+      return this.isBitSet(loadCenterValveData, valveIndex);
+    }
   }
 
   decodeDelayData() {
@@ -209,7 +213,7 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
     if (this.miscDataArray[4] !== 0) {
       this.misc.spaManual = true;
     } else {
-      this.misc.spaManuel = false;
+      this.misc.spaManual = false;
     }
   }
 
