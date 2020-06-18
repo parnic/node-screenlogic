@@ -33,12 +33,12 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
     this.controllerData = this.readInt32LE();
     this.versionDataArray = this.readSLArray();
     this.speedDataArray = this.readSLArray();
-    this.valveDataArray = this.readSLArray();
+    this.valveDataArray = this.readSLArray(); // decodeValveData()
     this.remoteDataArray = this.readSLArray();
-    this.sensorDataArray = this.readSLArray();
-    this.delayDataArray = this.readSLArray();
+    this.sensorDataArray = this.readSLArray(); // decodeSensorData()
+    this.delayDataArray = this.readSLArray(); // decodeDelayData()
     this.macroDataArray = this.readSLArray();
-    this.miscDataArray = this.readSLArray();
+    this.miscDataArray = this.readSLArray(); // decodeMiscData()
     this.lightDataArray = this.readSLArray();
     this.flowDataArray = this.readSLArray();
     this.sgDataArray = this.readSLArray();
@@ -116,5 +116,108 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
 
   static getResponseId() {
     return MSG_ID + 1;
+  }
+
+  decodeSensorData() {
+    var sensors = this.sensorDataArray;
+
+    this.sensors = {};
+
+    this.sensors.poolSolarPresent = this.isBitSet(sensors[0], 1);
+    this.sensors.spaSolarPresent = this.isBitSet(sensors[0], 4);
+    this.sensors.thermaFloCoolPresent = this.isBitSet(sensors[1], 1);
+    this.sensors.solarHeatPumpPresent = this.isBitSet(sensors[2], 4);
+    this.sensors.thermaFloPresent = this.isBitSet(sensors[2], 5);
+  }
+
+  decodeValveData() {
+    var secondaries = this.getSecondariesCount();
+    var isSolarValve0 = false;
+    var isSolarValve1 = false;
+
+    if (!this.sensors) {
+      this.decodeSensorData();
+    }
+
+    if (this.sensors.poolSolarPresent && !this.sensors.solarHeatPumpPresent) {
+      isSolarValve0 = true;
+    }
+
+    if (this.isDualBody()) {
+      if (this.sensors.spaSolarPresent && !this.sensors.thermaFloPresent) {
+        isSolarValve1 = true;
+      }
+    }
+
+    var valveArray = [];
+
+    for (var loadCenterIndex = 0; loadCenterIndex <= secondaries; loadCenterIndex++) {
+      var loadCenterValveData = this.valveDataArray[loadCenterIndex];
+      var valveObject = {};
+
+      for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
+        var isSolarValve = false;
+        if (loadCenterIndex === 0) {
+          if (valveIndex === 0 && isSolarValve0) {
+            isSolarValve = true;
+          }
+          if (valveIndex === 1 && isSolarValve1) {
+            isSolarValve = true;
+          }
+        }
+        if (this.isValvePresent(valveIndex, loadCenterValveData)) {
+          var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
+          var deviceId = this.valveDataArray[valveDataIndex];
+          if (deviceId === 0) {
+            // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
+          } else if (isSolarValve === true){
+            // console.log('used by solar');
+          } else {
+            valveObject.loadCenterIndex = loadCenterIndex;
+            valveObject.valveIndex = valveIndex;
+            valveObject.valveName = String.fromCharCode(65 + valveIndex);
+            valveObject.loadCenterName = (loadCenterIndex + 1).toString();
+            valveObject.deviceId = deviceId;
+            valveArray.push(valveObject);
+          }
+        }
+      }
+
+    }
+    this.valves = valveArray;
+  }
+
+  isValvePresent(valveIndex, loadCenterValveData) {
+    if (valveIndex < 2) {
+      return true;
+    } else {
+      return this.isBitSet(loadCenterValveData, valveIndex);
+    }
+  }
+
+  decodeDelayData() {
+    this.delays = {};
+
+    this.delays.poolPumpCooldown = this.isBitSet(this.delayDataArray[0], 0);
+    this.delays.spaPumpCooldown = this.isBitSet(this.delayDataArray[0], 1);
+    this.delays.pumpOff = this.isBitSet(this.delayDataArray[0], 7);
+  }
+
+  decodeMiscData() {
+    this.misc = {};
+
+    if (this.isBitSet(this.miscDataArray[3], 0) === false) {
+      this.misc.intelliChem = false;
+    }
+
+    if (this.miscDataArray[4] !== 0) {
+      this.misc.spaManual = true;
+    } else {
+      this.misc.spaManual = false;
+    }
+  }
+
+  isDualBody() {
+    return this.controllerType === 5;
   }
 };
