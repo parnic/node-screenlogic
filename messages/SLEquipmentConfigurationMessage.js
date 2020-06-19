@@ -156,6 +156,7 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
 
       for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
         var valveObject = {};
+
         var isSolarValve = false;
         if (loadCenterIndex === 0) {
           if (valveIndex === 0 && isSolarValve0) {
