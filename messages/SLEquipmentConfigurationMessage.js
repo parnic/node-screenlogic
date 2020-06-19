@@ -207,17 +207,8 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
   decodeMiscData() {
     this.misc = {};
 
-    if (this.isBitSet(this.miscDataArray[3], 0) === false) {
-      this.misc.intelliChem = false;
-    } else {
-      this.misc.intelliChem = true;
-    }
-
-    if (this.miscDataArray[4] !== 0) {
-      this.misc.spaManualHeat = true;
-    } else {
-      this.misc.spaManualHeat = false;
-    }
+    this.misc.intelliChem = this.isBitSet(this.miscDataArray[3], 0);
+    this.misc.spaManualHeat = this.miscDataArray[4] !== 0;
   }
 
   isDualBody() {
