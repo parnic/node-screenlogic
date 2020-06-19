@@ -4,6 +4,14 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12532;
 
+const CIRCUIT_NAME_VALUE_MAP = [
+  {name: 'Unused', deviceId: 0},
+  {name: 'Solar Active', deviceId: 128},
+  {name: 'Pool or Spa Heater Active', deviceId: 129},
+  {name: 'Pool Heater Active', deviceId: 130},
+  {name: 'Spa Heater Active', deviceId: 131},
+];
+
 exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMessage {
   constructor(buf) {
     var size;
@@ -129,14 +137,28 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
   }
 
   getCircuitByDeviceId(deviceId) {
-    if (this.bodyArray) {
-      for (var i = 0; i < this.bodyArray.length; i++) {
-        if (this.bodyArray[i].deviceId === deviceId) {
-          return this.bodyArray[i];
-        }
+    var deviceArray = this.getCircuitsMap();
+
+    for (var i = 0; i < deviceArray.length; i++) {
+      if (deviceArray[i].deviceId === deviceId) {
+        return deviceArray[i];
       }
     }
 
     return null;
   }
+
+
+  getCircuitsMap() {
+    var deviceArray;
+
+    if (this.bodyArray) {
+      deviceArray = this.bodyArray.concat(CIRCUIT_NAME_VALUE_MAP);
+    } else {
+      deviceArray = [].concat(CIRCUIT_NAME_VALUE_MAP);
+    }
+
+    return deviceArray;
+  }
+
 };
