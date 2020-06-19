@@ -4,6 +4,14 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12532;
 
+const CIRCUIT_NAME_VALUE_MAP = [
+  ['Unused', 0],
+  ['Solar Active', 128],
+  ['Pool or Spa Heater Active', 129],
+  ['Pool Heater Active', 130],
+  ['Spa Heater Active', 131],
+];
+
 exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMessage {
   constructor(buf) {
     var size;
@@ -134,6 +142,12 @@ exports.SLControllerConfigMessage = class SLControllerConfigMessage extends SLMe
         if (this.bodyArray[i].deviceId === deviceId) {
           return this.bodyArray[i];
         }
+      }
+    }
+
+    for (i = 0; i < CIRCUIT_NAME_VALUE_MAP.length; i++) {
+      if (CIRCUIT_NAME_VALUE_MAP[i][1] === deviceId) {
+        return {name: CIRCUIT_NAME_VALUE_MAP[i][0], deviceId: deviceId};
       }
     }
 

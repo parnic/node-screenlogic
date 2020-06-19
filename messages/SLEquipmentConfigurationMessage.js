@@ -153,9 +153,9 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
 
     for (var loadCenterIndex = 0; loadCenterIndex <= secondaries; loadCenterIndex++) {
       var loadCenterValveData = this.valveDataArray[loadCenterIndex];
-      var valveObject = {};
 
       for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
+        var valveObject = {};
         var isSolarValve = false;
         if (loadCenterIndex === 0) {
           if (valveIndex === 0 && isSolarValve0) {
@@ -198,9 +198,9 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
   decodeDelayData() {
     this.delays = {};
 
-    this.delays.poolPumpCooldown = this.isBitSet(this.delayDataArray[0], 0);
-    this.delays.spaPumpCooldown = this.isBitSet(this.delayDataArray[0], 1);
-    this.delays.pumpOff = this.isBitSet(this.delayDataArray[0], 7);
+    this.delays.poolPumpOnDuringHeaterCooldown = this.isBitSet(this.delayDataArray[0], 0);
+    this.delays.spaPumpOnDuringHeaterCooldown = this.isBitSet(this.delayDataArray[0], 1);
+    this.delays.pumpOffDuringValveAction = this.isBitSet(this.delayDataArray[0], 7);
   }
 
   decodeMiscData() {
@@ -208,12 +208,14 @@ exports.SLEquipmentConfigurationMessage = class SLEquipmentConfigurationMessage 
 
     if (this.isBitSet(this.miscDataArray[3], 0) === false) {
       this.misc.intelliChem = false;
+    } else {
+      this.misc.intelliChem = true;
     }
 
     if (this.miscDataArray[4] !== 0) {
-      this.misc.spaManual = true;
+      this.misc.spaManualHeat = true;
     } else {
-      this.misc.spaManual = false;
+      this.misc.spaManualHeat = false;
     }
   }
 
