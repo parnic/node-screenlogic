@@ -133,6 +133,7 @@ class UnitConnection extends EventEmitter {
 
     this.password = password;
     this.client = new net.Socket();
+    this.client.setKeepAlive(true, 10 * 1000);
     var _this = this;
     var buffer = Buffer.alloc(1024);
     var bufferIdx = 0;
