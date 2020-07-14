@@ -2,7 +2,7 @@
 
 This is a Node.JS library for interfacing with Pentair ScreenLogic systems over your local network or remotely through the Pentair dispatcher. Local connections require a Pentair ScreenLogic device on the same network (a network which supports UDP broadcasts).
 
-Tested on node v8.11.1, v10.15.1 with a system on firmware versions 5.2 Build 736.0 Rel, 5.2 Build 738.0 Rel
+Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Rel, 5.2 Build 738.0 Rel
 
 ## Usage
 
