@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * ScreenLogic.HEAT_MODE_DONTCHANGE
 * Debug logs using the "debug" NPM package. You'll need to run an `npm install` after updating to this version.
 * Ability to cancel delays in pool equipment. #20 - thanks @bshep
-* Ability to register for push messages from the equipment so the connection can be kept open instead of repeatedly reconnecting and polling for changes. See the `addClient()` and `removeClient()` functions on the `UnitConnection` docs.
+* Ability to register for push messages from the equipment so the connection can be kept open instead of repeatedly reconnecting and polling for changes. See the `addClient()` and `removeClient()` functions on the `UnitConnection` docs. Thanks @bshep
 
 ## v1.5.0 - 2020-06-06
 
