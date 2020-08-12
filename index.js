@@ -336,23 +336,23 @@ class UnitConnection extends EventEmitter {
         break;
       case messages.SLSetCircuitStateMessage.getResponseId():
         debugUnit("  it's circuit toggle ack");
-        this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage());
+        this.emit('circuitStateChanged', new messages.SLSetCircuitStateMessage(msg));
         break;
       case messages.SLSetHeatSetPointMessage.getResponseId():
         debugUnit("  it's a setpoint ack");
-        this.emit('setPointChanged', new messages.SLSetHeatSetPointMessage());
+        this.emit('setPointChanged', new messages.SLSetHeatSetPointMessage(msg));
         break;
       case messages.SLSetHeatModeMessage.getResponseId():
         debugUnit("  it's a heater mode ack");
-        this.emit('heatModeChanged', new messages.SLSetHeatModeMessage());
+        this.emit('heatModeChanged', new messages.SLSetHeatModeMessage(msg));
         break;
       case messages.SLLightControlMessage.getResponseId():
         debugUnit("  it's a light control ack");
-        this.emit('sentLightCommand', new messages.SLLightControlMessage());
+        this.emit('sentLightCommand', new messages.SLLightControlMessage(msg));
         break;
       case messages.SLSetSaltCellConfigMessage.getResponseId():
         debugUnit("  it's a set salt cell config ack");
-        this.emit('setSaltCellConfig', new messages.SLSetSaltCellConfigMessage());
+        this.emit('setSaltCellConfig', new messages.SLSetSaltCellConfigMessage(msg));
         break;
       case messages.SLEquipmentConfigurationMessage.getResponseId():
         debugUnit("  it's equipment configuration");
@@ -376,7 +376,7 @@ class UnitConnection extends EventEmitter {
         break;
       case messages.SLSetCircuitRuntimeById.getResponseId():
         debugUnit("  it's a set circuit runtime ack");
-        this.emit('setCircuitRuntimebyId', new messages.SLSetCircuitRuntimeById());
+        this.emit('setCircuitRuntimebyId', new messages.SLSetCircuitRuntimeById(msg));
         break;
       case messages.SLGetPumpStatus.getResponseId():
         debugUnit("  it's pump status");
@@ -384,19 +384,19 @@ class UnitConnection extends EventEmitter {
         break;
       case messages.SLSetPumpFlow.getResponseId():
         debugUnit("  it's a set pump flow ack");
-        this.emit('setPumpFlow', new messages.SLSetPumpFlow());
+        this.emit('setPumpFlow', new messages.SLSetPumpFlow(msg));
         break;
       case messages.SLCancelDelay.getResponseId():
         debugUnit("  it's a cancel delay ack");
-        this.emit('cancelDelay', new messages.SLCancelDelay());
+        this.emit('cancelDelay', new messages.SLCancelDelay(msg));
         break;
       case messages.SLAddClient.getResponseId():
         debugUnit("  it's an add client ack");
-        this.emit('addClient', new messages.SLCancelDelay());
+        this.emit('addClient', new messages.SLAddClient(msg));
         break;
       case messages.SLRemoveClient.getResponseId():
         debugUnit("  it's a remove client ack");
-        this.emit('removeClient', new messages.SLCancelDelay());
+        this.emit('removeClient', new messages.SLRemoveClient(msg));
         break;
       case messages.SLPoolStatusMessage.getAsyncResponseId():
         debugUnit("  it's async pool status");

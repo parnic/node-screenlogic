@@ -6,11 +6,16 @@ const MSG_ID = 12530;
 
 exports.SLSetCircuitStateMessage = class SLSetCircuitStateMessage extends SLMessage {
   constructor(controllerId, circuitId, circuitState, senderId) {
-    super(senderId, MSG_ID);
+    if (typeof controllerId === 'object') {
+      var size = controllerId.readInt32LE(4) + 8;
+      super(controllerId, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-    this.controllerId = controllerId;
-    this.circuitId = circuitId;
-    this.circuitState = circuitState;
+      this.controllerId = controllerId;
+      this.circuitId = circuitId;
+      this.circuitState = circuitState;
+    }
   }
 
   encode() {

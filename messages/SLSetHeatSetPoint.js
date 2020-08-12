@@ -6,11 +6,16 @@ const MSG_ID = 12528;
 
 exports.SLSetHeatSetPoint = class SLSetHeatSetPoint extends SLMessage {
   constructor(controllerIndex, bodyType, temperature, senderId) {
-    super(senderId, MSG_ID);
+    if (typeof controllerIndex === 'object') {
+      var size = controllerIndex.readInt32LE(4) + 8;
+      super(controllerIndex, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-    this.controllerIndex = controllerIndex;
-    this.bodyType = bodyType;
-    this.temperature = temperature;
+      this.controllerIndex = controllerIndex;
+      this.bodyType = bodyType;
+      this.temperature = temperature;
+    }
   }
 
   encode() {

@@ -6,11 +6,16 @@ const MSG_ID = 12576;
 
 exports.SLSetSaltCellConfigMessage = class SLSetSaltCellConfigMessage extends SLMessage {
   constructor(controllerIndex, poolOutput, spaOutput, senderId) {
-    super(senderId, MSG_ID);
+    if (typeof controllerIndex === 'object') {
+      var size = controllerIndex.readInt32LE(4) + 8;
+      super(controllerIndex, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-    this.controllerIndex = controllerIndex;
-    this.poolOutput = poolOutput;
-    this.spaOutput = spaOutput;
+      this.controllerIndex = controllerIndex;
+      this.poolOutput = poolOutput;
+      this.spaOutput = spaOutput;
+    }
   }
 
   encode() {

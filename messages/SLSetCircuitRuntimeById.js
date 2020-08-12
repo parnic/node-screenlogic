@@ -7,10 +7,15 @@ const MSG_ID = 12550;
 
 exports.SLSetCircuitRuntimeById = class SLSetCircuitRuntimeById extends SLMessage {
   constructor(circuitId, runTime, senderId) {
-    super(senderId, MSG_ID);
+    if (typeof circuitId === 'object') {
+      var size = circuitId.readInt32LE(4) + 8;
+      super(circuitId, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-    this.circuitId = circuitId;
-    this.runTime = runTime;
+      this.circuitId = circuitId;
+      this.runTime = runTime;
+    }
   }
 
   encode() {

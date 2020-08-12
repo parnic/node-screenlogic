@@ -6,16 +6,21 @@ const MSG_ID = 12586;
 
 exports.SLSetPumpFlow = class SLSetPumpFlow extends SLMessage {
   constructor(pumpId, circuitId, setPoint, isRPMs, senderId) {
-    super(senderId, MSG_ID);
-
-    this.pumpId = pumpId;
-    this.circuitId = circuitId;
-    this.setPoint = setPoint;
-
-    if (isRPMs === true) {
-      this.isRPMs = 1;
+    if (typeof pumpId === 'object') {
+      var size = pumpId.readInt32LE(4) + 8;
+      super(pumpId, MSG_ID, size);
     } else {
-      this.isRPMs = 0;
+      super(senderId, MSG_ID);
+
+      this.pumpId = pumpId;
+      this.circuitId = circuitId;
+      this.setPoint = setPoint;
+
+      if (isRPMs === true) {
+        this.isRPMs = 1;
+      } else {
+        this.isRPMs = 0;
+      }
     }
   }
 

@@ -438,7 +438,7 @@ Passed as an argument to the emitted `saltCellConfig` event handler.
 
 ### SLSetSaltCellConfigMessage
 
-Passed as an argument to the emitted `setSaltCellConfig` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `setSaltCellConfig` event.
 
 #### Properties
 
@@ -527,7 +527,7 @@ Returns the `bodyArray` entry for the circuit matching the given device id. This
 
 ### SLSetCircuitStateMessage
 
-Passed as an argument to the emitted `circuitStateChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `circuitStateChanged` event.
 
 #### Properties
 
@@ -539,7 +539,7 @@ Passed as an argument to the emitted `circuitStateChanged` event. The passed ver
 
 ### SLSetHeatSetPointMessage
 
-Passed as an argument to the emitted `setPointChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `setPointChanged` event.
 
 #### Properties
 
@@ -550,7 +550,7 @@ Passed as an argument to the emitted `setPointChanged` event. The passed version
 
 ### SLSetHeatModeMessage
 
-Passed as an argument to the emitted `heatModeChanged` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `heatModeChanged` event.
 
 #### Properties
 
@@ -566,7 +566,7 @@ Passed as an argument to the emitted `heatModeChanged` event. The passed version
 
 ### SLLightControlMessage
 
-Passed as an argument to the emitted `sentLightCommand` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the light command.
+Passed as an argument to the emitted `sentLightCommand` event.
 
 #### Properties
 
@@ -656,7 +656,7 @@ Passed as an argument to the emitted `setScheduleEventById` event. Configures an
 
 ### SLSetCircuitRuntimeById
 
-Passed as an argument to the emitted `setCircuitRuntimebyId` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command. Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program.
+Passed as an argument to the emitted `setCircuitRuntimebyId` event. Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program.
 
 #### Properties
 
@@ -690,7 +690,7 @@ Passed as an argument to the emitted `getPumpStatus` event. Gets information abo
 
 ### SLSetPumpFlow
 
-Passed as an argument to the emitted `setPumpFlow` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command. Sets flow setting for a pump/circuit combination.
+Passed as an argument to the emitted `setPumpFlow` event. Sets flow setting for a pump/circuit combination.
 
 #### Properties
 
@@ -701,12 +701,12 @@ Passed as an argument to the emitted `setPumpFlow` event. The passed version is 
 
 ### SLCancelDelay
 
-Passed as an argument to the emitted `cancelDelay` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the set command.
+Passed as an argument to the emitted `cancelDelay` event.
 
 ### SLAddClient
 
-Passed as an argument to the emitted `addClient` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the command.
+Passed as an argument to the emitted `addClient` event.
 
 ### SLRemoveClient
 
-Passed as an argument to the emitted `removeClient` event. The passed version is empty, however, since the response is just an acknowledgement of receipt of the command.
+Passed as an argument to the emitted `removeClient` event.

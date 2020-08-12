@@ -6,10 +6,15 @@ const MSG_ID = 12556;
 
 exports.SLLightControl = class SLLightControl extends SLMessage {
   constructor(controllerIndex, command, senderId) {
-    super(senderId, MSG_ID);
+    if (typeof controllerIndex === 'object') {
+      var size = controllerIndex.readInt32LE(4) + 8;
+      super(controllerIndex, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-    this.controllerIndex = controllerIndex;
-    this.command = command;
+      this.controllerIndex = controllerIndex;
+      this.command = command;
+    }
   }
 
   encode() {

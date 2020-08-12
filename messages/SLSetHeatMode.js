@@ -6,13 +6,16 @@ const MSG_ID = 12538;
 
 exports.SLSetHeatMode = class SLSetHeatMode extends SLMessage {
   constructor(controllerIndex, bodyType, heatMode, senderId) {
-    super(senderId, MSG_ID);
+    if (typeof controllerIndex === 'object') {
+      var size = controllerIndex.readInt32LE(4) + 8;
+      super(controllerIndex, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-    this.controllerIndex = controllerIndex;
-    this.bodyType = bodyType;
-    this.heatMode = heatMode;
-    // heatmodes:
-    // 0: "Off", 1: "Solar", 2 : "Solar Preferred", 3 : "Heat Pump", 4: "Don't Change"
+      this.controllerIndex = controllerIndex;
+      this.bodyType = bodyType;
+      this.heatMode = heatMode;
+    }
   }
 
   encode() {
