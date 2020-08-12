@@ -5,8 +5,8 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12538;
 
 exports.SLSetHeatMode = class SLSetHeatMode extends SLMessage {
-  constructor(controllerIndex, bodyType, heatMode) {
-    super(0, MSG_ID);
+  constructor(controllerIndex, bodyType, heatMode, senderId) {
+    super(senderId, MSG_ID);
 
     this.controllerIndex = controllerIndex;
     this.bodyType = bodyType;

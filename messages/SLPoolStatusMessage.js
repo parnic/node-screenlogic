@@ -9,20 +9,14 @@ const SPA_CIRCUIT_ID = 500;
 const POOL_CIRCUIT_ID = 505;
 
 exports.SLPoolStatusMessage = class SLPoolStatusMessage extends SLMessage {
-  constructor(buf) {
-    var size;
+  constructor(buf, senderId) {
     if (buf) {
-      size = buf.readInt32LE(4) + 8;
-    }
-    super(0, MSG_ID, size);
-
-    if (!buf) {
-      this.writeInt32LE(0);
+      var size = buf.readInt32LE(4) + 8;
+      super(buf, MSG_ID, size);
     } else {
-      this._wroteSize = true;
-      this.writeBuffer(buf, 0);
+      super(senderId, MSG_ID);
 
-      this.decode();
+      this.writeInt32LE(0);
     }
   }
 

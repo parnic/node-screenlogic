@@ -5,8 +5,8 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12576;
 
 exports.SLSetSaltCellConfigMessage = class SLSetSaltCellConfigMessage extends SLMessage {
-  constructor(controllerIndex, poolOutput, spaOutput) {
-    super(0, MSG_ID);
+  constructor(controllerIndex, poolOutput, spaOutput, senderId) {
+    super(senderId, MSG_ID);
 
     this.controllerIndex = controllerIndex;
     this.poolOutput = poolOutput;

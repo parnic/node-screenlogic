@@ -5,8 +5,8 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12556;
 
 exports.SLLightControl = class SLLightControl extends SLMessage {
-  constructor(controllerIndex, command) {
-    super(0, MSG_ID);
+  constructor(controllerIndex, command, senderId) {
+    super(senderId, MSG_ID);
 
     this.controllerIndex = controllerIndex;
     this.command = command;

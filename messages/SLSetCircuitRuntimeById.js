@@ -6,8 +6,8 @@ const MSG_ID = 12550;
 
 
 exports.SLSetCircuitRuntimeById = class SLSetCircuitRuntimeById extends SLMessage {
-  constructor(circuitId, runTime) {
-    super(0, MSG_ID);
+  constructor(circuitId, runTime, senderId) {
+    super(senderId, MSG_ID);
 
     this.circuitId = circuitId;
     this.runTime = runTime;

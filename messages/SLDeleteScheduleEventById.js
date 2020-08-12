@@ -5,8 +5,8 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12546;
 
 exports.SLDeleteScheduleEventById = class SLDeleteScheduleEventById extends SLMessage {
-  constructor(scheduleId) {
-    super(0, MSG_ID);
+  constructor(scheduleId, senderId) {
+    super(senderId, MSG_ID);
 
     this.writeInt32LE(0);
     this.writeInt32LE(scheduleId);

@@ -6,15 +6,13 @@ const MSG_ID = 12548;
 
 
 exports.SLSetScheduleEventById = class SLSetScheduleEventById extends SLMessage {
-  constructor(buf, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
-    var size;
+  constructor(buf, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId) {
     if (buf) {
-      size = buf.readInt32LE(4) + 8;
-    }
-    super(0, MSG_ID, size);
+      var size = buf.readInt32LE(4) + 8;
+      super(buf, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-
-    if (!buf) {
       this.writeInt32LE(0);
       this.writeInt32LE(scheduleId);
       this.writeInt32LE(circuitId);
@@ -24,11 +22,6 @@ exports.SLSetScheduleEventById = class SLSetScheduleEventById extends SLMessage 
       this.writeInt32LE(flags);
       this.writeInt32LE(heatCmd);
       this.writeInt32LE(heatSetPoint);
-    } else {
-      this._wroteSize = true;
-      this.writeBuffer(buf, 0);
-
-      this.decode();
     }
   }
 

@@ -9,7 +9,7 @@ function slMessageLen(str) {
   return 4 + str.length + SLMessage.slackForAlignment(str.length);
 }
 
-describe('SLMessage utilities', () => {
+describe('SLMessage utilities', function() {
   // message header = senderId, messageId, bodyLen.
   // senderId and messageId are int16's, so 2b each. bodyLen is an int32, so 4b. total 8b.
   let msgHeaderLen = 8;

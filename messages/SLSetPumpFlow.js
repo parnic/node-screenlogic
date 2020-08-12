@@ -5,8 +5,9 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12586;
 
 exports.SLSetPumpFlow = class SLSetPumpFlow extends SLMessage {
-  constructor(pumpId, circuitId, setPoint, isRPMs) {
-    super(0, MSG_ID);
+  constructor(pumpId, circuitId, setPoint, isRPMs, senderId) {
+    super(senderId, MSG_ID);
+
     this.pumpId = pumpId;
     this.circuitId = circuitId;
     this.setPoint = setPoint;

@@ -191,110 +191,110 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLLoginMessage(password).toBuffer());
   }
 
-  getPoolStatus() {
-    debugUnit('sending pool status query...');
-    this.client.write(new messages.SLPoolStatusMessage().toBuffer());
+  getPoolStatus(senderId) {
+    debugUnit('[%d] sending pool status query...', senderId || 0);
+    this.client.write(new messages.SLPoolStatusMessage(null, senderId).toBuffer());
   }
 
-  getControllerConfig() {
-    debugUnit('sending controller config query...');
-    this.client.write(new messages.SLControllerConfigMessage().toBuffer());
+  getControllerConfig(senderId) {
+    debugUnit('[%d] sending controller config query...', senderId || 0);
+    this.client.write(new messages.SLControllerConfigMessage(null, senderId).toBuffer());
   }
 
-  getChemicalData() {
-    debugUnit('sending chemical data query...');
-    this.client.write(new messages.SLChemDataMessage().toBuffer());
+  getChemicalData(senderId) {
+    debugUnit('[%d] sending chemical data query...', senderId || 0);
+    this.client.write(new messages.SLChemDataMessage(null, senderId).toBuffer());
   }
 
-  getSaltCellConfig() {
-    debugUnit('sending salt cell config query...');
-    this.client.write(new messages.SLSaltCellConfigMessage().toBuffer());
+  getSaltCellConfig(senderId) {
+    debugUnit('[%d] sending salt cell config query...', senderId || 0);
+    this.client.write(new messages.SLSaltCellConfigMessage(null, senderId).toBuffer());
   }
 
-  getVersion() {
-    debugUnit('sending version query...');
-    this.client.write(new messages.SLVersionMessage().toBuffer());
+  getVersion(senderId) {
+    debugUnit('[%d] sending version query...', senderId || 0);
+    this.client.write(new messages.SLVersionMessage(null, senderId).toBuffer());
   }
 
-  getEquipmentConfiguration() {
-    debugUnit('sending equipment configuration query...');
-    this.client.write(new messages.SLEquipmentConfigurationMessage().toBuffer());
+  getEquipmentConfiguration(senderId) {
+    debugUnit('[%d] sending equipment configuration query...', senderId || 0);
+    this.client.write(new messages.SLEquipmentConfigurationMessage(null, senderId).toBuffer());
   }
 
-  setCircuitState(controllerId, circuitId, circuitState) {
-    debugUnit('sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', controllerId, circuitId, circuitState);
-    this.client.write(new messages.SLSetCircuitStateMessage(controllerId, circuitId, circuitState).toBuffer());
+  setCircuitState(controllerId, circuitId, circuitState, senderId) {
+    debugUnit('[%d] sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', senderId || 0, controllerId, circuitId, circuitState);
+    this.client.write(new messages.SLSetCircuitStateMessage(controllerId, circuitId, circuitState, senderId).toBuffer());
   }
 
-  setSetPoint(controllerId, bodyType, temperature) {
-    debugUnit('sending set setpoint command: controllerId: %d, bodyType: %d, temperature: %d...', controllerId, bodyType, temperature);
-    this.client.write(new messages.SLSetHeatSetPointMessage(controllerId, bodyType, temperature).toBuffer());
+  setSetPoint(controllerId, bodyType, temperature, senderId) {
+    debugUnit('[%d] sending set setpoint command: controllerId: %d, bodyType: %d, temperature: %d...', senderId || 0, controllerId, bodyType, temperature);
+    this.client.write(new messages.SLSetHeatSetPointMessage(controllerId, bodyType, temperature, senderId).toBuffer());
   }
 
-  setHeatMode(controllerId, bodyType, heatMode) {
-    debugUnit('sending set heatmode command: controllerId: %d, bodyType: %d, heatMode: %d...', controllerId, bodyType, heatMode);
-    this.client.write(new messages.SLSetHeatModeMessage(controllerId, bodyType, heatMode).toBuffer());
+  setHeatMode(controllerId, bodyType, heatMode, senderId) {
+    debugUnit('[%d] sending set heatmode command: controllerId: %d, bodyType: %d, heatMode: %d...', senderId || 0, controllerId, bodyType, heatMode);
+    this.client.write(new messages.SLSetHeatModeMessage(controllerId, bodyType, heatMode, senderId).toBuffer());
   }
 
-  sendLightCommand(controllerId, command) {
-    debugUnit('sending light command: controllerId: %d, command: %d...', controllerId, command);
-    this.client.write(new messages.SLLightControlMessage(controllerId, command).toBuffer());
+  sendLightCommand(controllerId, command, senderId) {
+    debugUnit('[%d] sending light command: controllerId: %d, command: %d...', senderId || 0, controllerId, command);
+    this.client.write(new messages.SLLightControlMessage(controllerId, command, senderId).toBuffer());
   }
 
-  setSaltCellOutput(controllerId, poolOutput, spaOutput) {
-    debugUnit('sending set saltcell output command: controllerId: %d, poolOutput: %d, spaOutput: %d...', controllerId, poolOutput, spaOutput);
-    this.client.write(new messages.SLSetSaltCellConfigMessage(controllerId, poolOutput, spaOutput).toBuffer());
+  setSaltCellOutput(controllerId, poolOutput, spaOutput, senderId) {
+    debugUnit('[%d] sending set saltcell output command: controllerId: %d, poolOutput: %d, spaOutput: %d...', senderId || 0, controllerId, poolOutput, spaOutput);
+    this.client.write(new messages.SLSetSaltCellConfigMessage(controllerId, poolOutput, spaOutput, senderId).toBuffer());
   }
 
-  getScheduleData(scheduleType) {
-    debugUnit('sending set schedule data query for scheduleType: %d...', scheduleType);
-    this.client.write(new messages.SLGetScheduleData(null, scheduleType).toBuffer());
+  getScheduleData(scheduleType, senderId) {
+    debugUnit('[%d] sending set schedule data query for scheduleType: %d...', senderId || 0, scheduleType);
+    this.client.write(new messages.SLGetScheduleData(null, scheduleType, senderId).toBuffer());
   }
 
-  addNewScheduleEvent(scheduleType) {
-    debugUnit('sending add new schedule event command for scheduleType: %d...', scheduleType);
-    this.client.write(new messages.SLAddNewScheduleEvent(null, scheduleType).toBuffer());
+  addNewScheduleEvent(scheduleType, senderId) {
+    debugUnit('[%d] sending add new schedule event command for scheduleType: %d...', senderId || 0, scheduleType);
+    this.client.write(new messages.SLAddNewScheduleEvent(null, scheduleType, senderId).toBuffer());
   }
 
-  deleteScheduleEventById(scheduleId) {
-    debugUnit('sending delete schedule event command for scheduleId: %d...', scheduleId);
-    this.client.write(new messages.SLDeleteScheduleEventById(scheduleId).toBuffer());
+  deleteScheduleEventById(scheduleId, senderId) {
+    debugUnit('[%d] sending delete schedule event command for scheduleId: %d...', senderId || 0, scheduleId);
+    this.client.write(new messages.SLDeleteScheduleEventById(scheduleId, senderId).toBuffer());
   }
 
   // todo: should this just accept a SLSetScheduleEventById message instead of all these args?
-  setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
-    debugUnit('sending set schedule event command for scheduleId: %d, circuitId: %d, startTime: %d, stopTime: %d, dayMask: %d, flags: %d, heatCmd: %d, heatSetPoint: %d...', scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
-    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint).toBuffer());
+  setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId) {
+    debugUnit('[%d] sending set schedule event command for scheduleId: %d, circuitId: %d, startTime: %d, stopTime: %d, dayMask: %d, flags: %d, heatCmd: %d, heatSetPoint: %d...', senderId || 0, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
+    this.client.write(new messages.SLSetScheduleEventById(null, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId).toBuffer());
   }
 
-  setCircuitRuntimebyId(circuitId, runTime) {
-    debugUnit('sending set circuit runtime command for circuitId: %d, runTime: %d...', circuitId, runTime);
-    this.client.write(new messages.SLSetCircuitRuntimeById(circuitId, runTime).toBuffer());
+  setCircuitRuntimebyId(circuitId, runTime, senderId) {
+    debugUnit('[%d] sending set circuit runtime command for circuitId: %d, runTime: %d...', senderId || 0, circuitId, runTime);
+    this.client.write(new messages.SLSetCircuitRuntimeById(circuitId, runTime, senderId).toBuffer());
   }
 
-  getPumpStatus(pumpId) {
-    debugUnit('sending get pump status command for pumpId: %d...', pumpId);
-    this.client.write(new messages.SLGetPumpStatus(null, pumpId).toBuffer());
+  getPumpStatus(pumpId, senderId) {
+    debugUnit('[%d] sending get pump status command for pumpId: %d...', senderId || 0, pumpId);
+    this.client.write(new messages.SLGetPumpStatus(null, pumpId, senderId).toBuffer());
   }
 
-  setPumpFlow(pumpId, circuitId, setPoint, isRPMs) {
-    debugUnit('sending set pump flow command for pumpId: %d, circuitId: %d, setPoint: %d, isRPMs: %d...', pumpId, circuitId, setPoint, isRPMs);
-    this.client.write(new messages.SLSetPumpFlow(pumpId, circuitId, setPoint, isRPMs).toBuffer());
+  setPumpFlow(pumpId, circuitId, setPoint, isRPMs, senderId) {
+    debugUnit('[%d] sending set pump flow command for pumpId: %d, circuitId: %d, setPoint: %d, isRPMs: %d...', senderId || 0, pumpId, circuitId, setPoint, isRPMs);
+    this.client.write(new messages.SLSetPumpFlow(pumpId, circuitId, setPoint, isRPMs, senderId).toBuffer());
   }
 
-  cancelDelay() {
-    debugUnit('sending cancel delay command...');
-    this.client.write(new messages.SLCancelDelay().toBuffer());
+  cancelDelay(senderId) {
+    debugUnit('[%d] sending cancel delay command...', senderId || 0);
+    this.client.write(new messages.SLCancelDelay(senderId).toBuffer());
   }
 
-  addClient(senderId) {
-    debugUnit('sending add client command...');
-    this.client.write(new messages.SLAddClient(senderId).toBuffer());
+  addClient(clientId, senderId) {
+    debugUnit('[%d] sending add client command, clientId %d...', senderId || 0, clientId);
+    this.client.write(new messages.SLAddClient(clientId, senderId).toBuffer());
   }
 
-  removeClient(senderId) {
-    debugUnit('sending remove client command...');
-    this.client.write(new messages.SLRemoveClient(senderId).toBuffer());
+  removeClient(clientId, senderId) {
+    debugUnit('[%d] sending remove client command, clientId %d...', senderId || 0, clientId);
+    this.client.write(new messages.SLRemoveClient(clientId, senderId).toBuffer());
   }
 
   onClientMessage(msg) {

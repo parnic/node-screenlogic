@@ -178,87 +178,87 @@ client.connect();
 
 Closes the connection.
 
-#### getVersion()
+#### getVersion(senderId)
 
-Requests the system version string from the connected unit. Emits the `version` event when the response comes back.
+Requests the system version string from the connected unit. Emits the `version` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### getPoolStatus()
+#### getPoolStatus(senderId)
 
-Requests pool status from the connected unit. Emits the `poolStatus` event when the response comes back.
+Requests pool status from the connected unit. Emits the `poolStatus` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### getChemicalData()
+#### getChemicalData(senderId)
 
-Requests chemical data from the connected unit (may require an IntelliChem or similar). Emits the `chemicalData` event when the response comes back.
+Requests chemical data from the connected unit (may require an IntelliChem or similar). Emits the `chemicalData` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### getSaltCellConfig()
+#### getSaltCellConfig(senderId)
 
-Requests salt cell status/configuration from the connected unit (requires an IntelliChlor or compatible salt cell). Emits the `saltCellConfig` event when the response comes back.
+Requests salt cell status/configuration from the connected unit (requires an IntelliChlor or compatible salt cell). Emits the `saltCellConfig` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### getControllerConfig()
+#### getControllerConfig(senderId)
 
-Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back.
+Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back. `senderId` isan  optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### setCircuitState(controllerId, circuitId, circuitState)
+#### setCircuitState(controllerId, circuitId, circuitState, senderId)
 
-Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged.
+Activates or deactivates a circuit. See [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### setSetPoint(controllerId, bodyType, temperature)
+#### setSetPoint(controllerId, bodyType, temperature, senderId)
 
-Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged.
+Sets the heating setpoint for any body. See [`SLSetHeatSetPointMessage`](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### setHeatMode(controllerId, bodyType, heatMode)
+#### setHeatMode(controllerId, bodyType, heatMode, senderId)
 
-Sets the preferred heat mode. See [`SLSetHeatModeMessage`](#slsetheatmodemessage) documentation for argument values. Emits the `heatModeChanged` event when response is acknowledged.
+Sets the preferred heat mode. See [`SLSetHeatModeMessage`](#slsetheatmodemessage) documentation for argument values. Emits the `heatModeChanged` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### sendLightCommand(controllerId, command)
+#### sendLightCommand(controllerId, command, senderId)
 
-Sends a lighting command. See [`SLLightControlMessage`](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged.
+Sends a lighting command. See [`SLLightControlMessage`](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 Note that better/more complete handling of lighting is desired, but I have yet to find all the commands I need to implement to make that happen. This currently sends each command to all lights and there is no ability to send to an individual light. Pull requests adding more functionality here would be most welcome.
 
-#### setSaltCellOutput(controllerId, poolOutput, spaOutput)
+#### setSaltCellOutput(controllerId, poolOutput, spaOutput, senderId)
 
-Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) documentation for argument values. Emits the `setSaltCellConfig` event when response is acknowledged.
+Sets the salt cell's output levels. See [`SLSetSaltCellConfigMessage`](#slsetsaltcellconfigmessage) documentation for argument values. Emits the `setSaltCellConfig` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### getScheduleData(scheduleType)
+#### getScheduleData(scheduleType, senderId)
 
-Retrieves a list of schedule events of the specified type. See [`SLGetScheduleData`](#slgetscheduledata) documentation for argument values. Emits the `getScheduleData` event when response is acknowledged.
+Retrieves a list of schedule events of the specified type. See [`SLGetScheduleData`](#slgetscheduledata) documentation for argument values. Emits the `getScheduleData` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### addNewScheduleEvent(scheduleType)
+#### addNewScheduleEvent(scheduleType, senderId)
 
-Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) documentation for argument values. Emits the `addNewScheduleEvent` event when response is acknowledged.
+Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) documentation for argument values. Emits the `addNewScheduleEvent` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### deleteScheduleEventById(scheduleId)
+#### deleteScheduleEventById(scheduleId, senderId)
 
-Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` event when response is acknowledged.
+Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint)
+#### setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId)
 
-Configures a schedule event. See [`SLSetScheduleEventById`](#slsetscheduleeventbyid) documentation for argument values. Emits the `setScheduleEventById` event when response is acknowledged.
+Configures a schedule event. See [`SLSetScheduleEventById`](#slsetscheduleeventbyid) documentation for argument values. Emits the `setScheduleEventById` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### setCircuitRuntimebyId(circuitId, runTime)
+#### setCircuitRuntimebyId(circuitId, runTime, senderId)
 
-Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program. See [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) documentation for argument values. Emits the `setCircuitRuntimeById` event when response is acknowledged.
+Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program. See [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) documentation for argument values. Emits the `setCircuitRuntimeById` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### getPumpStatus(pumpId)
+#### getPumpStatus(pumpId, senderId)
 
-Gets information about the specified pump. See [`SLGetPumpStatus`](#slgetpumpstatus) documentation for argument values. Emits the `getPumpStatus` event when response is acknowledged.
+Gets information about the specified pump. See [`SLGetPumpStatus`](#slgetpumpstatus) documentation for argument values. Emits the `getPumpStatus` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### setPumpFlow(pumpId, circuitId, setPoint, isRPMs)
+#### setPumpFlow(pumpId, circuitId, setPoint, isRPMs, senderId)
 
-Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpumpflow) documentation for argument values. Emits the `setPumpFlow` event when response is acknowledged.
+Sets flow setting for a pump/circuit combination. See [`SLSetPumpFlow`](#slsetpumpflow) documentation for argument values. Emits the `setPumpFlow` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### cancelDelay()
+#### cancelDelay(senderId)
 
-Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) documentation. Emits the `cancelDelay` event when response is acknowledged.
+Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) documentation. Emits the `cancelDelay` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### addClient(senderId)
+#### addClient(clientId, senderId)
 
-Registers to receive updates from controller when something changes. Takes a random number `senderId` to identify the client. Emits the `poolStatus` event when something changes on the controller.
+Registers to receive updates from controller when something changes. Takes a random number `clientId` to identify the client. Emits the `poolStatus` event when something changes on the controller. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
-#### removeClient(senderId)
+#### removeClient(clientId, senderId)
 
-No longer receive `poolStatus` messages from controller. Takes a random number `senderId` that should match a previously registered client with `addClient`.
+No longer receive `poolStatus` messages from controller. Takes a random number `clientId` that should match a previously registered client with `addClient`. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 ### Events
 
@@ -294,6 +294,49 @@ No longer receive `poolStatus` messages from controller. Takes a random number `
 * `gatewayType` - byte
 * `gatewaySubtype` - byte
 * `gatewayName` - string representing the server's name. Will be in the format Pentair: xx-xx-xx
+
+### All messages
+
+Information about features common to all the below SL Message types.
+
+#### decodeTime(time)
+
+Interprets a time integer recorded as minutes past midnight and returns the ScreenLogic string representation of it in 24-hour time.
+
+#### encodeTime(time)
+
+Interprets the string representing 24-hour time and returns an integer of minutes past midnight.
+
+#### decodeDayMask(mask)
+
+Converts a day mask from, for example, `SLGetScheduleData`'s events[idx].days property into a `DAY_VALUES` array for ease of use.
+
+#### encodeDayMask(days)
+
+Converts an array of DAY_VALUES into a mask used by, for example, `SLGetScheduleData`'s events[idx].days property.
+
+#### getDayValue(dayName)
+
+Returns the value of a given `DAY_VALUES` day name.
+
+`DAY_VALUES` is defined as the following array for simplicity of checking whether a specific day is set in a mask:
+
+```js
+const DAY_VALUES = [
+  ['Mon', 0x1 ],
+  ['Tue', 0x2 ],
+  ['Wed', 0x4 ],
+  ['Thu', 0x8 ],
+  ['Fri', 0x10 ],
+  ['Sat', 0x20 ],
+  ['Sun', 0x40 ],
+];
+```
+
+#### Properties
+
+* `senderId` - an integer matching whatever was passed as the `senderId` argument when making the initial request (default 0)
+* `messageId` - an integer indicating the ScreenLogic ID for this message
 
 ### SLVersionMessage
 

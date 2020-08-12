@@ -27,7 +27,7 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
       this.writeUInt16LE(messageId || 0);
 
       this._wroteSize = false;
-    } else if (senderId) {
+    } else if (typeof senderId === 'object') {
       this._wroteSize = true;
       var buffer = senderId;
       this.writeBuffer(buffer, 0);

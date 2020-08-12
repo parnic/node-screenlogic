@@ -1,11 +1,12 @@
 'use strict';
 
 const ScreenLogic = require('../index');
+var assert = require('assert');
 
 // you'll need a ScreenLogic-enabled device on your network for this to succeed
-describe('Unit', () => {
+describe('Unit', function() {
   let unit;
-  before(done => {
+  before(function(done) {
     let finder = new ScreenLogic.FindUnits();
     finder.on('serverFound', server => {
       finder.close();
@@ -21,50 +22,57 @@ describe('Unit', () => {
     finder.search();
   });
 
-  after(() => {
+  after(function() {
     unit.close();
   });
 
-  // let circuit;
-  it('gets pool status', done => {
+  it('gets pool status', function(done) {
     unit.on('poolStatus', status => {
-      /* circuit = */status.circuitArray[0];
+      assert.equal(status.senderId, 0);
       done();
     });
 
     unit.getPoolStatus();
   });
 
-  it('gets controller config', done => {
+  it('gets controller config', function(done) {
     unit.on('controllerConfig', config => {
+      assert.equal(config.senderId, 42);
       done();
     });
-    unit.getControllerConfig();
+
+    unit.getControllerConfig(42);
   });
 
-  it('gets chemical data', done => {
-    unit.on('chemicalData', () => {
+  it('gets chemical data', function(done) {
+    unit.on('chemicalData', chemData => {
+      assert.equal(chemData.senderId, 123);
       done();
     });
-    unit.getChemicalData();
+
+    unit.getChemicalData(123);
   });
 
-  it('gets salt cell config', done => {
-    unit.on('saltCellConfig', () => {
+  it('gets salt cell config', function(done) {
+    unit.on('saltCellConfig', saltConfig => {
+      assert.equal(saltConfig.senderId, 0);
       done();
     });
+
     unit.getSaltCellConfig();
   });
 
-  it('gets version', done => {
-    unit.on('version', () => {
+  it('gets version', function(done) {
+    unit.on('version', version => {
+      assert.equal(version.senderId, 41239);
       done();
     });
-    unit.getVersion();
+
+    unit.getVersion(41239);
   });
 
   /* uncomment this and the `circuit` stuff above to test setting state
-  it('sets circuit state', done => {
+  it('sets circuit state', function(done) {
     unit.on('circuitStateChanged', () => {
       done();
     });

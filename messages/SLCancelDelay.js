@@ -5,9 +5,8 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 12580;
 
 exports.SLCancelDelay = class SLCancelDelay extends SLMessage {
-  constructor() {
-    super(0, MSG_ID);
-
+  constructor(senderId) {
+    super(senderId, MSG_ID);
   }
 
   encode() {

@@ -5,18 +5,12 @@ const SLMessage = require('./SLMessage.js').SLMessage;
 const MSG_ID = 8120;
 
 exports.SLVersionMessage = class SLVersionMessage extends SLMessage {
-  constructor(buf) {
-    var size;
+  constructor(buf, senderId) {
     if (buf) {
-      size = buf.readInt32LE(4) + 8;
-    }
-    super(0, MSG_ID, size);
-
-    if (buf) {
-      this._wroteSize = true;
-      this.writeBuffer(buf, 0);
-
-      this.decode();
+      var size = buf.readInt32LE(4) + 8;
+      super(buf, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
     }
   }
 

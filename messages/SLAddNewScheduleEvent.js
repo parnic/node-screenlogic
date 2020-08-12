@@ -6,23 +6,15 @@ const MSG_ID = 12544;
 
 
 exports.SLAddNewScheduleEvent = class SLAddNewScheduleEvent extends SLMessage {
-  constructor(buf, scheduleType) {
-    var size;
+  constructor(buf, scheduleType, senderId) {
     if (buf) {
-      size = buf.readInt32LE(4) + 8;
-    }
-    super(0, MSG_ID, size);
+      var size = buf.readInt32LE(4) + 8;
+      super(buf, MSG_ID, size);
+    } else {
+      super(senderId, MSG_ID);
 
-
-    if (!buf) {
-      // console.log('Requested Schedule type = ', scheduleType);
       this.writeInt32LE(0);
       this.writeInt32LE(scheduleType);
-    } else {
-      this._wroteSize = true;
-      this.writeBuffer(buf, 0);
-
-      this.decode();
     }
   }
 
