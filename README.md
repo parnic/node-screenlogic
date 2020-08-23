@@ -4,6 +4,36 @@ This is a Node.JS library for interfacing with Pentair ScreenLogic systems over 
 
 Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Rel, 5.2 Build 738.0 Rel
 
+* [Usage](#usage)
+* [Notes](#notes)
+* [Packet format](#packet-format)
+* [API reference](#api-reference)
+  * [FindUnits](#findunits)
+  * [RemoteLogin](#remotelogin)
+  * [UnitConnection](#unitconnection)
+  * [All messages](#all-messages)
+  * [SLVersionMessage](#slversionmessage)
+  * [SLPoolStatusMessage](#slpoolstatusmessage)
+  * [SLChemDataMessage](#slchemdatamessage)
+  * [SLSaltCellConfigMessage](#slsaltcellconfigmessage)
+  * [SLSetSaltCellConfigMessage](#slsetsaltcellconfigmessage)
+  * [SLControllerConfigMessage](#slcontrollerconfigmessage)
+  * [SLSetCircuitStateMessage](#slsetcircuitstatemessage)
+  * [SLSetHeatSetPointMessage](#slsetheatsetpointmessage)
+  * [SLSetHeatModeMessage](#slsetheatmodemessage)
+  * [SLLightControlMessage](#sllightcontrolmessage)
+  * [SLGetGatewayDataMessage](#slgetgatewaydatamessage)
+  * [SLAddNewScheduleEvent](#sladdnewscheduleevent)
+  * [SLDeleteScheduleEventById](#sldeletescheduleeventbyid)
+  * [SLGetScheduleData](#slgetscheduledata)
+  * [SLSetScheduleEventById](#slsetscheduleeventbyid)
+  * [SLSetCircuitRuntimeById](#slsetcircuitruntimebyid)
+  * [SLGetPumpStatus](#slgetpumpstatus)
+  * [SLSetPumpFlow](#slsetpumpflow)
+  * [SLCancelDelay](#slcanceldelay)
+  * [SLAddClient](#sladdclient)
+  * [SLRemoveClient](#slremoveclient)
+
 ## Usage
 
 See example.js for an example of interfacing with the library. Broadly, import the library with
