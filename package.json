@@ -1,28 +1,28 @@
 {
-	"name": "node-screenlogic",
-	"description": "Tool for connecting to Pentair ScreenLogic systems on the local network",
-	"version": "1.6.0-1",
-	"main": "index.js",
-	"license": "MIT",
-	"repository": "https://github.com/parnic/node-screenlogic.git",
-	"keywords": [
-		"pentair",
-		"pool",
-		"screenlogic",
-		"swimmingpool"
-	],
-	"dependencies": {
-		"debug": "^4.1.1",
-		"smart-buffer": "~4.1.0"
-	},
-	"devDependencies": {
-		"eslint": "^7.6.0",
-		"eslint-config-strongloop": "^2.1.0",
-		"mocha": "^8.1.1"
-	},
-	"scripts": {
-		"test": "mocha test/*.spec.js",
-		"pretest": "eslint --ignore-path .gitignore .",
-		"test-slmessage": "mocha test/slmessage.spec.js"
-	}
+    "name": "node-screenlogic",
+    "description": "Tool for connecting to Pentair ScreenLogic systems on the local network",
+    "version": "1.6.1",
+    "main": "index.js",
+    "license": "MIT",
+    "repository": "https://github.com/parnic/node-screenlogic.git",
+    "keywords": [
+        "pentair",
+        "pool",
+        "screenlogic",
+        "swimmingpool"
+    ],
+    "dependencies": {
+        "debug": "^4.3.1",
+        "smart-buffer": "~4.1.0"
+    },
+    "devDependencies": {
+        "eslint": "^7.14.0",
+        "eslint-config-strongloop": "^2.1.0",
+        "mocha": "^8.2.1"
+    },
+    "scripts": {
+        "test": "mocha test/*.spec.js",
+        "pretest": "eslint --ignore-path .gitignore .",
+        "test-slmessage": "mocha test/slmessage.spec.js"
+    }
 }
