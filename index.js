@@ -402,6 +402,9 @@ class UnitConnection extends EventEmitter {
         debugUnit("  it's async pool status");
         this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
         break;
+      case 12501:
+        debugUnit("  it's a schedule changed notification");
+        this.emit('scheduleChanged');
       case 13:
         debugUnit("  it's a login failure.");
         this.emit('loginFailed');

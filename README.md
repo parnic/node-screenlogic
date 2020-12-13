@@ -256,15 +256,15 @@ Retrieves a list of schedule events of the specified type. See [`SLGetScheduleDa
 
 #### addNewScheduleEvent(scheduleType, senderId)
 
-Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) documentation for argument values. Emits the `addNewScheduleEvent` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) documentation for argument values. Emits either the `addNewScheduleEvent` or `scheduleChanged` event when response is acknowledged (listen for both). `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 #### deleteScheduleEventById(scheduleId, senderId)
 
-Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` or `scheduleChanged` event when response is acknowledged (listen for both). `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 #### setScheduleEventById(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId)
 
-Configures a schedule event. See [`SLSetScheduleEventById`](#slsetscheduleeventbyid) documentation for argument values. Emits the `setScheduleEventById` event when response is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+Configures a schedule event. See [`SLSetScheduleEventById`](#slsetscheduleeventbyid) documentation for argument values. Emits the `setScheduleEventById` or `scheduleChanged` event when response is acknowledged (listen for both). `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 #### setCircuitRuntimebyId(circuitId, runTime, senderId)
 
@@ -307,6 +307,7 @@ No longer receive `poolStatus` messages from controller. Takes a random number `
 * `addNewScheduleEvent` - Indicates that a response to `addNewScheduleEvent()` has been received which contains the created `scheduleId` to be used later for setting up the properties. Event handler receives a [`SLAddNewScheduleEvent`](#sladdnewscheduleevent) object.
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleById()` has been received. Event handler receives a [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) object.
 * `setScheduleEventById` - Indicates that a response to `setScheduleEventById()` has been received. Event handler receives a [`SLSetScheduleEventById`](#slsetscheduleeventbyid) object.
+* `scheduleChanged` - Indicates that a response to adding, deleting, or setting a schedule has been received. Event handler receives nothing. This seems to be arbitrarily returned sometimes instead of a normal ack by the system.
 * `setCircuitRuntimeById` - Indicates that a response to `setCircuitRuntimeById()` has been received. Event handler receives a [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) object.
 * `getPumpStatus` - Indicates that a response to `getPumpStatus()` has been received. Event handler receives a [`SLGetPumpStatus`](#slgetpumpstatus) object.
 * `setPumpFlow` - Indicates that a response to `setPumpFlow()` has been received. Event handler receives a [`SLSetPumpFlow`](#slsetpumpflow) object.
