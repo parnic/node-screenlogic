@@ -405,6 +405,7 @@ class UnitConnection extends EventEmitter {
       case 12501:
         debugUnit("  it's a schedule changed notification");
         this.emit('scheduleChanged');
+        break;
       case 13:
         debugUnit("  it's a login failure.");
         this.emit('loginFailed');
