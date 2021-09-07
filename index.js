@@ -302,6 +302,23 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLGetSystemTime(null, senderId).toBuffer());
   }
 
+  setSystemTime(date, shouldAdjustForDST, senderId) {
+    if (!(date instanceof Date)) {
+      debugUnit('setSystemTime() must receive valid Date object for the date argument');
+      this.emit('setSystemTime', null);
+      return;
+    }
+
+    if (typeof shouldAdjustForDST !== 'boolean') {
+      debugUnit('setSystemTime() must receive a boolean for the shouldAdjustForDST argument');
+      this.emit('setSystemTime', null);
+      return;
+    }
+
+    debugUnit('[%d] sending set system time command...', senderId || 0);
+    this.client.write(new messages.SLSetSystemTime(null, date, shouldAdjustForDST, senderId).toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -410,6 +427,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLGetSystemTime.getResponseId():
         debugUnit("  it's system time");
         this.emit('getSystemTime', new messages.SLGetSystemTime(msg));
+        break;
+      case messages.SLSetSystemTime.getResponseId():
+        debugUnit("  it's a set system time ack");
+        this.emit('setSystemTime', new messages.SLSetSystemTime(msg));
         break;
       case 12501:
         debugUnit("  it's a schedule changed notification");
