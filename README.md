@@ -284,11 +284,11 @@ Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) document
 
 #### addClient(clientId, senderId)
 
-Registers to receive updates from controller when something changes. Takes a random number `clientId` to identify the client. Emits the `poolStatus` event when something changes on the controller. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+Registers to receive updates from controller when something changes. Takes a random number `clientId` to identify the client. Emits the `poolStatus` event when something changes on the controller, and the `addClient` event when the request to add a client is acknowledged. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 #### removeClient(clientId, senderId)
 
-No longer receive `poolStatus` messages from controller. Takes a random number `clientId` that should match a previously registered client with `addClient`. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+No longer receive `poolStatus` messages from controller. Emits the `removeClient` event when the request to remove a client is acknowledged. Takes a random number `clientId` that should match a previously registered client with `addClient`. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 ### Events
 
@@ -312,6 +312,8 @@ No longer receive `poolStatus` messages from controller. Takes a random number `
 * `getPumpStatus` - Indicates that a response to `getPumpStatus()` has been received. Event handler receives a [`SLGetPumpStatus`](#slgetpumpstatus) object.
 * `setPumpFlow` - Indicates that a response to `setPumpFlow()` has been received. Event handler receives a [`SLSetPumpFlow`](#slsetpumpflow) object.
 * `cancelDelay` - Indicates that a response to `cancelDelay()` has been received. Event handler receives a [`SLCancelDelay`](#slcanceldelay) object.
+* `addClient` - Indicates that a response to `addClient()` has been received. Event handler receives a [`SLAddClient`](#sladdclient) object.
+* `removeClient` - Indicates that a response to `removeClient()` has been received. Event handler receives a [`SLRemoveClient`](#slremoveclient) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
