@@ -685,10 +685,10 @@ Passed as an argument to the emitted `setScheduleEventById` event. Configures an
 
 * `scheduleId` - id of a schedule previously created, see [`SLAddNewScheduleEvent`](#sladdnewscheduleevent)
 * `circuitId` - id of the circuit to which this event applies
-* `startTime` - the start time of the event, specified as minutes since midnight
+* `startTime` - the start time of the event, specified as minutes since midnight (see [conversion functions](#encodetimetime))
   * example: 6:00am would be 360
   * example: 6:15am would be 375
-* `stopTime` - the stop time of the event, specified as minutes since midnight
+* `stopTime` - the stop time of the event, specified as minutes since midnight (see [conversion functions](#encodetimetime))
 * `dayMask`
   * 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127
 * `flags`
