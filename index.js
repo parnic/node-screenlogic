@@ -297,6 +297,11 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLRemoveClient(clientId, senderId).toBuffer());
   }
 
+  getSystemTime(senderId) {
+    debugUnit('[%d] sending get system time query...', senderId || 0);
+    this.client.write(new messages.SLGetSystemTime(null, senderId).toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -401,6 +406,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLPoolStatusMessage.getAsyncResponseId():
         debugUnit("  it's async pool status");
         this.emit('poolStatus', new messages.SLPoolStatusMessage(msg));
+        break;
+      case messages.SLGetSystemTime.getResponseId():
+        debugUnit("  it's system time");
+        this.emit('getSystemTime', new messages.SLGetSystemTime(msg));
         break;
       case 12501:
         debugUnit("  it's a schedule changed notification");

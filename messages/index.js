@@ -25,3 +25,4 @@ exports.SLSetPumpFlow = require('./SLSetPumpFlow.js').SLSetPumpFlow;
 exports.SLCancelDelay = require('./SLCancelDelay.js').SLCancelDelay;
 exports.SLAddClient = require('./SLAddClient.js').SLAddClient;
 exports.SLRemoveClient = require('./SLRemoveClient.js').SLRemoveClient;
+exports.SLGetSystemTime = require('./SLGetSystemTime.js').SLGetSystemTime;

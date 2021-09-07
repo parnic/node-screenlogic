@@ -33,6 +33,7 @@ Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Re
   * [SLCancelDelay](#slcanceldelay)
   * [SLAddClient](#sladdclient)
   * [SLRemoveClient](#slremoveclient)
+  * [SLGetSystemTime](#slgetsystemtime)
 
 ## Usage
 
@@ -290,6 +291,10 @@ Registers to receive updates from controller when something changes. Takes a ran
 
 No longer receive `poolStatus` messages from controller. Emits the `removeClient` event when the request to remove a client is acknowledged. Takes a random number `clientId` that should match a previously registered client with `addClient`. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
+#### getSystemTime(senderId)
+
+Retrieves the current time the system is set to. Emits the `getSystemTime` event when response is received. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+
 ### Events
 
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
@@ -314,6 +319,7 @@ No longer receive `poolStatus` messages from controller. Emits the `removeClient
 * `cancelDelay` - Indicates that a response to `cancelDelay()` has been received. Event handler receives a [`SLCancelDelay`](#slcanceldelay) object.
 * `addClient` - Indicates that a response to `addClient()` has been received. Event handler receives a [`SLAddClient`](#sladdclient) object.
 * `removeClient` - Indicates that a response to `removeClient()` has been received. Event handler receives a [`SLRemoveClient`](#slremoveclient) object.
+* `getSystemTime` - Indicates that a response to `getSystemTime()` has been received. Event handler receives a [`SLGetSystemTime`](#slgetsystemtime) object.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `badParameter` - Indicates that a bad parameter has been supplied to a function. This can be triggered, for example, by sending the wrong controller ID to a `set` function.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
@@ -760,3 +766,20 @@ Passed as an argument to the emitted `addClient` event.
 ### SLRemoveClient
 
 Passed as an argument to the emitted `removeClient` event.
+
+### SLGetSystemTime
+
+Contains information about the system's current time and date. Passed as an argument to the emitted `getSystemTime` event.
+
+#### Properties
+
+* `year` - short representing current system year
+* `month` - short representing current system month (where 1 is January, 2 is February, etc.)
+* `day` - short representing current system day of the month
+* `dayOfWeek` - short representing current system day of the week (where 0 is Monday and 6 is Sunday)
+* `hour` - short representing current system hour (24-hour time where 0 is midnight, 13 is 1PM, etc.)
+* `minute` - short representing current system minute
+* `second` - short representing current system second
+* `millisecond` - short representing current system millisecond
+* `adjustForDST` - bool indicating whether the system should adjust for daylight saving time or not
+* `date` - `Date` instance representing the current system datetime (convenience, constructed from the above properties)
