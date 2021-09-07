@@ -658,7 +658,24 @@ Passed as an argument to the emitted `getScheduleData` event. Retrieves a list o
 
 #### Properties
 
-* `scheduleType` - 0 indicates regular scheduled events, 1 indicates a run-once event
+* `eventCount` - the number of `events` returned
+* `events` - array containing:
+  * `scheduleId` - the associated scheduleId
+  * `circuitId` - the circuit this schedule affects
+  * `startTime` - the start time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
+  * `stopTime` - the stop time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
+  * `dayMask` - 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127 (see [conversion functions](#decodedaymaskmask))
+  * `flags`
+    * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
+    * bit 1 indicates whether heat setPoint should be changed
+  * `heatCmd` - integer indicating the desired heater mode. Valid values are:
+    * ScreenLogic.HEAT_MODE_OFF
+    * ScreenLogic.HEAT_MODE_SOLAR
+    * ScreenLogic.HEAT_MODE_SOLARPREFERRED
+    * ScreenLogic.HEAT_MODE_HEATPUMP
+    * ScreenLogic.HEAT_MODE_DONTCHANGE
+  * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
+  * `days` - which days this schedule is active for; this is just the `dayMask` property run through [`decodeDayMask()`](#decodedaymaskmask) for convenience
 
 ### SLSetScheduleEventById
 
