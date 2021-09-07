@@ -172,4 +172,21 @@ describe('SLMessage utilities', function() {
       assert.strictEqual(decodedMsg.dataLength, decodedMsg.readOffset - 8);
     }
   });
+
+  it('encodes Date as SLTime', function() {
+    let msg = new SLMessage();
+    let date = new Date(2021, 8, 6, 22, 8, 5);
+    msg.writeSLDateTime(date);
+    let decodedMsg = new SLMessage(msg.toBuffer());
+    assert.equal(decodedMsg.readUInt16LE(), 2021);
+    // javascript Date() month is 0-based, ScreenLogic month matches the calendar
+    assert.equal(decodedMsg.readUInt16LE(), 9);
+    // ScreenLogic day-of-week starts with Monday as 0
+    assert.equal(decodedMsg.readUInt16LE(), 0);
+    assert.equal(decodedMsg.readUInt16LE(), 6);
+    assert.equal(decodedMsg.readUInt16LE(), 22);
+    assert.equal(decodedMsg.readUInt16LE(), 8);
+    assert.equal(decodedMsg.readUInt16LE(), 5);
+    assert.equal(decodedMsg.readUInt16LE(), 0);
+  });
 });

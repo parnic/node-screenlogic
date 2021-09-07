@@ -150,6 +150,21 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     return 0;
   }
 
+  writeSLDateTime(date) {
+    this.writeInt16LE(date.getFullYear());
+    this.writeInt16LE(date.getMonth() + 1);
+    var dayOfWeek = date.getDay() - 1;
+    if (dayOfWeek < 0) {
+      dayOfWeek = 6;
+    }
+    this.writeInt16LE(dayOfWeek);
+    this.writeInt16LE(date.getDate());
+    this.writeInt16LE(date.getHours());
+    this.writeInt16LE(date.getMinutes());
+    this.writeInt16LE(date.getSeconds());
+    this.writeInt16LE(date.getMilliseconds());
+  }
+
   static slackForAlignment(val) {
     return (4 - val % 4) % 4;
   }
