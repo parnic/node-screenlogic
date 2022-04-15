@@ -232,7 +232,7 @@ Requests chemical data from the connected unit (may require an IntelliChem or si
 
 #### getControllerConfig(senderId)
 
-Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back. `senderId` isan  optional 16-bit integer and will be present as the `senderId` field on the returned message.
+Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
 #### getPoolStatus(senderId)
 
