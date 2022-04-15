@@ -581,7 +581,7 @@ Contains information about the system's current time and date. Passed as an argu
 * `year` - short representing current system year
 * `month` - short representing current system month (where 1 is January, 2 is February, etc.)
 * `day` - short representing current system day of the month
-* `dayOfWeek` - short representing current system day of the week (where 0 is Sunday and 6 is Sunday)
+* `dayOfWeek` - short representing current system day of the week (where 1 is Sunday and 7 is Saturday)
 * `hour` - short representing current system hour (24-hour time where 0 is midnight, 13 is 1PM, etc.)
 * `minute` - short representing current system minute
 * `second` - short representing current system second

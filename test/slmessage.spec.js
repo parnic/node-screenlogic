@@ -181,8 +181,8 @@ describe('SLMessage utilities', function() {
     assert.equal(decodedMsg.readUInt16LE(), 2021);
     // javascript Date() month is 0-based, ScreenLogic month matches the calendar
     assert.equal(decodedMsg.readUInt16LE(), 9);
-    // ScreenLogic day-of-week starts with Monday as 0
-    assert.equal(decodedMsg.readUInt16LE(), 0);
+    // ScreenLogic day-of-week starts with Sunday as 1
+    assert.equal(decodedMsg.readUInt16LE(), 2);
     assert.equal(decodedMsg.readUInt16LE(), 6);
     assert.equal(decodedMsg.readUInt16LE(), 22);
     assert.equal(decodedMsg.readUInt16LE(), 8);
