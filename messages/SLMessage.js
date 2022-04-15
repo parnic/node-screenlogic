@@ -154,7 +154,7 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.writeInt16LE(date.getFullYear());
     this.writeInt16LE(date.getMonth() + 1);
     var dayOfWeek = date.getDay() + 1;
-    if (dayOfWeek == 7) {
+    if (dayOfWeek === 7) {
       dayOfWeek = 0;
     }
     this.writeInt16LE(dayOfWeek);
