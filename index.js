@@ -319,6 +319,11 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLSetSystemTime(null, date, shouldAdjustForDST, senderId).toBuffer());
   }
 
+  getHistoryData(fromTime, toTime, senderId) {
+    debugUnit('[%d] requesting history data from `%s` to `%s`', senderId || 0, fromTime || new Date(), toTime || new Date());
+    this.client.write(new messages.SLGetHistoryData(null, fromTime, toTime, senderId).toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -431,6 +436,14 @@ class UnitConnection extends EventEmitter {
       case messages.SLSetSystemTime.getResponseId():
         debugUnit("  it's a set system time ack");
         this.emit('setSystemTime', new messages.SLSetSystemTime(msg));
+        break;
+      case messages.SLGetHistoryData.getResponseId():
+        debugUnit("  it's a history data query ack");
+        this.emit('getHistoryDataPending');
+        break;
+      case messages.SLGetHistoryData.getPayloadId():
+        debugUnit("  it's a history data payload");
+        this.emit('getHistoryData', new messages.SLGetHistoryData(msg));
         break;
       case 12501:
         debugUnit("  it's a schedule changed notification");

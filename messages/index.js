@@ -27,3 +27,4 @@ exports.SLAddClient = require('./SLAddClient.js').SLAddClient;
 exports.SLRemoveClient = require('./SLRemoveClient.js').SLRemoveClient;
 exports.SLGetSystemTime = require('./SLGetSystemTime.js').SLGetSystemTime;
 exports.SLSetSystemTime = require('./SLSetSystemTime.js').SLSetSystemTime;
+exports.SLGetHistoryData = require('./SLGetHistoryData.js').SLGetHistoryData;

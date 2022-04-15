@@ -19,6 +19,7 @@ Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Re
     * [SLControllerConfigMessage](#slcontrollerconfigmessage)
     * [SLDeleteScheduleEventById](#sldeletescheduleeventbyid)
     * [SLGetGatewayDataMessage](#slgetgatewaydatamessage)
+    * [SLGetHistoryData](#slgethistorydata)
     * [SLGetPumpStatus](#slgetpumpstatus)
     * [SLGetScheduleData](#slgetscheduledata)
     * [SLGetSystemTime](#slgetsystemtime)
@@ -234,6 +235,10 @@ Requests chemical data from the connected unit (may require an IntelliChem or si
 
 Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
+#### getHistoryData(fromTime, toTime, senderId)
+
+Requests history data from the connected unit. This is information like what various temperature sensors (air, water) read over time, changes in heat setpoints, and when various circuits (pool, spa, solar, heater, and lights) were turned on and off. `fromTime` is the time (as a Javascript Date object) that you want to get events from and `toTime` is the time (as a Javascript Date object) that you want to get events until. Emits the `getHistoryDataPending` event when the request to get data is confirmed, then the `getHistoryData` event when the history data is actually ready to be handled. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+
 #### getPoolStatus(senderId)
 
 Requests pool status from the connected unit. Emits the `poolStatus` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
@@ -311,6 +316,8 @@ Sets the current date and time of the ScreenLogic system. Emits the `setSystemTi
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleById()` has been received. Event handler receives a [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) object.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
+* `getHistoryData` - Indicates that history data for the requested timeframe is ready. Event handler receives a [`SLGetHistoryData`](#slgethistorydata) object.
+* `getHistoryDataPending` - Indicates that the `getHistoryData()` request has been received and is being processed.
 * `getPumpStatus` - Indicates that a response to `getPumpStatus()` has been received. Event handler receives a [`SLGetPumpStatus`](#slgetpumpstatus) object.
 * `getScheduleData` - Indicates that a response to `getScheduleData()` has been received. Event handler receives a [`SLGetScheduleData`](#slgetscheduledata) object.
 * `getSystemTime` - Indicates that a response to `getSystemTime()` has been received. Event handler receives a [`SLGetSystemTime`](#slgetsystemtime) object.
@@ -520,6 +527,23 @@ Passed as an argument to the emitted `gatewayFound` event. Contains information 
 * `port` - number containing the port to connect to the unit
 * `portOpen` - boolean indicating whether or not the port is open and able to be connected to
 * `relayOn` - boolean indicating whether the relay is on (unsure what exactly this indicates; it's always been false in my tests)
+
+### SLGetHistoryData
+
+Passed as an argument to the emitted `getHistoryData` event. Contains information about the remote unit's temperature and circuit on/off times over time.
+
+#### Properties
+
+* `airTemps` - array of objects containing the air temperature over time. Each object contains a `time` key containing a Javascript Date object, and a `temp` key containing the temperature as an integer.
+* `poolTemps` - array of objects containing the pool temperature over time. Each object contains a `time` key containing a Javascript Date object, and a `temp` key containing the temperature as an integer.
+* `poolSetPointTemps` - array of objects containing the pool setpoint over time. Each object contains a `time` key containing a Javascript Date object, and a `temp` key containing the temperature as an integer.
+* `spaTemps` - array of objects containing the spa temperature over time. Each object contains a `time` key containing a Javascript Date object, and a `temp` key containing the temperature as an integer.
+* `spaSetPointTemps` - array of objects containing the spa setpoint over time. Each object contains a `time` key containing a Javascript Date object, and a `temp` key containing the temperature as an integer.
+* `poolRuns` - array of objects containing the pool on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
+* `spaRuns` - array of objects containing the spa on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
+* `solarRuns` - array of objects containing the solar on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
+* `heaterRuns` - array of objects containing the heater on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
+* `lightRuns` - array of objects containing the light on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
 
 ### SLGetPumpStatus
 
