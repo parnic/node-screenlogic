@@ -189,4 +189,19 @@ describe('SLMessage utilities', function() {
     assert.equal(decodedMsg.readUInt16LE(), 5);
     assert.equal(decodedMsg.readUInt16LE(), 0);
   });
+
+  it('decodes SLTime as Date', function() {
+    let msg = new SLMessage();
+    let date = new Date(2021, 8, 6, 22, 8, 5);
+    msg.writeSLDateTime(date);
+    let decodedMsg = new SLMessage(msg.toBuffer());
+    let decodedDate = decodedMsg.readSLDateTime();
+    assert.equal(date.getFullYear(), decodedDate.getFullYear());
+    assert.equal(date.getMonth(), decodedDate.getMonth());
+    assert.equal(date.getDate(), decodedDate.getDate());
+    assert.equal(date.getHours(), decodedDate.getHours());
+    assert.equal(date.getMinutes(), decodedDate.getMinutes());
+    assert.equal(date.getSeconds(), decodedDate.getSeconds());
+    assert.equal(date.getMilliseconds(), decodedDate.getMilliseconds());
+  });
 });

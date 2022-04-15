@@ -17,18 +17,18 @@ exports.SLGetSystemTime = class SLGetSystemTime extends SLMessage {
   decode() {
     super.decode();
 
-    this.year = this.readUInt16LE();
-    this.month = this.readUInt16LE();
-    this.dayOfWeek = this.readUInt16LE();
-    this.day = this.readUInt16LE();
-    this.hour = this.readUInt16LE();
-    this.minute = this.readUInt16LE();
-    this.second = this.readUInt16LE();
-    this.millisecond = this.readUInt16LE();
+    this.date = this.readSLDateTime();
+    this.year = this.date.getFullYear();
+    this.month = this.date.getMonth() + 1; // + 1 is for backward compatibility, SLTime represents months as 1-based
+    this.dayOfWeek = this.date.getDay(); // should probably be tweaked to adjust what days are 0-6 as SLTime and Javascript start on different days of the week
+    this.day = this.date.getDate();
+    this.hour = this.date.getHours();
+    this.minute = this.date.getMinutes();
+    this.second = this.date.getSeconds();
+    this.millisecond = this.date.getMilliseconds();
+
     var adjustForDST = this.readInt32LE();
     this.adjustForDST = adjustForDST === 1;
-
-    this.date = new Date(this.year, this.month - 1, this.day, this.hour, this.minute, this.second);
   }
 
   static getResponseId() {

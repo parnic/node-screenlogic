@@ -165,6 +165,20 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
     this.writeInt16LE(date.getMilliseconds());
   }
 
+  readSLDateTime() {
+    let date = new Date();
+    date.setFullYear(this.readInt16LE());
+    date.setMonth(this.readInt16LE() - 1);
+    this.readInt16LE();
+    date.setDate(this.readInt16LE());
+    date.setHours(this.readInt16LE());
+    date.setMinutes(this.readInt16LE());
+    date.setSeconds(this.readInt16LE());
+    date.setMilliseconds(this.readInt16LE());
+
+    return date;
+  }
+
   static slackForAlignment(val) {
     return (4 - val % 4) % 4;
   }

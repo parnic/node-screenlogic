@@ -779,16 +779,16 @@ Contains information about the system's current time and date. Passed as an argu
 
 #### Properties
 
+* `date` - `Date` instance representing the current system datetime (preferred, the other properties are derived from this one and provided for backward compatibility purposes)
 * `year` - short representing current system year
 * `month` - short representing current system month (where 1 is January, 2 is February, etc.)
 * `day` - short representing current system day of the month
-* `dayOfWeek` - short representing current system day of the week (where 0 is Monday and 6 is Sunday)
+* `dayOfWeek` - short representing current system day of the week (where 0 is Sunday and 6 is Sunday)
 * `hour` - short representing current system hour (24-hour time where 0 is midnight, 13 is 1PM, etc.)
 * `minute` - short representing current system minute
 * `second` - short representing current system second
 * `millisecond` - short representing current system millisecond
 * `adjustForDST` - bool indicating whether the system should adjust for daylight saving time or not
-* `date` - `Date` instance representing the current system datetime (convenience, constructed from the above properties)
 
 ### SLSetSystemTime
 
