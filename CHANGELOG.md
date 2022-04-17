@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.8.0 - 2022-04-17
+
+### Added
+
+* Added support for reading ScreenLogic time packets.
+* Added support for getting system history data. This includes temperature readings over time as well as circuit on/off changes over time.
+
+### Fixed
+
+* Updated dependencies to safer versions of some packages.
+* Fixed day-of-week conversion from Javascript Date objects to ScreenLogic times (SLTimes are 1-based starting on Sunday).
+
+### Changed
+
+* Alphabetized the readme.
+
 ## v1.7.0 - 2021-10-13
 
 ### Added
