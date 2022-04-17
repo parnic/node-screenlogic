@@ -153,11 +153,7 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
   writeSLDateTime(date) {
     this.writeInt16LE(date.getFullYear());
     this.writeInt16LE(date.getMonth() + 1);
-    var dayOfWeek = date.getDay() + 1;
-    if (dayOfWeek === 7) {
-      dayOfWeek = 0;
-    }
-    this.writeInt16LE(dayOfWeek);
+    this.writeInt16LE(date.getDay() + 1);
     this.writeInt16LE(date.getDate());
     this.writeInt16LE(date.getHours());
     this.writeInt16LE(date.getMinutes());

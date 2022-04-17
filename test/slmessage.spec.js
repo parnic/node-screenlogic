@@ -204,4 +204,30 @@ describe('SLMessage utilities', function() {
     assert.equal(date.getSeconds(), decodedDate.getSeconds());
     assert.equal(date.getMilliseconds(), decodedDate.getMilliseconds());
   });
+
+  it('writes the appropriate day of week', function() {
+    let handler = function(inDate) {
+      let msg = new SLMessage();
+      msg.writeSLDateTime(inDate);
+      let decodedMsg = new SLMessage(msg.toBuffer());
+      decodedMsg.readUInt16LE();
+      decodedMsg.readUInt16LE();
+      return decodedMsg.readUInt16LE();
+    }
+
+    let dow = handler(new Date(2022, 3, 17, 10, 3, 0));
+    assert.equal(dow, 1);
+    dow = handler(new Date(2022, 3, 18, 10, 3, 0));
+    assert.equal(dow, 2);
+    dow = handler(new Date(2022, 3, 19, 10, 3, 0));
+    assert.equal(dow, 3);
+    dow = handler(new Date(2022, 3, 20, 10, 3, 0));
+    assert.equal(dow, 4);
+    dow = handler(new Date(2022, 3, 21, 10, 3, 0));
+    assert.equal(dow, 5);
+    dow = handler(new Date(2022, 3, 22, 10, 3, 0));
+    assert.equal(dow, 6);
+    dow = handler(new Date(2022, 3, 23, 10, 3, 0));
+    assert.equal(dow, 7);
+  });
 });
