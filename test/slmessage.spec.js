@@ -213,7 +213,7 @@ describe('SLMessage utilities', function() {
       decodedMsg.readUInt16LE();
       decodedMsg.readUInt16LE();
       return decodedMsg.readUInt16LE();
-    }
+    };
 
     let dow = handler(new Date(2022, 3, 17, 10, 3, 0));
     assert.equal(dow, 1);
