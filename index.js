@@ -324,6 +324,11 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLGetHistoryData(null, fromTime, toTime, senderId).toBuffer());
   }
 
+  getChemHistoryData(fromTime, toTime, senderId) {
+    debugUnit('[%d] requesting chem history data from `%s` to `%s`', senderId || 0, fromTime || new Date(), toTime || new Date());
+    this.client.write(new messages.SLGetChemHistoryData(null, fromTime || new Date(), toTime || new Date(), senderId).toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -444,6 +449,14 @@ class UnitConnection extends EventEmitter {
       case messages.SLGetHistoryData.getPayloadId():
         debugUnit("  it's a history data payload");
         this.emit('getHistoryData', new messages.SLGetHistoryData(msg));
+        break;
+      case messages.SLGetChemHistoryData.getResponseId():
+        debugUnit("  it's a chem history data query ack");
+        this.emit('getChemHistoryDataPending');
+        break;
+      case messages.SLGetChemHistoryData.getPayloadId():
+        debugUnit("  it's a chem history data payload");
+        this.emit('getChemHistoryData', new messages.SLGetChemHistoryData(msg));
         break;
       case 12501:
         debugUnit("  it's a schedule changed notification");

@@ -18,6 +18,7 @@ Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Re
     * [SLChemDataMessage](#slchemdatamessage)
     * [SLControllerConfigMessage](#slcontrollerconfigmessage)
     * [SLDeleteScheduleEventById](#sldeletescheduleeventbyid)
+    * [SLGetChemHistoryData](#slgetchemhistorydata)
     * [SLGetGatewayDataMessage](#slgetgatewaydatamessage)
     * [SLGetHistoryData](#slgethistorydata)
     * [SLGetPumpStatus](#slgetpumpstatus)
@@ -227,6 +228,10 @@ Cancels any delays on the system. See [`SLCancelDelay`](#slcanceldelay) document
 
 Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Emits the `deleteScheduleById` or `scheduleChanged` event when response is acknowledged (listen for both). `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
+#### getChemHistoryData(fromTime, toTime, senderId)
+
+Requests chemical history data from the connected unit. This is information about the pH and ORP readings over time and when pH and ORP feeds were turned on and off. `fromTime` is the time (as a Javascript Date object) that you want to get events from and `toTime` is the time (as a Javascript Date object) that you want to get events until. Emits the `getChemHistoryDataPending` event when the request to get data is confirmed, then the `getChemHistoryData` event when the chemical history data is actually ready to be handled. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+
 #### getChemicalData(senderId)
 
 Requests chemical data from the connected unit (may require an IntelliChem or similar). Emits the `chemicalData` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
@@ -316,6 +321,8 @@ Sets the current date and time of the ScreenLogic system. Emits the `setSystemTi
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleById()` has been received. Event handler receives a [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) object.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
+* `getChemHistoryData` - Indicates that chemical history data for the requested timeframe is ready. Event handler receives a [`SLGetChemHistoryData`](#slgetchemhistorydata) object.
+* `getChemHistoryDataPending` - Indicates that the `getChemHistoryData()` request has been received and is being processed.
 * `getHistoryData` - Indicates that history data for the requested timeframe is ready. Event handler receives a [`SLGetHistoryData`](#slgethistorydata) object.
 * `getHistoryDataPending` - Indicates that the `getHistoryData()` request has been received and is being processed.
 * `getPumpStatus` - Indicates that a response to `getPumpStatus()` has been received. Event handler receives a [`SLGetPumpStatus`](#slgetpumpstatus) object.
@@ -514,6 +521,17 @@ Passed as an argument to the emitted `deleteScheduleEventById` event. Deletes a 
 #### Properties
 
 * `scheduleId` - the scheduleId of the schedule to be deleted
+
+### SLGetChemHistoryData
+
+Passed as an argument to the emitted `getChemHistoryData` event. Contains information about the remote unit's pH and ORP readings over time as well as pH and ORP feed on/off times.
+
+#### Properties
+
+* `phPoints` - array of objects containing the pH reading over time. Each object contains a `time` key containing a Javascript Date object, and a `pH` key containing the pH reading as a float.
+* `orpPoints` - array of objects containing the ORP reading over time. Each object contains a `time` key containing a Javascript Date object, and an `orp` key containing the ORP reading as an integer.
+* `phRuns` - array of objects containing the pH feed on/off times. Each object contains an `on` key containing a Javascript Date object for when the feed turned on, and an `off` key containing a Javascript Date object for when the feed turned off.
+* `orpRuns` - array of objects containing the ORP feed on/off times. Each object contains an `on` key containing a Javascript Date object for when the feed turned on, and an `off` key containing a Javascript Date object for when the feed turned off.
 
 ### SLGetGatewayDataMessage
 
