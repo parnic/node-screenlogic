@@ -321,7 +321,7 @@ class UnitConnection extends EventEmitter {
 
   getHistoryData(fromTime, toTime, senderId) {
     debugUnit('[%d] requesting history data from `%s` to `%s`', senderId || 0, fromTime || new Date(), toTime || new Date());
-    this.client.write(new messages.SLGetHistoryData(null, fromTime, toTime, senderId).toBuffer());
+    this.client.write(new messages.SLGetHistoryData(null, fromTime || new Date(), toTime || new Date(), senderId).toBuffer());
   }
 
   getChemHistoryData(fromTime, toTime, senderId) {
