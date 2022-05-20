@@ -126,6 +126,8 @@ Closes the socket.
 
 #### Events
 
+* `close` - Indicates that `close()` has been called on the finder.
+* `error` - Indicates that an unhandled error was caught.
 * `serverFound` - Indicates that a ScreenLogic unit has been found. Event handler receives a [`UnitConnection`](#unitconnection) object.
 
 Examples:
@@ -162,8 +164,9 @@ Closes the connection
 
 #### Events
 
+* `close` - Indicates that the connection to the remote login server has been closed. Event handler receives a bool indicating whether there was a transmission error.
+* `error` - Indicates that an unhandled error was caught (such as the connection timing out).
 * `gatewayFound` - Indicates that the search for the named unit has completed (may or may not be successful). Event handler receives a [`SLGetGatewayDataMessage`](#slgetgatewaydatamessage) argument.
-* `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 
 ### UnitConnection
 
@@ -318,6 +321,7 @@ Sets the current date and time of the ScreenLogic system. Emits the `setSystemTi
 * `cancelDelay` - Indicates that a response to `cancelDelay()` has been received. Event handler receives a [`SLCancelDelay`](#slcanceldelay) object.
 * `chemicalData` - Indicates that a response to `getChemicalData()` has been received. Event handler receives a [`SLChemDataMessage`](#slchemdatamessage) object.
 * `circuitStateChanged` - Indicates that a response to `setCircuitState()` has been received. Event handler receives a [`SLSetCircuitStateMessage`](#slsetcircuitstatemessage) object.
+* `close` - Indicates that the connection to the unit has been closed. Event handler receives a bool indicating whether there was a transmission error.
 * `controllerConfig` - Indicates that a response to `getControllerConfig()` has been received. Event handler receives a [`SLControllerConfigMessage`](#slcontrollerconfigmessage) object.
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleById()` has been received. Event handler receives a [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) object.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
