@@ -461,6 +461,10 @@ class UnitConnection extends EventEmitter {
         debugUnit("  it's a chem history data payload");
         this.emit('getChemHistoryData', new messages.SLGetChemHistoryData(msg));
         break;
+      case 9806:
+        debugUnit("  it's a 'weather forecast changed' notification");
+        this.emit('weatherForecastChanged');
+        break;
       case 12501:
         debugUnit("  it's a schedule changed notification");
         this.emit('scheduleChanged');
