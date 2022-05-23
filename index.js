@@ -332,6 +332,11 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLGetChemHistoryData(null, fromTime || new Date(), toTime || new Date(), senderId).toBuffer());
   }
 
+  getWeatherForecast(senderId) {
+    debugUnit('[%d] requesting weather forecast', senderId || 0);
+    this.client.write(new messages.SLGetWeatherForecast(null, senderId).toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -460,6 +465,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLGetChemHistoryData.getPayloadId():
         debugUnit("  it's a chem history data payload");
         this.emit('getChemHistoryData', new messages.SLGetChemHistoryData(msg));
+        break;
+      case messages.SLGetWeatherForecast.getResponseId():
+        debugUnit("  it's a weather forecast ack");
+        this.emit('weatherForecast', new messages.SLGetWeatherForecast(msg));
         break;
       case 9806:
         debugUnit("  it's a 'weather forecast changed' notification");
