@@ -136,27 +136,13 @@ class UnitConnection extends EventEmitter {
     this.password = password;
     this.client = new net.Socket();
     this.client.setKeepAlive(true, 10 * 1000);
+    this.buffer = Buffer.alloc(1024);
+    this.bufferIdx = 0;
+    this.expectedMsgLen = 0;
     var _this = this;
-    var buffer = Buffer.alloc(1024);
-    var bufferIdx = 0;
-    var expectedMsgLen = 0;
 
     this.client.on('data', function(msg) {
-      if (buffer.length < msg.length + bufferIdx) {
-        buffer = Buffer.alloc(msg.length + buffer.length, buffer);
-      }
-
-      if (bufferIdx === 0) {
-        expectedMsgLen = msg.readInt32LE(4) + 8;
-      }
-
-      msg.copy(buffer, bufferIdx);
-      bufferIdx = bufferIdx + msg.length;
-
-      if (bufferIdx === expectedMsgLen) {
-        _this.onClientMessage(buffer.slice(0, expectedMsgLen));
-        bufferIdx = 0;
-      }
+      _this.processData(msg);
     }).on('close', function(had_error) {
       debugUnit('closed');
       _this.emit('close', had_error);
@@ -164,6 +150,37 @@ class UnitConnection extends EventEmitter {
       debugUnit('error: %o', e);
       _this.emit('error', e);
     });
+  }
+
+  processData(msg) {
+    // ensure we can hold this message
+    if (this.buffer.length < msg.length + this.bufferIdx) {
+      this.buffer = Buffer.alloc(msg.length + this.buffer.length, this.buffer);
+    }
+
+    // if this is the start of a new message (as opposed to the continuation of a previous one)
+    // then store how long this message tells us it is
+    if (this.bufferIdx === 0) {
+      this.expectedMsgLen = msg.readInt32LE(4) + 8;
+    }
+
+    // if the expected message length is less than the message length, it means we have two messages
+    // packed into the same data
+    let toRead = Math.min(this.expectedMsgLen, msg.length);
+    msg.copy(this.buffer, this.bufferIdx, 0, toRead);
+    this.bufferIdx = this.bufferIdx + toRead;
+
+    // once we've read the expected length, we have a full message to handle
+    if (this.bufferIdx === this.expectedMsgLen) {
+      this.onClientMessage(this.buffer.slice(0, this.expectedMsgLen));
+      this.bufferIdx = 0;
+    } else debugUnit('...waiting to combine');
+
+    // finally check if there was more in the buffer than what we expected to receive.
+    // if so, there's another message (or more) left to be read
+    if (toRead < msg.length) {
+      this.processData(msg.slice(toRead, msg.length));
+    }
   }
 
   close() {
