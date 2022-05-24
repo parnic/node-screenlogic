@@ -3,6 +3,7 @@
 const SLMessage = require('./SLMessage.js').SLMessage;
 
 const MSG_ID = 12592;
+const ASYNC_MSG_ID = 12505;
 
 exports.SLChemDataMessage = class SLChemDataMessage extends SLMessage {
   constructor(buf, senderId) {
@@ -53,5 +54,9 @@ exports.SLChemDataMessage = class SLChemDataMessage extends SLMessage {
 
   static getResponseId() {
     return MSG_ID + 1;
+  }
+
+  static getAsyncResponseId() {
+    return ASYNC_MSG_ID;
   }
 };

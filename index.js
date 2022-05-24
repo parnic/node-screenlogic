@@ -487,6 +487,10 @@ class UnitConnection extends EventEmitter {
         debugUnit("  it's a weather forecast ack");
         this.emit('weatherForecast', new messages.SLGetWeatherForecast(msg));
         break;
+      case messages.SLChemDataMessage.getAsyncResponseId():
+        debugUnit("  it's async chem data");
+        this.emit('chemicalData', new messages.SLChemDataMessage(msg));
+        break;
       case 9806:
         debugUnit("  it's a 'weather forecast changed' notification");
         this.emit('weatherForecastChanged');
