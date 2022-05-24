@@ -174,7 +174,7 @@ class UnitConnection extends EventEmitter {
     if (this.bufferIdx === this.expectedMsgLen) {
       this.onClientMessage(this.buffer.slice(0, this.expectedMsgLen));
       this.bufferIdx = 0;
-    } else debugUnit('...waiting to combine');
+    }
 
     // finally check if there was more in the buffer than what we expected to receive.
     // if so, there's another message (or more) left to be read
