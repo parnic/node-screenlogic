@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+* Added capturing of weather forecast events so that we're not treating it as an unknown message. This also includes full handling for getting weather forecasts from the equipment, but in my experience it's either outdated or not as thorough/reliable as we could get from pretty much any other source, so it remains undocumented for now.
+* Added handling of asynchronous chemicalData messages. These are received periodically through the addClient() data push feature.
+
+### Fixed
+
+* Fixed an ugly problem where the library could hang and fail to hand off any more messages if multiple messages were received at the same time (which I've seen happen on lower powered hardware like a Raspberry Pi). This would also cause the internal data buffer to grow unbounded as long as the UnitConnection stayed alive.
+
 ## v1.9.1 - 2022-05-20
 
 ### Added
