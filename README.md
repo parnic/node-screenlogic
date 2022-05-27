@@ -25,6 +25,7 @@ Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Re
     * [SLGetScheduleData](#slgetscheduledata)
     * [SLGetSystemTime](#slgetsystemtime)
     * [SLLightControlMessage](#sllightcontrolmessage)
+    * [SLPingServerMessage](#slpingservermessage)
     * [SLPoolStatusMessage](#slpoolstatusmessage)
     * [SLRemoveClient](#slremoveclient)
     * [SLSaltCellConfigMessage](#slsaltcellconfigmessage)
@@ -271,6 +272,10 @@ Retrieves the current time the system is set to. Emits the `getSystemTime` event
 
 Requests the system version string from the connected unit. Emits the `version` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
 
+#### pingServer(senderId)
+
+Sends a ping to the server to keep the connection alive. Emits the `pong` event when the response comes back. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
+
 #### removeClient(clientId, senderId)
 
 No longer receive `poolStatus` messages from controller. Emits the `removeClient` event when the request to remove a client is acknowledged. Takes a random number `clientId` that should match a previously registered client with `addClient`. `senderId` is an optional 16-bit integer and will be present as the `senderId` field on the returned message.
@@ -335,6 +340,7 @@ Sets the current date and time of the ScreenLogic system. Emits the `setSystemTi
 * `heatModeChanged` - Indicates that a response to `setHeatMode()` has been received. Event handler receives a [`SLSetHeatModeMessage`](#slsetheatmodemessage) object.
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
+* `pong` - Indicates that a response to `pingServer()` has been received. Event handler receives a [`SLPingServerMessage`](#slpingservermessage) object.
 * `poolStatus` - Indicates that a response to `getPoolStatus()` has been received. Event handler receives a [`SLPoolStatusMessage`](#slpoolstatusmessage) object.
 * `removeClient` - Indicates that a response to `removeClient()` has been received. Event handler receives a [`SLRemoveClient`](#slremoveclient) object.
 * `saltCellConfig` - Indicates that a response to `getSaltCellConfig()` has been received. Event handler receives a [`SLSaltCellConfigMessage`](#slsaltcellconfigmessage) object.
@@ -661,6 +667,10 @@ Passed as an argument to the emitted `sentLightCommand` event.
   * ScreenLogic.LIGHT_CMD_COLOR_RED
   * ScreenLogic.LIGHT_CMD_COLOR_WHITE
   * ScreenLogic.LIGHT_CMD_COLOR_PURPLE
+
+### SLPingServerMessage
+
+Passed as an argument to the emitted `pong` event handler.
 
 ### SLPoolStatusMessage
 

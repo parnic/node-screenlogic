@@ -30,3 +30,4 @@ exports.SLSetSystemTime = require('./SLSetSystemTime.js').SLSetSystemTime;
 exports.SLGetHistoryData = require('./SLGetHistoryData.js').SLGetHistoryData;
 exports.SLGetChemHistoryData = require('./SLGetChemHistoryData.js').SLGetChemHistoryData;
 exports.SLGetWeatherForecast = require('./SLGetWeatherForecast.js').SLGetWeatherForecast;
+exports.SLPingServerMessage = require('./SLPingServerMessage.js').SLPingServerMessage;

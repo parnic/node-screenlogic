@@ -354,6 +354,11 @@ class UnitConnection extends EventEmitter {
     this.client.write(new messages.SLGetWeatherForecast(null, senderId).toBuffer());
   }
 
+  pingServer(senderId) {
+    debugUnit('[%d] pinging server', senderId || 0);
+    this.client.write(new messages.SLPingServerMessage(null, senderId || 0).toBuffer());
+  }
+
   onClientMessage(msg) {
     debugUnit('received message of length %d', msg.length);
     if (msg.length < 4) {
@@ -490,6 +495,10 @@ class UnitConnection extends EventEmitter {
       case messages.SLChemDataMessage.getAsyncResponseId():
         debugUnit("  it's async chem data");
         this.emit('chemicalData', new messages.SLChemDataMessage(msg));
+        break;
+      case messages.SLPingServerMessage.getResponseId():
+        debugUnit("  it's a pong");
+        this.emit('pong', new messages.SLPingServerMessage(msg));
         break;
       case 9806:
         debugUnit("  it's a 'weather forecast changed' notification");
