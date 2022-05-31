@@ -12,10 +12,22 @@ var debugUnit = require('debug')('sl:unit');
 class FindUnits extends EventEmitter {
   constructor() {
     super();
+
+    this.message = Buffer.alloc(8);
+    this.message[0] = 1;
+
     this.finder = dgram.createSocket('udp4');
     var _this = this;
-    this.finder.on('message', function(message, remote) {
-      _this.foundServer(message, remote);
+    this.finder.on('listening', function() {
+      _this.finder.setBroadcast(true);
+      _this.finder.setMulticastTTL(128);
+
+      if (!_this.bound) {
+        _this.bound = true;
+        _this.sendServerBroadcast();
+      }
+    }).on('message', function(msg, remote) {
+      _this.foundServer(msg, remote);
     }).on('close', function() {
       debugFind('closed');
       _this.emit('close');
@@ -26,24 +38,23 @@ class FindUnits extends EventEmitter {
   }
 
   search() {
-    var _this = this;
-    this.finder.bind(function() {
-      _this.finder.setBroadcast(true);
-      _this.finder.setMulticastTTL(128);
-      _this.sendServerBroadcast();
-    });
+    if (!this.bound) {
+      this.finder.bind();
+    } else {
+      this.sendServerBroadcast();
+    }
   }
 
-  foundServer(message, remote) {
+  foundServer(msg, remote) {
     debugFind('found something');
-    if (message.length >= 40) {
+    if (msg.length >= 40) {
       var server = {
         address: remote.address,
-        type: message.readInt32LE(0),
-        port: message.readInt16LE(8),
-        gatewayType: message.readUInt8(10),
-        gatewaySubtype: message.readUInt8(11),
-        gatewayName: message.toString('utf8', 12, 29),
+        type: msg.readInt32LE(0),
+        port: msg.readInt16LE(8),
+        gatewayType: msg.readUInt8(10),
+        gatewaySubtype: msg.readUInt8(11),
+        gatewayName: msg.toString('utf8', 12, 29),
       };
 
       debugFind('  type: ' + server.type + ', host: ' + server.address + ':' + server.port + ', identified as ' + server.gatewayName);
@@ -56,9 +67,7 @@ class FindUnits extends EventEmitter {
   }
 
   sendServerBroadcast() {
-    var message = Buffer.alloc(8);
-    message[0] = 1;
-    this.finder.send(message, 0, message.length, 1444, '255.255.255.255');
+    this.finder.send(this.message, 0, this.message.length, 1444, '255.255.255.255');
     debugFind('Looking for ScreenLogic hosts...');
   }
 

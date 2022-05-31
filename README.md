@@ -119,7 +119,7 @@ var finder = new ScreenLogic.FindUnits();
 
 #### search()
 
-Begins a UDP broadcast search for available units.
+Issues one UDP broadcast search for available units. Since this is a stateless UDP query, the connection will not automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is no automatic timeout or retry mechanism built in to this command.
 
 #### close()
 
