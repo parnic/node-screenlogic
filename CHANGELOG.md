@@ -5,11 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## v1.10.1 - 2022-05-31
 
 ### Added
 
 * Added simple "ping" message as a lightweight way to keep the connection alive for a user using the addClient() api.
+
+### Fixed
+
+* Fixed Date parsing from ScreenLogic packets returning the wrong date under specific conditions (such as the last day of the month or during specific hours when javascript month/day assignment order can change other parts of the date).
+
+### Changed
+
+* Improved FindUnits.search() to support being called multiple times. This function issues one UDP broadcast per call, so consumer applications may need to run it in a delayed loop if no units are found on the first request (e.g. when the device running the search or the pool equipment is temporarily disconnected from the network). This is a stateless UDP query, so client applications cannot rely on the error or close events to issue retries.
 
 ## v1.10.0 - 2022-05-23
 
