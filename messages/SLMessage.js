@@ -162,16 +162,16 @@ exports.SLMessage = class SLMessage extends SmartBuffer {
   }
 
   readSLDateTime() {
-    let date = new Date();
-    date.setFullYear(this.readInt16LE());
-    date.setMonth(this.readInt16LE() - 1);
-    this.readInt16LE();
-    date.setDate(this.readInt16LE());
-    date.setHours(this.readInt16LE());
-    date.setMinutes(this.readInt16LE());
-    date.setSeconds(this.readInt16LE());
-    date.setMilliseconds(this.readInt16LE());
+    let year = this.readInt16LE();
+    let month = this.readInt16LE() - 1;
+    this.readInt16LE(); // day of week
+    let day = this.readInt16LE();
+    let hour = this.readInt16LE();
+    let minute = this.readInt16LE();
+    let second = this.readInt16LE();
+    let millisecond = this.readInt16LE();
 
+    let date = new Date(year, month, day, hour, minute, second, millisecond);
     return date;
   }
 
