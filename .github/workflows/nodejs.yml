@@ -28,3 +28,4 @@ jobs:
     - run: npm run build --if-present
     - run: npm run pretest
     - run: npm run test-slmessage
+    - run: npm run test-passwordencoder

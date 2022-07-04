@@ -23,6 +23,7 @@
     "scripts": {
         "test": "mocha test/*.spec.js",
         "pretest": "eslint --ignore-path .gitignore .",
-        "test-slmessage": "mocha test/slmessage.spec.js"
+        "test-slmessage": "mocha test/slmessage.spec.js",
+        "test-passwordencoder": "mocha test/password.spec.js"
     }
 }
