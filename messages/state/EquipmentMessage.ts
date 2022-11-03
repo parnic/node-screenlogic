@@ -3,8 +3,8 @@ import { PumpTypes } from "../../index";
 import { Inbound } from "../SLMessage";
 
 
-export class EquipmentMessage{
-  public static decodeEquipmentStateResponse(msg: Inbound){
+export class EquipmentMessage {
+  public static decodeEquipmentStateResponse(msg: Inbound) {
     let data: SLEquipmentStateData;
     let ok = msg.readInt32LE();
     let freezeMode = msg.readUInt8();
@@ -86,7 +86,7 @@ export class EquipmentMessage{
     };
     return data;
   }
-  public static decodeControllerConfig(msg: Inbound){
+  public static decodeControllerConfig(msg: Inbound) {
     let controllerId = msg.readInt32LE();
 
     let minSetPoint = new Array(2);
@@ -165,7 +165,7 @@ export class EquipmentMessage{
     }
     return data;
   }
-  public static decodeSystemTime(msg: Inbound){
+  public static decodeSystemTime(msg: Inbound) {
     let date = msg.readSLDateTime();
     let year = date.getFullYear();
     let month = date.getMonth() + 1; // + 1 is for backward compatibility, SLTime represents months as 1-based
@@ -190,46 +190,46 @@ export class EquipmentMessage{
     }
     return data;
   }
-  public static decodeCancelDelay(msg: Inbound){
+  public static decodeCancelDelay(msg: Inbound) {
     // ack
     return true;
   }
-  public static decodeSetSystemTime(msg: Inbound){
+  public static decodeSetSystemTime(msg: Inbound) {
     // ack
     return true;
   }
-  public static decodeEquipmentConfiguration(msg: Inbound){
-    let getNumPumps = function() {
+  public static decodeEquipmentConfiguration(msg: Inbound) {
+    let getNumPumps = function () {
       if (flowDataArray === null) {
         return 0;
       }
-  
+
       let numPumps = 0;
       for (var i = 0; i < flowDataArray.length; i += 45) {
         if (flowDataArray[i + 2] !== 0) {
           numPumps++;
         }
       }
-  
+
       return numPumps;
     }
-    let getPumpType= function(pumpIndex) {
+    let getPumpType = function (pumpIndex) {
       if (typeof (pumpIndex) !== 'number') {
         return 0;
       }
-  
+
       if (flowDataArray === null || flowDataArray.length < (pumpIndex + 1) * 45) {
         return 0;
       }
-  
+
       let pumpType = flowDataArray[(45 * pumpIndex) + 2];
       if (pumpType <= 3) {
         return pumpType as PumpTypes;
       }
-  
+
       return 0;
     }
-    let isValvePresent = function(valveIndex, loadCenterValveData) {
+    let isValvePresent = function (valveIndex, loadCenterValveData) {
       if (valveIndex < 2) {
         return true;
       } else {
@@ -254,17 +254,17 @@ export class EquipmentMessage{
     let flowDataArray = msg.readSLArray();
     let sgDataArray = msg.readSLArray();
     let spaFlowDataArray = msg.readSLArray();
-    
-    let expansionsCount = (controllerData & 0x11000000) >> 6;
+
+    let expansionsCount = (controllerData & 192) >> 6;
     if (versionDataArray === null || versionDataArray.length < 2) {
-       version = 0;
+      version = 0;
     }
     else version = (versionDataArray[0] * 1000) + (versionDataArray[1]);
     let numPumps = getNumPumps();
 
     let pumps = [];
-    for (let i = 0; i < numPumps; i++){
-      let pump:any = {id: i + 1};
+    for (let i = 0; i < numPumps; i++) {
+      let pump: any = { id: i + 1 };
       pump.type = getPumpType(i);
     }
 
@@ -277,7 +277,7 @@ export class EquipmentMessage{
       thermaFloCoolPresent: msg.isBitSet(heaterConfigDataArray[1], 1),
       solarHeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),
       thermaFloPresent: msg.isBitSet(heaterConfigDataArray[2], 5)
-     };
+    };
     ///// End heater config
     ///// Valve decode
     var isSolarValve0 = false;
@@ -298,17 +298,15 @@ export class EquipmentMessage{
       }
     }
 
-    var valves:Valves[] = [];
+    var valves: Valves[] = [];
 
-    for (var loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
-      var loadCenterValveData = valveDataArray[loadCenterIndex];
+    for (let loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
+      let loadCenterValveData = valveDataArray[loadCenterIndex];
 
       for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
-        let loadCenterIndex: number;
-        let valveIndex: number;
         let valveName: string;
         let loadCenterName: string;
-        let deviceId: number;   
+        let deviceId: number;
 
         var isSolarValve = false;
         if (loadCenterIndex === 0) {
@@ -322,16 +320,13 @@ export class EquipmentMessage{
         if (isValvePresent(valveIndex, loadCenterValveData)) {
           var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
           deviceId = valveDataArray[valveDataIndex];
-          if (deviceId === 0) {
-            // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
-          } else if (isSolarValve === true){
-            // console.log('used by solar');
-          } else {
-            loadCenterIndex = loadCenterIndex;
-            valveIndex = valveIndex;
+          // if (deviceId === 0) {
+          //   // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
+          // } else if (isSolarValve === true) {
+          //   // console.log('used by solar');
+          // } else {
             valveName = String.fromCharCode(65 + valveIndex);
             loadCenterName = (loadCenterIndex + 1).toString();
-            deviceId = deviceId;
             let v: Valves = {
               loadCenterIndex,
               valveIndex,
@@ -340,8 +335,9 @@ export class EquipmentMessage{
               deviceId
             }
             valves.push(v);
-          }
+          // }
         }
+
       }
 
     }
@@ -360,7 +356,7 @@ export class EquipmentMessage{
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
       spaManualHeat: miscDataArray[4] !== 0
     } as Misc;
-    let data:SLEquipmentConfigurationData = {
+    let data: SLEquipmentConfigurationData = {
       controllerType,
       hardwareType,
       expansionsCount,
@@ -373,7 +369,7 @@ export class EquipmentMessage{
     };
     return data;
   }
-  public static decodeWeatherMessage(msg: Inbound){
+  public static decodeWeatherMessage(msg: Inbound) {
     let version = msg.readInt32LE();
     let zip = msg.readSLString();
     let lastUpdate = msg.readSLDateTime();
@@ -388,7 +384,7 @@ export class EquipmentMessage{
     let windChill = msg.readInt32LE();
     let visibility = msg.readInt32LE();
     let numDays = msg.readInt32LE();
-    let dayData:SLWeatherForecastDayData[] = new Array(numDays);
+    let dayData: SLWeatherForecastDayData[] = new Array(numDays);
     for (let i = 0; i < numDays; i++) {
       dayData[i] = {
         dayTime: msg.readSLDateTime(),
@@ -397,7 +393,7 @@ export class EquipmentMessage{
         text: msg.readSLString(),
       };
     }
-    
+
     let sunrise = msg.readInt32LE();
     let sunset = msg.readInt32LE();
     let data: SLWeatherForecastData = {
@@ -420,9 +416,9 @@ export class EquipmentMessage{
     };
     return data;
   }
-  public static decodeGetHistory(msg: Inbound){
-    let readTimeTempPointsPairs = function() {
-      let retval:TimeTempPointPairs[] = [];
+  public static decodeGetHistory(msg: Inbound) {
+    let readTimeTempPointsPairs = function () {
+      let retval: TimeTempPointPairs[] = [];
       // 4 bytes for the length
       if (msg.length >= msg.readOffset + 4) {
         let points = msg.readInt32LE();
@@ -438,11 +434,11 @@ export class EquipmentMessage{
           }
         }
       }
-  
+
       return retval;
     }
     let readTimeTimePointsPairs = function () {
-      let retval:TimeTimePointPairs[] = [];
+      let retval: TimeTimePointPairs[] = [];
       // 4 bytes for the length
       if (msg.length >= msg.readOffset + 4) {
         let points = msg.readInt32LE();
@@ -458,7 +454,7 @@ export class EquipmentMessage{
           }
         }
       }
-  
+
       return retval;
     }
     let airTemps = readTimeTempPointsPairs();
@@ -547,41 +543,41 @@ export interface SLSystemTimeData {
 }
 
 export interface SLEquipmentConfigurationData {
-controllerType: number;
-hardwareType: number;
-expansionsCount: number;
-version: number;
-heaterConfig: HeaterConfig;
-valves: any[];
-delays: Delays;
-misc: Misc;
+  controllerType: number;
+  hardwareType: number;
+  expansionsCount: number;
+  version: number;
+  heaterConfig: HeaterConfig;
+  valves: any[];
+  delays: Delays;
+  misc: Misc;
 }
 
 export interface HeaterConfig {
-poolSolarPresent: boolean,
-spaSolarPresent: boolean,
-thermaFloCoolPresent: boolean,
-solarHeatPumpPresent: boolean,
-thermaFloPresent: boolean,
+  poolSolarPresent: boolean,
+  spaSolarPresent: boolean,
+  thermaFloCoolPresent: boolean,
+  solarHeatPumpPresent: boolean,
+  thermaFloPresent: boolean,
 }
 
 export interface Delays {
-poolPumpOnDuringHeaterCooldown: boolean,
-spaPumpOnDuringHeaterCooldown: boolean,
-pumpOffDuringValveAction
+  poolPumpOnDuringHeaterCooldown: boolean,
+  spaPumpOnDuringHeaterCooldown: boolean,
+  pumpOffDuringValveAction
 }
 
 export interface Misc {
-intelliChem: boolean,
-spaManualHeat: boolean
+  intelliChem: boolean,
+  spaManualHeat: boolean
 }
 
 export interface Valves {
-loadCenterIndex: number,
-valveIndex: number,
-valveName: string,
-loadCenterName: string,
-deviceId: any
+  loadCenterIndex: number,
+  valveIndex: number,
+  valveName: string,
+  loadCenterName: string,
+  deviceId: any
 }
 
 export interface SLWeatherForecastData {
@@ -603,10 +599,10 @@ export interface SLWeatherForecastData {
   sunset: number;
 }
 export interface SLWeatherForecastDayData {
-    dayTime: Date;
-    highTemp: number;
-    lowTemp: number;
-    text: string;
+  dayTime: Date;
+  highTemp: number;
+  lowTemp: number;
+  text: string;
 }
 
 export interface TimeTimePointPairs {

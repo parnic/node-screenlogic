@@ -57,3 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
+dist/example copy.js
+dist/example copy.js.map
+example copy.ts

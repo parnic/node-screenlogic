@@ -235,7 +235,7 @@ class EquipmentMessage {
         let flowDataArray = msg.readSLArray();
         let sgDataArray = msg.readSLArray();
         let spaFlowDataArray = msg.readSLArray();
-        let expansionsCount = (controllerData & 0x11000000) >> 6;
+        let expansionsCount = (controllerData & 192) >> 6;
         if (versionDataArray === null || versionDataArray.length < 2) {
             version = 0;
         }
@@ -273,11 +273,9 @@ class EquipmentMessage {
             }
         }
         var valves = [];
-        for (var loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
-            var loadCenterValveData = valveDataArray[loadCenterIndex];
+        for (let loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
+            let loadCenterValveData = valveDataArray[loadCenterIndex];
             for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
-                let loadCenterIndex;
-                let valveIndex;
                 let valveName;
                 let loadCenterName;
                 let deviceId;
@@ -293,27 +291,22 @@ class EquipmentMessage {
                 if (isValvePresent(valveIndex, loadCenterValveData)) {
                     var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
                     deviceId = valveDataArray[valveDataIndex];
-                    if (deviceId === 0) {
-                        // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
-                    }
-                    else if (isSolarValve === true) {
-                        // console.log('used by solar');
-                    }
-                    else {
-                        loadCenterIndex = loadCenterIndex;
-                        valveIndex = valveIndex;
-                        valveName = String.fromCharCode(65 + valveIndex);
-                        loadCenterName = (loadCenterIndex + 1).toString();
-                        deviceId = deviceId;
-                        let v = {
-                            loadCenterIndex,
-                            valveIndex,
-                            valveName,
-                            loadCenterName,
-                            deviceId
-                        };
-                        valves.push(v);
-                    }
+                    // if (deviceId === 0) {
+                    //   // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
+                    // } else if (isSolarValve === true) {
+                    //   // console.log('used by solar');
+                    // } else {
+                    valveName = String.fromCharCode(65 + valveIndex);
+                    loadCenterName = (loadCenterIndex + 1).toString();
+                    let v = {
+                        loadCenterIndex,
+                        valveIndex,
+                        valveName,
+                        loadCenterName,
+                        deviceId
+                    };
+                    valves.push(v);
+                    // }
                 }
             }
         }

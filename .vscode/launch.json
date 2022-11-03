@@ -19,5 +19,20 @@
             "console": "integratedTerminal",
             "env": {"DEBUG":"*"}
           },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Example Copy",
+            "skipFiles": [
+              "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/dist/example copy.js",
+            "__preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+              "${workspaceFolder}/dist/**/*.js"
+            ],
+            "console": "integratedTerminal",
+            "env": {"DEBUG":"*"}
+          },
     ]
 }
