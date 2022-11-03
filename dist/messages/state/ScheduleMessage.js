@@ -6,7 +6,7 @@ class ScheduleMessage {
         let eventCount = msg.readUInt32LE();
         let data = [];
         for (var i = 0; i < eventCount; i++) {
-            let scheduleId = msg.readUInt32LE() - 700;
+            let scheduleId = msg.readUInt32LE() - 699;
             let circuitId = msg.readUInt32LE() - 499;
             let startTime = msg.decodeTime(msg.readUInt32LE());
             let stopTime = msg.decodeTime(msg.readUInt32LE());

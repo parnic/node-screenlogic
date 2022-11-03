@@ -124,7 +124,7 @@ class CircuitCommands extends Commands {
         // this.addHeader(this.senderId, this.messageId);
         // this._controllerId = controllerId;
         this.writeInt32LE(this.controllerId);
-        this.writeInt32LE(circuitId || 0);
+        this.writeInt32LE(circuitId + 499);
         this.writeInt32LE((circuitState ? 1 : 0) || 0);
         this.encode();
         return this.toBuffer();
@@ -140,7 +140,7 @@ class CircuitCommands extends Commands {
         this.messageId = 12550;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
-        this.writeInt32LE(circuitId);
+        this.writeInt32LE(circuitId + 499);
         this.writeInt32LE(runTime);
         return this.toBuffer();
     }
@@ -221,15 +221,15 @@ class ScheduleCommands extends Commands {
         this.messageId = 12546;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
-        this.writeInt32LE(schedId);
+        this.writeInt32LE(schedId + 699);
         return this.toBuffer();
     }
     createSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
         this.messageId = 12548;
         this.createBaseMessage();
         this.writeInt32LE(0);
-        this.writeInt32LE(scheduleId);
-        this.writeInt32LE(circuitId);
+        this.writeInt32LE(scheduleId + 699);
+        this.writeInt32LE(circuitId + 499);
         this.writeInt32LE(startTime);
         this.writeInt32LE(stopTime);
         this.writeInt32LE(dayMask);

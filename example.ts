@@ -18,7 +18,7 @@ async function app() {
 
   // use this to remote connect to a system by name (going through the Pentair servers)
 
-  const systemName = 'Pentair: XX-XX-XX';
+  const systemName = 'Pentair: 00-45-F4';
   const password = '1111';
 
   let gateway = new RemoteLogin(systemName);
@@ -73,18 +73,21 @@ async function app() {
     console.log(`Add client result: ${addClient}`);
 
     // EQUIPMENT
-    let equipmentState = await client.equipment.getEquipmentState();
+    // let pumpStatus = await client.pump.getPumpStatus(0);
+    // console.log(`Pump 0: ${JSON.stringify(pumpStatus)}`);
+    // let equipConfig = await client.equipment.getEquipmentConfiguration();
+    // console.log(`Equipment config: ${JSON.stringify(equipConfig)}`);
+    /*
+    let weatherForecast = await client.equipment.getWeatherForecast();
+    console.log(`Weather: ${JSON.stringify(weatherForecast)}`); 
+    let equipment State = await client.equipment.getEquipmentState();
     console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
     let result = await client.getVersion();
     console.log(`Pool Version: ${result}`);
     let controller = await client.equipment.getControllerConfig();
     console.log(`Controller: ${JSON.stringify(controller)}`);
-    let equipConfig = await client.equipment.getEquipmentConfiguration();
-    console.log(`Equipment config: ${JSON.stringify(equipConfig)}`);
     let cancelDelay = await client.equipment.cancelDelay();
     console.log(`Cancel delay: ${cancelDelay}`);
-    let weatherForecast = await client.equipment.getWeatherForecast();
-    console.log(`Weather: ${JSON.stringify(weatherForecast)}`); 
     let systemTime = await client.equipment.getSystemTime();
     console.log(`System Time: ${JSON.stringify(systemTime)}`)
     let dt = systemTime.date;
@@ -105,19 +108,19 @@ async function app() {
     console.log(`Chem data: ${JSON.stringify(chem)}`);
     let chemHist = await screenlogic.chem.getChemHistoryData()
     console.log(`history data: ${JSON.stringify(chemHist)}`)
-
+    */
     // SCHEDULES
-    let recurringSched = await client.schedule.getScheduleData(0);
-    console.log(`reccuring schedules: ${JSON.stringify(recurringSched)}`);
-    let runOnceSched = await client.schedule.getScheduleData(1);
-    console.log(`Run once schedules: ${JSON.stringify(runOnceSched)}`);
-    let addSched = await client.schedule.addNewScheduleEvent(SchedTypes.RECURRING);
-    console.log(`Add sched response: ${addSched}`);
-    let setSched = await client.schedule.setScheduleEventById(10, 2,500,1200,127,0,1,99);
-    console.log(`Set sched result: ${setSched}`);
-    let delSched = await client.schedule.deleteScheduleEventById(10);
-    console.log(`Deleted sched result: ${delSched}`);
-
+    // let recurringSched = await client.schedule.getScheduleData(0);
+    // console.log(`reccuring schedules: ${JSON.stringify(recurringSched)}`);
+    // let runOnceSched = await client.schedule.getScheduleData(1);
+    // console.log(`Run once schedules: ${JSON.stringify(runOnceSched)}`);
+    // let addSched = await client.schedule.addNewScheduleEvent(SchedTypes.RECURRING);
+    // console.log(`Add sched response: ${addSched}`);
+    // let setSched = await client.schedule.setScheduleEventById(4, 2,1080 ,1380,127,0,0,0);
+    // console.log(`Set sched result: ${setSched}`);
+    // let delSched = await client.schedule.deleteScheduleEventById(10);
+    // console.log(`Deleted sched result: ${delSched}`);
+    /*
     // PUMPS
     let pumpStatus = await client.pump.getPumpStatus(0);
     console.log(`Pump 0: ${JSON.stringify(pumpStatus)}`);
@@ -132,14 +135,15 @@ async function app() {
     
     // CIRCUITS
     let lightRes = await client.circuits.sendLightCommand(LightCommands.LIGHT_CMD_COLOR_MODE_PARTY);
-    console.log(`Light result: ${lightRes}`);
-    // NOT WORKING...    
-    let cstate = await client.circuits.setCircuitState(3, true);
+    console.log(`Light result: ${lightRes}`);     
+    let cstate = await client.circuits.setCircuitState(6, true);
     console.log(`Circuit state: ${JSON.stringify(cstate)}`);
-    let circRun = await client.circuits.setCircuitRuntimebyId(4, 5);
+    */    
+    let circRun = await client.circuits.setCircuitRuntimebyId(1, 240);
     console.log(`circ run res: ${circRun}`);
-    
-   setTimeout(async () => {
+  
+  
+    setTimeout(async () => {
      console.log(`closing connection after 60s`);
      await client.close();
     }, 60*1000)
