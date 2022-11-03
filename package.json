@@ -13,17 +13,21 @@
     ],
     "dependencies": {
         "debug": "^4.3.2",
-        "smart-buffer": "^4.2.0"
+        "smart-buffer": "^4.2.0",
+        "source-map-support": "^0.5.21"
     },
     "devDependencies": {
+        "@types/node": "^16.18.0",
         "eslint": "^8.0.0",
         "eslint-config-strongloop": "^2.1.0",
-        "mocha": "^9.1.2"
+        "mocha": "^9.1.2",
+        "typescript": "^4.8.4"
     },
     "scripts": {
         "test": "mocha test/*.spec.js",
         "pretest": "eslint --ignore-path .gitignore .",
         "test-slmessage": "mocha test/slmessage.spec.js",
-        "test-passwordencoder": "mocha test/password.spec.js"
+        "test-passwordencoder": "mocha test/password.spec.js",
+        "build": "tsc"
     }
 }

@@ -7,14 +7,17 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Example",
-            "program": "${workspaceFolder}/example.js",
+            "name": "Launch Program",
             "skipFiles": [
-                "<node_internals>/**"
+              "<node_internals>/**"
             ],
-            "env": {
-                "DEBUG": "sl:*"
-            }
-        }
+            "program": "${workspaceFolder}/dist/example.js",
+            "__preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+              "${workspaceFolder}/dist/**/*.js"
+            ],
+            "console": "integratedTerminal",
+            "env": {"DEBUG":"*"}
+          },
     ]
 }

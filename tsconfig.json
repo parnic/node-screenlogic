@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "noImplicitAny": false,
+    "module": "commonjs",
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "ESNext",
+    "preserveConstEnums": true,
+    "outDir": "dist"
+  },
+  "include": ["messages/**/*", "*.ts", "example_orig.js"],
+  "exclude": [
+    "node_modules"
+  ]
+}
