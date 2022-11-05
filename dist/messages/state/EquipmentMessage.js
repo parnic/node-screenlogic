@@ -217,6 +217,63 @@ class EquipmentMessage {
                 return msg.isBitSet(loadCenterValveData, valveIndex);
             }
         };
+        let deviceIDToString = (poolConfig) => {
+            switch (poolConfig) {
+                case 128:
+                    return 'Solar_Active';
+                case 129:
+                    return 'Pool_or_Spa_Heater_Active';
+                case 130:
+                    return 'Pool_Heater_Active';
+                case 131:
+                    return 'Spa_Heater_Active';
+                case 132:
+                    return 'Freeze_Mode_Active';
+                case 133:
+                    return 'Heat_Boost';
+                case 134:
+                    return 'Heat_Enable';
+                case 135:
+                    return 'Increment_Pump_Speed';
+                case 136:
+                    return 'Decrement_Pump_Speed';
+                case 137:
+                case 138:
+                case 139:
+                case 140:
+                case 141:
+                case 142:
+                case 143:
+                case 144:
+                case 145:
+                case 146:
+                case 147:
+                case 148:
+                case 149:
+                case 150:
+                case 151:
+                case 152:
+                case 153:
+                case 154:
+                default:
+                    // PoolCircuit pC = poolConfig.getCircuitByDeviceID(byID);
+                    // if (pC != null) {
+                    //     return pC.getM_Name();
+                    // }
+                    // return 'None';
+                    return `fix: poolConfig ${poolConfig}`;
+                case 155:
+                    return 'Pool_Heater';
+                case 156:
+                    return 'Spa_Heater';
+                case 157:
+                    return 'Either_Heater';
+                case 158:
+                    return 'Solar';
+                case 159:
+                    return 'Freeze';
+            }
+        };
         let controllerType = msg.readUInt8();
         let hardwareType = msg.readUInt8();
         msg.readUInt8();
@@ -250,27 +307,25 @@ class EquipmentMessage {
         // let sensors = msg.decodeHeaterConfigData(heaterConfigDataArray);
         ///// Heater config
         let heaterConfig = {
-            poolSolarPresent: msg.isBitSet(heaterConfigDataArray[0], 1),
-            spaSolarPresent: msg.isBitSet(heaterConfigDataArray[0], 4),
-            thermaFloCoolPresent: msg.isBitSet(heaterConfigDataArray[1], 1),
-            solarHeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),
-            thermaFloPresent: msg.isBitSet(heaterConfigDataArray[2], 5)
+            body1SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 1),
+            body1HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),
+            // solarHeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),  // ?? bHPump1
+            body2SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 4),
+            thermaFloPresent: msg.isBitSet(heaterConfigDataArray[2], 5),
+            // body2HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 5),  // bHPump2
+            thermaFloCoolPresent: msg.isBitSet(heaterConfigDataArray[1], 1), // ?? Source?
         };
         ///// End heater config
         ///// Valve decode
-        var isSolarValve0 = false;
-        var isSolarValve1 = false;
-        // if (!heaterConfig) {
-        //   msg.decodeHeaterConfigData();
-        // }
-        if (heaterConfig.poolSolarPresent && !heaterConfig.solarHeatPumpPresent) {
-            isSolarValve0 = true;
+        var bEnable1 = true;
+        var bEnable2 = true;
+        // var isSolarValve0 = false;
+        // var isSolarValve1 = false;
+        if (heaterConfig.body1SolarPresent && !heaterConfig.body1HeatPumpPresent) {
+            bEnable1 = false;
         }
-        if (controllerType === 5) {
-            // dual body
-            if (heaterConfig.spaSolarPresent && !heaterConfig.thermaFloPresent) {
-                isSolarValve1 = true;
-            }
+        if (heaterConfig.body2SolarPresent && !heaterConfig.thermaFloPresent && controllerType === 5) {
+            bEnable2 = false;
         }
         var valves = [];
         for (let loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
@@ -279,35 +334,49 @@ class EquipmentMessage {
                 let valveName;
                 let loadCenterName;
                 let deviceId;
-                var isSolarValve = false;
+                var bEnable = true;
+                // var isSolarValve = true;
                 if (loadCenterIndex === 0) {
-                    if (valveIndex === 0 && isSolarValve0) {
-                        isSolarValve = true;
+                    if (valveIndex === 0 && !bEnable1) {
+                        bEnable = false;
                     }
-                    if (valveIndex === 1 && isSolarValve1) {
-                        isSolarValve = true;
+                    if (valveIndex === 1 && !bEnable2) {
+                        bEnable = false;
                     }
                 }
-                if (isValvePresent(valveIndex, loadCenterValveData)) {
+                let bPresent = false;
+                if (valveIndex < 2) {
+                    bPresent = true;
+                }
+                else {
+                    bPresent = isValvePresent(valveIndex, loadCenterValveData);
+                }
+                let sCircuit;
+                if (bPresent) {
                     var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
                     deviceId = valveDataArray[valveDataIndex];
-                    // if (deviceId === 0) {
-                    //   // console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
-                    // } else if (isSolarValve === true) {
-                    //   // console.log('used by solar');
-                    // } else {
+                    sCircuit = deviceIDToString(deviceId);
                     valveName = String.fromCharCode(65 + valveIndex);
-                    loadCenterName = (loadCenterIndex + 1).toString();
+                    if (deviceId !== 0) {
+                        sCircuit = 'Unused';
+                        console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
+                        // } else if (isSolarValve === true) {
+                        //   // console.log('used by solar');
+                    }
+                    else {
+                        loadCenterName = (loadCenterIndex + 1).toString();
+                    }
                     let v = {
                         loadCenterIndex,
                         valveIndex,
                         valveName,
                         loadCenterName,
-                        deviceId
+                        deviceId: deviceId,
+                        sCircuit
                     };
                     valves.push(v);
-                    // }
                 }
+                // }
             }
         }
         // msg.valves = valveArray;
