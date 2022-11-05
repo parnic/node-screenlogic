@@ -3,7 +3,7 @@ import { PumpTypes } from "../../index";
 import { Inbound } from "../SLMessage";
 
 
-export class EquipmentStateMessage {
+export class EquipmentMessage {
   public static decodeEquipmentStateResponse(msg: Inbound) {
     let data: SLEquipmentStateData;
     let ok = msg.readInt32LE();
@@ -198,25 +198,6 @@ export class EquipmentStateMessage {
     // ack
     return true;
   }
-  isEasyTouch(controllerType) {
-    return controllerType === 14 || controllerType === 13;
-  }
-
-  isIntelliTouch(controllerType) {
-    return controllerType !== 14 && controllerType !== 13 && controllerType !== 10;
-  }
-
-  isEasyTouchLite(controllerType, hwType) {
-    return controllerType === 13 && (hwType & 4) !== 0;
-  }
-
-  isDualBody(controllerType) {
-    return controllerType === 5;
-  }
-
-  isChem2(controllerType, hwType) {
-    return controllerType === 252 && hwType === 2;
-  }
   public static decodeEquipmentConfiguration(msg: Inbound) {
     let getNumPumps = function () {
       if (flowDataArray === null) {
@@ -348,24 +329,6 @@ export class EquipmentStateMessage {
       }
       return result;
     }
-
-    let getRange = function () {
-      let ret = { min: 0, max: 0 };
-      ret.max = speedDataArray.length;
-      if (this.isEasyTouch(controllerType)) {
-        ret.max = 4;
-      }
-      if (this.isDualBody(controllerType)) {
-        ret.max = 4
-        // what is 'isPoolData'?  Define both bodies as pool instead of
-        // sep pool/spa types?
-        // if (isPoolData){
-        //  ret.min = 0 + 4;
-        //  ret.max = 4 + 4;
-        // }
-      }
-
-    }
     let controllerType = msg.readUInt8();
     let hardwareType = msg.readUInt8();
     msg.readUInt8();
@@ -481,9 +444,7 @@ export class EquipmentStateMessage {
       }
 
     }
-    ///// End Valve decode
-    ///// Speed Data decode
-
+    // msg.valves = valveArray;
 
     ///// End Valve decode
 
@@ -498,10 +459,10 @@ export class EquipmentStateMessage {
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
       spaManualHeat: miscDataArray[4] !== 0
     } as Misc;
-    let speed: any[] = [];
+    let speed : any[] = [];
     speed = loadSpeedCircuits(speedDataArray, true);
     let data: any = {
-      // let data: SLEquipmentConfigurationData = {
+    // let data: SLEquipmentConfigurationData = {
       controllerType,
       hardwareType,
       expansionsCount,
@@ -632,78 +593,7 @@ export class EquipmentStateMessage {
     return data;
 
   }
-  public getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number) {
-    if (poolConfig.controllerType === 3 || poolConfig.controllerType === 4) {
-      if (circuitIndex == 0) {
-        return "Hight";
-      }
-      if (circuitIndex == 5) {
-        return "Low";
-      }
-    } else if (circuitIndex == 0) {
-      return "Spa";
-    } else {
-      if (circuitIndex == 5) {
-        return "Pool";
-      }
-    }
-    return (circuitIndex <= 0 || circuitIndex >= 5) ? this.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
-  }
-  /* public  getTypeList(poolConfig: SLEquipmentConfigurationData, circuit: number) {
-    let resultList = [];
-    if (circuit.getM_Function() == 2) {
-        CircuitType type = new CircuitType();
-        type.setName(StringLib.string(R.string.Pool));
-        type.setTypeID(2);
-        resultList.add(type);
-    }
-    if (circuit.getM_Function() == 1) {
-        CircuitType type2 = new CircuitType();
-        type2.setName(StringLib.string(R.string.Spa));
-        type2.setTypeID(1);
-        resultList.add(type2);
-    }
-    ArrayList<CircuitType> tempList = poolConfig.getCircuitTypes();
-    Iterator<CircuitType> it = tempList.iterator();
-    while (it.hasNext()) {
-        CircuitType type3 = it.next();
-        boolean hasType = true;
-        switch (type3.getTypeID()) {
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 6:
-                hasType = false;
-                break;
-        }
-        if (poolConfig.isEasyTouch()) {
-            switch (type3.getTypeID()) {
-                case 6:
-                case 8:
-                case 13:
-                    hasType = false;
-                    break;
-                case 16:
-                    if (poolConfig.getFWVersionNumeric() < 2010.0f && !poolConfig.iseasyTouchLite()) {
-                        hasType = false;
-                        break;
-                    }
-                    break;
-                case 17:
-                    if (poolConfig.getFWVersionNumeric() < 2060.0f && !poolConfig.iseasyTouchLite()) {
-                        hasType = false;
-                        break;
-                    }
-                    break;
-            }
-        }
-        if (hasType) {
-            resultList.add(type3);
-        }
-    }
-    return resultList;
-}*/
+
 }
 
 export interface SLEquipmentStateData {

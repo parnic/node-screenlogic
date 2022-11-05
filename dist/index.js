@@ -51,9 +51,6 @@ class FindUnits extends events_1.EventEmitter {
             _this.emit('error', e);
         });
     }
-    finder;
-    bound;
-    message;
     search() {
         if (!this.bound) {
             ``;
@@ -99,9 +96,6 @@ class RemoteLogin extends events_1.EventEmitter {
         this._client = new net.Socket();
         this._gateway = new OutgoingMessages_1.OutboundGateway(0, 0);
     }
-    systemName;
-    _client;
-    _gateway;
     connect() {
         return new Promise((resolve, reject) => {
             debugRemote('connecting to dispatcher...');
@@ -164,6 +158,12 @@ exports.RemoteLogin = RemoteLogin;
 class UnitConnection extends events_1.EventEmitter {
     constructor() {
         super();
+        this._controllerId = 0;
+        // private _expectedMsgLen: number;
+        // private challengeString;
+        this._senderId = 0;
+        this.netTimeout = 1000;
+        this._keepAliveDuration = 30 * 1000;
         this.client = new net.Socket();
         this.client.setKeepAlive(true, 10 * 1000);
         this._buffer = Buffer.alloc(1024);
@@ -172,39 +172,15 @@ class UnitConnection extends events_1.EventEmitter {
         var self = this;
         // this.SLMessages.init(this);
     }
-    serverPort;
-    serverAddress;
-    password;
-    client;
-    _clientId;
     get clientId() { return this._clientId; }
     ;
     set clientId(val) { this._clientId = val; }
-    _controllerId = 0;
     get controllerId() { return this._controllerId; }
     ;
     set controllerId(val) { this._controllerId = val; }
-    _buffer;
-    _bufferIdx;
-    // private _expectedMsgLen: number;
-    // private challengeString;
-    _senderId = 0;
     get senderId() { return this._senderId; }
     ;
     set senderId(val) { this._senderId = val; }
-    // public SLMessages = slmessage;
-    controller;
-    netTimeout = 1000;
-    _keepAliveDuration = 30 * 1000;
-    _keepAliveTimer;
-    _expectedMsgLen;
-    circuits;
-    equipment;
-    bodies;
-    chem;
-    chlor;
-    schedule;
-    pump;
     init(address, port, password, senderId) {
         let self = this;
         this.client.on('data', function (msg) {

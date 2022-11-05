@@ -6,12 +6,13 @@
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,
-    "target": "ESNext",
+    "target": "ES2018",
     "preserveConstEnums": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "declaration": true
   },
-  "include": ["messages/**/*", "*.ts", "example_orig.js"],
+  "include": ["messages/**/*.ts", "*.ts", "index.ts", "utils/**/*.ts"],
   "exclude": [
-    "node_modules"
+    "node_modules", "example copy.ts"
   ]
 }

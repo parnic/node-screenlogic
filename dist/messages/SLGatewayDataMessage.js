@@ -4,8 +4,6 @@ exports.SLReceiveGatewayDataMessage = void 0;
 const SLMessage_1 = require("./SLMessage");
 const _MSG_ID = 18003;
 class SLReceiveGatewayDataMessage extends SLMessage_1.Inbound {
-    // static MSG_ID = _MSG_ID;
-    data;
     constructor(buf) {
         super(0, 0);
         this.readFromBuffer(buf);
