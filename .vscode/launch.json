@@ -1,38 +1,42 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-              "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/dist/example.js",
-            "__preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-              "${workspaceFolder}/dist/**/*.js"
-            ],
-            "console": "integratedTerminal",
-            "env": {"DEBUG":"*"}
-          },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Example Copy",
-            "skipFiles": [
-              "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/dist/example copy.js",
-            "__preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-              "${workspaceFolder}/dist/**/*.js"
-            ],
-            "console": "integratedTerminal",
-            "env": {"DEBUG":"*"}
-          },
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/dist/example.js",
+      "__preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "DEBUG": "*"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch LOCAL",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/dist/example -- LOCAL.js",
+      "__preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "DEBUG": "*"
+      }
+    },
+  ]
 }
