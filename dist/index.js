@@ -15,7 +15,7 @@ const SLGateway = require("./messages/SLGatewayDataMessage");
 const OutgoingMessages_1 = require("./messages/OutgoingMessages");
 const ConnectionMessage_1 = require("./messages/state/ConnectionMessage");
 // import { Inbound } from './messages/SLMessage';
-const EquipmentMessage_1 = require("./messages/state/EquipmentMessage");
+const EquipmentStateMessage_1 = require("./messages/state/EquipmentStateMessage");
 const ChlorMessage_1 = require("./messages/state/ChlorMessage");
 const ChemMessage_1 = require("./messages/state/ChemMessage");
 const ScheduleMessage_1 = require("./messages/state/ScheduleMessage");
@@ -423,7 +423,7 @@ class UnitConnection extends events_1.EventEmitter {
             case 12500: //SLPoolStatusMessage.getAsyncResponseId():
             case 12527: //SLPoolStatusMessage.getResponseId():
                 debugUnit("  it's pool status");
-                let equipmentState = EquipmentMessage_1.EquipmentMessage.decodeEquipmentStateResponse(msg);
+                let equipmentState = EquipmentStateMessage_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg);
                 this.emit('equipmentState', equipmentState);
                 break;
             case 8121: // SLVersionMessage.getResponseId():
@@ -437,7 +437,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12533: // SLControllerConfigMessage.getResponseId():
                 debugUnit("  it's controller configuration");
-                this.emit('controllerConfig', EquipmentMessage_1.EquipmentMessage.decodeControllerConfig(msg));
+                this.emit('controllerConfig', EquipmentStateMessage_1.EquipmentStateMessage.decodeControllerConfig(msg));
                 break;
             case 12505: // SLChemDataMessage.getAsyncResponseId():
             case 12593: // SLChemDataMessage.getResponseId():
@@ -446,7 +446,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 8111: // SLGetSystemTime.getResponseId():
                 debugUnit("  it's system time");
-                this.emit('getSystemTime', EquipmentMessage_1.EquipmentMessage.decodeSystemTime(msg));
+                this.emit('getSystemTime', EquipmentStateMessage_1.EquipmentStateMessage.decodeSystemTime(msg));
                 break;
             case 12543: // SLGetScheduleData.getResponseId():
                 debugUnit("  it's schedule data");
@@ -454,7 +454,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12581: // SLCancelDelay.getResponseId():
                 debugUnit("  it's a cancel delay ack");
-                this.emit('cancelDelay', EquipmentMessage_1.EquipmentMessage.decodeCancelDelay(msg));
+                this.emit('cancelDelay', EquipmentStateMessage_1.EquipmentStateMessage.decodeCancelDelay(msg));
                 break;
             case 12523: // SLAddClient.getResponseId():
                 debugUnit("  it's an add client ack");
@@ -470,7 +470,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12567: // SLEquipmentConfigurationMessage.getResponseId():
                 debugUnit("  it's equipment configuration");
-                this.emit('equipmentConfiguration', EquipmentMessage_1.EquipmentMessage.decodeEquipmentConfiguration(msg));
+                this.emit('equipmentConfiguration', EquipmentStateMessage_1.EquipmentStateMessage.decodeEquipmentConfiguration(msg));
                 break;
             case 12585: // SLGetPumpStatus.getResponseId():
                 debugUnit("  it's pump status");
@@ -478,7 +478,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 9808: // SLGetWeatherForecast.getResponseId():
                 debugUnit("  it's a weather forecast ack");
-                this.emit('weatherForecast', EquipmentMessage_1.EquipmentMessage.decodeWeatherMessage(msg));
+                this.emit('weatherForecast', EquipmentStateMessage_1.EquipmentStateMessage.decodeWeatherMessage(msg));
                 break;
             case 12531: // SLSetCircuitStateMessage.getResponseId():
                 debugUnit("  it's circuit toggle ack");
@@ -527,7 +527,7 @@ class UnitConnection extends events_1.EventEmitter {
             // ------------  ASYNC MESSAGES --------------- //
             case 8113: // SLSetSystemTime.getResponseId():
                 debugUnit("  it's a set system time ack");
-                this.emit('setSystemTime', EquipmentMessage_1.EquipmentMessage.decodeSetSystemTime(msg));
+                this.emit('setSystemTime', EquipmentStateMessage_1.EquipmentStateMessage.decodeSetSystemTime(msg));
                 break;
             case 12535: // SLGetHistoryData.getResponseId():
                 debugUnit("  it's a history data query ack");
@@ -535,7 +535,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12502: // SLGetHistoryData.getPayloadId():
                 debugUnit("  it's a history data payload");
-                this.emit('getHistoryData', EquipmentMessage_1.EquipmentMessage.decodeGetHistory(msg));
+                this.emit('getHistoryData', EquipmentStateMessage_1.EquipmentStateMessage.decodeGetHistory(msg));
                 break;
             case 12597: // SLGetChemHistoryData.getResponseId():
                 debugUnit("  it's a chem history data query ack");

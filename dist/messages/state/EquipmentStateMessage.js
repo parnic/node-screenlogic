@@ -497,4 +497,4 @@ class EquipmentStateMessage {
     }
 }
 exports.EquipmentStateMessage = EquipmentStateMessage;
-//# sourceMappingURL=EquipmentMessage.js.map
+//# sourceMappingURL=EquipmentStateMessage.js.map

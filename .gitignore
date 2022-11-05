@@ -60,3 +60,9 @@ typings/
 dist/example copy.js
 dist/example copy.js.map
 example copy.ts
+dist/example -- LOCAL.js
+dist/example -- LOCAL.js.map
+example -- LOCAL.ts
+messages/.DS_Store
+.vscode/launch.json
+
