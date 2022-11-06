@@ -73,7 +73,7 @@ export interface SLEquipmentConfigurationData {
     version: number;
     pumps: any;
     heaterConfig: HeaterConfig;
-    valves: any[];
+    valves: Valves[];
     delays: Delays;
     misc: Misc;
     speed: any[];

@@ -16,11 +16,11 @@ import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { ConnectionMessage } from './messages/state/ConnectionMessage';
 // import { Inbound } from './messages/SLMessage';
-import { EquipmentConfigurationMessage, SLEquipmentConfigurationData, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentConfig';
+import { EquipmentConfigurationMessage, SLEquipmentConfigurationData, SLEquipmentStateData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from './messages/state/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
-import { ChemMessage, SLChemData } from './messages/state/ChemMessage';
+import { ChemMessage, SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { ScheduleMessage, SLScheduleData } from './messages/state/ScheduleMessage';
-import { PumpMessage } from './messages/state/PumpMessage';
+import { PumpMessage, SLPumpStatusData } from './messages/state/PumpMessage';
 import { CircuitMessage } from './messages/state/CircuitMessage';
 import { HeaterMessage } from './messages/state/HeaterMessage';
 import { Inbound } from './messages/SLMessage';
@@ -327,7 +327,7 @@ export class UnitConnection extends EventEmitter {
     });
   }
 
-  public async connect() {
+  public async connect() :Promise<boolean>{
     return new Promise(async (resolve, reject) => {
 
       debugUnit('connecting...');
@@ -397,7 +397,7 @@ export class UnitConnection extends EventEmitter {
     });
   }
 
-  async removeClient() {
+  async removeClient():Promise<boolean> {
     let self = this;
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending remove client command, clientId %d...', this.senderId, this.clientId);
@@ -602,7 +602,7 @@ export class UnitConnection extends EventEmitter {
 }
 export let screenlogic = new UnitConnection();
 export class Equipment {
-  async setSystemTime(date: Date, shouldAdjustForDST: boolean) {
+  async setSystemTime(date: Date, shouldAdjustForDST: boolean):Promise<SLSystemTimeData> {
     return new Promise(async (resolve, reject) => {
       if (!(date instanceof Date)) {
         debugUnit('setSystemTime() must receive valid Date object for the date argument');
@@ -629,7 +629,7 @@ export class Equipment {
       screenlogic.write(screenlogic.controller.equipment.createSetSystemTimeMessage(date, shouldAdjustForDST));
     });
   }
-  async getWeatherForecast() {
+  async getWeatherForecast():Promise<SLWeatherForecastData> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] requesting weather forecast', screenlogic.senderId);
       let _timeout = setTimeout(() => {
@@ -644,7 +644,7 @@ export class Equipment {
     });
   }
 
-  async getHistoryData(fromTime?: Date, toTime?: Date) {
+  async getHistoryData(fromTime?: Date, toTime?: Date):Promise<SLHistoryData> {
     return new Promise(async (resolve, reject) => {
       let _timeout = setTimeout(() => {
         reject(new Error('time out waiting for get history response'));
@@ -661,13 +661,13 @@ export class Equipment {
       screenlogic.write(screenlogic.controller.equipment.createGetHistoryMessage(fromTime || yesterday, toTime || now));
     });
   }
-  async getEquipmentConfiguration() {
+  async getEquipmentConfiguration():Promise<SLEquipmentConfigurationData> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending equipment configuration query...', screenlogic.senderId);
       let _timeout = setTimeout(() => {
         reject(new Error('time out waiting for equipment configuration response'));
       }, screenlogic.netTimeout);
-      screenlogic.once('equipmentConfiguration', (data) => {
+      screenlogic.once('equipmentConfiguration', (data:SLEquipmentConfigurationData) => {
         clearTimeout(_timeout);
         debugUnit('received equipmentConfiguration event');
         resolve(data);
@@ -736,7 +736,7 @@ export class Equipment {
 }
 
 export class Circuit extends UnitConnection {
-  async sendLightCommand(command: LightCommands) {
+  async sendLightCommand(command: LightCommands):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending light command: controllerId: %d, command: %d...', screenlogic.senderId, this.controllerId, command);
       let _timeout = setTimeout(() => {
@@ -750,7 +750,7 @@ export class Circuit extends UnitConnection {
       screenlogic.write(screenlogic.controller.circuits.createIntellibriteMessage(command));
     });
   }
-  async setCircuitRuntimebyId(circuitId, runTime) {
+  async setCircuitRuntimebyId(circuitId, runTime):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set circuit runtime command for circuitId: %d, runTime: %d...', screenlogic.senderId, circuitId, runTime);
       let _timeout = setTimeout(() => {
@@ -764,7 +764,7 @@ export class Circuit extends UnitConnection {
       screenlogic.write(screenlogic.controller.circuits.createSetCircuitRuntimeMessage(circuitId, runTime));
     });
   }
-  async setCircuitState(circuitId: number, circuitState: boolean) {
+  async setCircuitState(circuitId: number, circuitState: boolean):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', screenlogic.senderId, this.controllerId, circuitId, circuitState);
       let _timeout = setTimeout(() => {
@@ -780,7 +780,7 @@ export class Circuit extends UnitConnection {
   }
 }
 export class Body extends UnitConnection {
-  async setSetPoint(bodyIndex: BodyIndex, temperature) {
+  async setSetPoint(bodyIndex: BodyIndex, temperature):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set setpoint command: controllerId: %d, bodyIndex: %d, temperature: %d...', screenlogic.senderId, this.controllerId, bodyIndex, temperature);
       let _timeout = setTimeout(() => {
@@ -795,7 +795,7 @@ export class Body extends UnitConnection {
     });
   }
 
-  async setHeatMode(bodyIndex: BodyIndex, heatMode: HeatModes) {
+  async setHeatMode(bodyIndex: BodyIndex, heatMode: HeatModes):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set heatmode command: controllerId: %d, bodyIndex: %d, heatMode: %d...', screenlogic.senderId, this.controllerId, bodyIndex, heatMode);
       let _timeout = setTimeout(() => {
@@ -811,7 +811,7 @@ export class Body extends UnitConnection {
   }
 }
 export class Pump extends UnitConnection {
-  async setPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean) {
+  async setPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set pump flow command for pumpId: %d, circuitId: %d, setPoint: %d, isRPMs: %d...', screenlogic.senderId, pumpId, circuitId, speed, isRPMs);
       let _timeout = setTimeout(() => {
@@ -825,7 +825,7 @@ export class Pump extends UnitConnection {
       screenlogic.write(screenlogic.controller.pumps.setPumpSpeed(pumpId, circuitId, speed, isRPMs));
     });
   }
-  async getPumpStatus(pumpId) {
+  async getPumpStatus(pumpId):Promise<SLPumpStatusData> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending get pump status command for pumpId: %d...', screenlogic.senderId, pumpId);
       let _timeout = setTimeout(() => {
@@ -842,7 +842,7 @@ export class Pump extends UnitConnection {
 }
 
 export class Schedule extends UnitConnection {
-  async setScheduleEventById(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number) {
+  async setScheduleEventById(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number) :Promise<boolean>{
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set schedule event command for scheduleId: %d, circuitId: %d, startTime: %d, stopTime: %d, dayMask: %d, flags: %d, heatCmd: %d, heatSetPoint: %d...', screenlogic.senderId, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
       let _timeout = setTimeout(() => {
@@ -856,7 +856,7 @@ export class Schedule extends UnitConnection {
       screenlogic.write(screenlogic.controller.schedules.createSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint));
     });
   }
-  async addNewScheduleEvent(scheduleType: SchedTypes) {
+  async addNewScheduleEvent(scheduleType: SchedTypes):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending add new schedule event command for scheduleType: %d...', screenlogic.senderId, scheduleType);
       let _timeout = setTimeout(() => {
@@ -871,7 +871,7 @@ export class Schedule extends UnitConnection {
     });
   }
 
-  async deleteScheduleEventById(scheduleId: number) {
+  async deleteScheduleEventById(scheduleId: number):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending delete schedule event command for scheduleId: %d...', screenlogic.senderId, scheduleId);
       let _timeout = setTimeout(() => {
@@ -902,7 +902,7 @@ export class Schedule extends UnitConnection {
 }
 
 export class Chem extends UnitConnection {
-  async getChemHistoryData(fromTime?: Date, toTime?: Date) {
+  async getChemHistoryData(fromTime?: Date, toTime?: Date):Promise<SLChemHistory> {
     return new Promise(async (resolve, reject) => {
       let _timeout = setTimeout(() => {
         reject(new Error('time out waiting for get chem history response'));
@@ -935,7 +935,7 @@ export class Chem extends UnitConnection {
   }
 }
 export class Chlor extends UnitConnection {
-  async setIntellichlorOutput(poolOutput: number, spaOutput: number) {
+  async setIntellichlorOutput(poolOutput: number, spaOutput: number):Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set intellichlor output command: controllerId: %d, poolOutput: %d, spaOutput: %d...', screenlogic.senderId, this.controllerId, poolOutput, spaOutput);
       let _timeout = setTimeout(() => {
