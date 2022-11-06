@@ -77,7 +77,7 @@ async function app() {
     console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
     let result = await client.getVersion();
     console.log(`Pool Version: ${result}`);
-    let controller = await client.equipment.getControllerConfig();
+    let controller = await client.equipment.getEquipmentConfiguration();
     console.log(`Controller: ${JSON.stringify(controller)}`);
     let equipConfig = await client.equipment.getEquipmentConfiguration();
     console.log(`Equipment config: ${JSON.stringify(equipConfig)}`);

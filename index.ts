@@ -6,17 +6,17 @@ import * as net from 'net';
 import { EventEmitter } from 'events';
 // import * as messages from './messages';
 import * as SLGateway from './messages/SLGatewayDataMessage';
-// import { SLChemData, SLControllerConfigData, SLIntellichlorData, SLPoolStatusData, SLReceivePoolStatusMessage, SLScheduleData, SLSystemTimeData } from './messages';
+// import { SLChemData, SLEquipmentConfigData, SLIntellichlorData, SLPoolStatusData, SLReceivePoolStatusMessage, SLScheduleData, SLSystemTimeData } from './messages';
 
 // import { SLPoolStatusData } from './messages/SLPoolStatusMessage';
 // import { SLIntellichlorData } from './messages/SLIntellichlorConfigMessage';
-// import { SLControllerConfigData } from './messages/SLControllerConfigMessage';
+// import { SLEquipmentConfigData } from './messages/SLEquipmentConfigMessage';
 // import { SLChemData, SLScheduleData, SLSystemTimeData } from './messages';
 
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { ConnectionMessage } from './messages/state/ConnectionMessage';
 // import { Inbound } from './messages/SLMessage';
-import { EquipmentStateMessage, SLControllerConfigData, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentStateMessage';
+import { EquipmentConfigurationMessage, SLEquipmentConfigurationData, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
 import { ChemMessage, SLChemData } from './messages/state/ChemMessage';
 import { ScheduleMessage, SLScheduleData } from './messages/state/ScheduleMessage';
@@ -24,6 +24,7 @@ import { PumpMessage } from './messages/state/PumpMessage';
 import { CircuitMessage } from './messages/state/CircuitMessage';
 import { HeaterMessage } from './messages/state/HeaterMessage';
 import { Inbound } from './messages/SLMessage';
+import { EquipmentStateMessage } from './messages/state/EquipmentState';
 const Encoder = require('./PasswordEncoder').HLEncoder;
 var debugFind = require('debug')('sl:find');
 var debugRemote = require('debug')('sl:remote');
@@ -463,9 +464,9 @@ export class UnitConnection extends EventEmitter {
         debugUnit("  it's salt cell config");
         this.emit('intellichlorConfig', ChlorMessage.decodeIntellichlorConfig(msg));
         break;
-      case 12533:  // SLControllerConfigMessage.getResponseId():
+      case 12533:  // SLEquipmentConfigMessage.getResponseId():
         debugUnit("  it's controller configuration");
-        this.emit('controllerConfig', EquipmentStateMessage.decodeControllerConfig(msg));
+        this.emit('equipmentConfig', EquipmentConfigurationMessage.decodeControllerConfig(msg));
         break;
       case 12505: // SLChemDataMessage.getAsyncResponseId():
       case 12593:  // SLChemDataMessage.getResponseId():
@@ -498,7 +499,7 @@ export class UnitConnection extends EventEmitter {
         break;
       case 12567: // SLEquipmentConfigurationMessage.getResponseId():
         debugUnit("  it's equipment configuration");
-        this.emit('equipmentConfiguration', EquipmentStateMessage.decodeEquipmentConfiguration(msg));
+        this.emit('equipmentConfiguration', EquipmentConfigurationMessage.decodeEquipmentConfiguration(msg));
         break;
       case 12585: // SLGetPumpStatus.getResponseId():
         debugUnit("  it's pump status");
@@ -506,7 +507,7 @@ export class UnitConnection extends EventEmitter {
         break;
       case 9808: // SLGetWeatherForecast.getResponseId():
         debugUnit("  it's a weather forecast ack");
-        this.emit('weatherForecast', EquipmentStateMessage.decodeWeatherMessage(msg));
+        this.emit('weatherForecast', EquipmentConfigurationMessage.decodeWeatherMessage(msg));
         break;
       case 12531: // SLSetCircuitStateMessage.getResponseId():
         debugUnit("  it's circuit toggle ack");
@@ -565,7 +566,7 @@ export class UnitConnection extends EventEmitter {
         break;
       case 12502: // SLGetHistoryData.getPayloadId():
         debugUnit("  it's a history data payload");
-        this.emit('getHistoryData', EquipmentStateMessage.decodeGetHistory(msg));
+        this.emit('getHistoryData', EquipmentConfigurationMessage.decodeGetHistory(msg));
         break;
       case 12597: // SLGetChemHistoryData.getResponseId():
         debugUnit("  it's a chem history data query ack");
@@ -671,7 +672,7 @@ export class Equipment {
         debugUnit('received equipmentConfiguration event');
         resolve(data);
       })
-      screenlogic.write(screenlogic.controller.equipment.createEquipmentConfigurationMessage());
+      screenlogic.write(screenlogic.controller.equipment.createGetEquipmentConfigurationMessage());
     });
   }
   async cancelDelay(): Promise<boolean> {
@@ -703,15 +704,15 @@ export class Equipment {
 
     });
   }
-  async getControllerConfig(): Promise<SLControllerConfigData> {
+  async getControllerConfig(): Promise<SLEquipmentConfigurationData> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending controller config query...', screenlogic.senderId);
       let _timeout = setTimeout(() => {
         reject(new Error('time out waiting for controller config'));
       }, screenlogic.netTimeout);
-      screenlogic.once('controllerConfig', (controller) => {
+      screenlogic.once('equipmentConfig', (controller) => {
         clearTimeout(_timeout);
-        debugUnit('received controllerConfig event');
+        debugUnit('received equipmentConfig event');
         resolve(controller);
       })
       screenlogic.write(screenlogic.controller.equipment.createGetControllerConfigMessage());
@@ -1001,9 +1002,9 @@ export enum HeatModes {
 }
 
 export enum PumpTypes {
-  PUMP_TYPE_INTELLIFLOVF = 1,
-  PUMP_TYPE_INTELLIFLOVS = 2,
-  PUMP_TYPE_INTELLIFLOVSF = 3
+  PUMP_TYPE_INTELLIFLOVF = 5,
+  PUMP_TYPE_INTELLIFLOVS = 3,
+  PUMP_TYPE_INTELLIFLOVSF = 4
 };
 
 export enum BodyIndex {

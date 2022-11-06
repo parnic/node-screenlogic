@@ -16,9 +16,9 @@ export declare class ConnectionCommands extends Commands {
 export declare class EquipmentCommands extends Commands {
     createEquipmentStateMessage(): Buffer;
     createGetControllerConfigMessage(): Buffer;
+    createGetEquipmentConfigurationMessage(): Buffer;
     createGetSystemTimeMessage(): Buffer;
     createCancelDelayMessage(): Buffer;
-    createEquipmentConfigurationMessage(): Buffer;
     createWeatherMessage(): Buffer;
     createSetSystemTimeMessage(date: Date, shouldAdjustForDST: boolean): Buffer;
     createGetHistoryMessage(fromTime: Date, toTime: Date): Buffer;

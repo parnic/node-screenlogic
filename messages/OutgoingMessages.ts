@@ -70,7 +70,14 @@ export class EquipmentCommands extends Commands {
     return this.toBuffer();
   }
   public createGetControllerConfigMessage() {
-    this.messageId = 12532;
+    this.messageId = 12532; // controller config
+    this.createBaseMessage();
+    this.writeInt32LE(0);
+    this.writeInt32LE(0);
+    return this.toBuffer();
+  }
+  public createGetEquipmentConfigurationMessage() {
+    this.messageId = 12566; //equipconfg
     this.createBaseMessage();
     this.writeInt32LE(0);
     this.writeInt32LE(0);
@@ -84,13 +91,6 @@ export class EquipmentCommands extends Commands {
   public createCancelDelayMessage() {
     this.messageId = 12580;
     this.createBaseMessage();
-    this.writeInt32LE(0);
-    return this.toBuffer();
-  }
-  public createEquipmentConfigurationMessage() {
-    this.messageId = 12566;
-    this.createBaseMessage();
-    this.writeInt32LE(0);
     this.writeInt32LE(0);
     return this.toBuffer();
   }

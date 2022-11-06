@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EquipmentStateMessage = void 0;
+exports.EquipmentConfigurationMessage = void 0;
 const index_1 = require("../../index");
-class EquipmentStateMessage {
-    static decodeEquipmentStateResponse(msg) {
-        let data;
+class EquipmentConfigurationMessage {
+    /*   public static decodeEquipmentStateResponse(msg: Inbound) {
+        let data: SLEquipmentStateData;
         let ok = msg.readInt32LE();
         let freezeMode = msg.readUInt8();
         let remotes = msg.readUInt8();
@@ -15,37 +15,42 @@ class EquipmentStateMessage {
         let airTemp = msg.readInt32LE();
         let bodiesCount = msg.readInt32LE();
         if (bodiesCount > 2) {
-            bodiesCount = 2;
+          bodiesCount = 2;
         }
+    
         let currentTemp = new Array(bodiesCount);
         let heatStatus = new Array(bodiesCount);
         let setPoint = new Array(bodiesCount);
         let coolSetPoint = new Array(bodiesCount);
         let heatMode = new Array(bodiesCount);
-        let bodies = [{ id: 1 }, bodiesCount > 1 ? { id: 2 } : undefined];
+    
+        let bodies = [{ id: 1 } as any, bodiesCount > 1 ? { id: 2 } : undefined];
+    
         for (let i = 0; i < bodiesCount; i++) {
-            let bodyType = msg.readInt32LE();
-            if (bodyType < 0 || bodyType >= 2) {
-                bodyType = 0;
-            }
-            bodies[bodyType].currentTemp = currentTemp[bodyType] = msg.readInt32LE();
-            bodies[bodyType].heatStatus = heatStatus[bodyType] = msg.readInt32LE();
-            bodies[bodyType].setPoint = setPoint[bodyType] = msg.readInt32LE();
-            bodies[bodyType].coolSetPoint = coolSetPoint[bodyType] = msg.readInt32LE();
-            bodies[bodyType].heatMode = heatMode[bodyType] = msg.readInt32LE();
+          let bodyType = msg.readInt32LE();
+          if (bodyType < 0 || bodyType >= 2) {
+            bodyType = 0;
+          }
+          bodies[bodyType].currentTemp = currentTemp[bodyType] = msg.readInt32LE();
+          bodies[bodyType].heatStatus = heatStatus[bodyType] = msg.readInt32LE();
+          bodies[bodyType].setPoint = setPoint[bodyType] = msg.readInt32LE();
+          bodies[bodyType].coolSetPoint = coolSetPoint[bodyType] = msg.readInt32LE();
+          bodies[bodyType].heatMode = heatMode[bodyType] = msg.readInt32LE();
         }
+    
         let circuitCount = msg.readInt32LE();
         let circuitArray = new Array(circuitCount);
         for (let i = 0; i < circuitCount; i++) {
-            circuitArray[i] = {
-                id: msg.readInt32LE() - 499,
-                state: msg.readInt32LE(),
-                colorSet: msg.readUInt8(),
-                colorPos: msg.readUInt8(),
-                colorStagger: msg.readUInt8(),
-                delay: msg.readUInt8(),
-            };
+          circuitArray[i] = {
+            id: msg.readInt32LE() - 499,
+            state: msg.readInt32LE(),
+            colorSet: msg.readUInt8(),
+            colorPos: msg.readUInt8(),
+            colorStagger: msg.readUInt8(),
+            delay: msg.readUInt8(),
+          };
         }
+    
         let pH = msg.readInt32LE() / 100;
         let orp = msg.readInt32LE();
         let saturation = msg.readInt32LE() / 100;
@@ -53,34 +58,35 @@ class EquipmentStateMessage {
         let pHTank = msg.readInt32LE();
         let orpTank = msg.readInt32LE();
         let alarms = msg.readInt32LE();
+    
         data = {
-            ok,
-            freezeMode,
-            remotes,
-            poolDelay,
-            spaDelay,
-            cleanerDelay,
-            airTemp,
-            bodiesCount,
-            bodies,
-            currentTemp,
-            heatStatus,
-            setPoint,
-            coolSetPoint,
-            heatMode,
-            circuitArray,
-            pH,
-            orp,
-            saturation,
-            saltPPM,
-            pHTank,
-            orpTank,
-            alarms,
+          ok,
+          freezeMode,
+          remotes,
+          poolDelay,
+          spaDelay,
+          cleanerDelay,
+          airTemp,
+          bodiesCount,
+          bodies,
+          currentTemp,
+          heatStatus,
+          setPoint,
+          coolSetPoint,
+          heatMode,
+          circuitArray,
+          pH,
+          orp,
+          saturation,
+          saltPPM,
+          pHTank,
+          orpTank,
+          alarms,
         };
         return data;
-    }
+      } */
     static decodeControllerConfig(msg) {
-        let controllerId = msg.readInt32LE();
+        let controllerId = msg.readInt32LE() - 99;
         let minSetPoint = new Array(2);
         let maxSetPoint = new Array(2);
         for (let i = 0; i < 2; i++) {
@@ -123,6 +129,7 @@ class EquipmentStateMessage {
                 },
             };
         }
+        // RSG - This data doesn't look right.  Rely on pump config.
         let pumpCircCount = 8;
         let pumpCircArray = new Array(pumpCircCount);
         for (let i = 0; i < pumpCircCount; i++) {
@@ -151,7 +158,7 @@ class EquipmentStateMessage {
         };
         return data;
     }
-    static decodeSystemTime(msg) {
+    /*   public static decodeSystemTime(msg: Inbound) {
         let date = msg.readSLDateTime();
         let year = date.getFullYear();
         let month = date.getMonth() + 1; // + 1 is for backward compatibility, SLTime represents months as 1-based
@@ -162,28 +169,28 @@ class EquipmentStateMessage {
         let second = date.getSeconds();
         let millisecond = date.getMilliseconds();
         var adjustForDST = msg.readInt32LE() === 1;
-        let data = {
-            date,
-            year,
-            month,
-            dayOfWeek,
-            day,
-            hour,
-            minute,
-            second,
-            millisecond,
-            adjustForDST
-        };
+        let data: SLSystemTimeData = {
+          date,
+          year,
+          month,
+          dayOfWeek,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond,
+          adjustForDST
+        }
         return data;
-    }
-    static decodeCancelDelay(msg) {
+      }
+      public static decodeCancelDelay(msg: Inbound) {
         // ack
         return true;
-    }
-    static decodeSetSystemTime(msg) {
+      }
+      public static decodeSetSystemTime(msg: Inbound) {
         // ack
         return true;
-    }
+      } */
     isEasyTouch(controllerType) {
         return controllerType === 14 || controllerType === 13;
     }
@@ -437,14 +444,11 @@ class EquipmentStateMessage {
                 else {
                     bPresent = isValvePresent(valveIndex, loadCenterValveData);
                 }
-                let sCircuit;
                 if (bPresent) {
                     var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
                     deviceId = valveDataArray[valveDataIndex];
-                    sCircuit = deviceIDToString(deviceId);
                     valveName = String.fromCharCode(65 + valveIndex);
                     if (deviceId !== 0) {
-                        sCircuit = 'Unused';
                         console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
                         // } else if (isSolarValve === true) {
                         //   // console.log('used by solar');
@@ -457,8 +461,7 @@ class EquipmentStateMessage {
                         valveIndex,
                         valveName,
                         loadCenterName,
-                        deviceId: deviceId,
-                        sCircuit
+                        deviceId
                     };
                     valves.push(v);
                 }
@@ -480,7 +483,8 @@ class EquipmentStateMessage {
             spaManualHeat: miscDataArray[4] !== 0
         };
         let speed = [];
-        speed = loadSpeedCircuits(speedDataArray, true);
+        // RSG - speed doesn't look right.
+        // speed = loadSpeedCircuits(speedDataArray, true);
         let data = {
             controllerType,
             hardwareType,
@@ -624,5 +628,5 @@ class EquipmentStateMessage {
         return (circuitIndex <= 0 || circuitIndex >= 5) ? this.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
     }
 }
-exports.EquipmentStateMessage = EquipmentStateMessage;
-//# sourceMappingURL=EquipmentStateMessage.js.map
+exports.EquipmentConfigurationMessage = EquipmentConfigurationMessage;
+//# sourceMappingURL=EquipmentConfig.js.map

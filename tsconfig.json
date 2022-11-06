@@ -13,6 +13,6 @@
   },
   "include": ["messages/**/*.ts", "*.ts", "index.ts", "utils/**/*.ts"],
   "exclude": [
-    "node_modules", "example copy.ts"
+    "node_modules"
   ]
 }

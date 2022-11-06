@@ -66,3 +66,5 @@ example -- LOCAL.ts
 messages/.DS_Store
 .vscode/launch.json
 
+dist/example copy.d.ts
+dist/example -- LOCAL.d.ts

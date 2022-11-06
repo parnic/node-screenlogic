@@ -1,10 +1,6 @@
 import { Inbound } from "../SLMessage";
-export declare class EquipmentStateMessage {
-    static decodeEquipmentStateResponse(msg: Inbound): SLEquipmentStateData;
+export declare class EquipmentConfigurationMessage {
     static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
-    static decodeSystemTime(msg: Inbound): SLSystemTimeData;
-    static decodeCancelDelay(msg: Inbound): boolean;
-    static decodeSetSystemTime(msg: Inbound): boolean;
     isEasyTouch(controllerType: any): boolean;
     isIntelliTouch(controllerType: any): boolean;
     isEasyTouchLite(controllerType: any, hwType: any): boolean;

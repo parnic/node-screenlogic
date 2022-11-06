@@ -625,4 +625,4 @@ class EquipmentStateMessage {
     }
 }
 exports.EquipmentStateMessage = EquipmentStateMessage;
-//# sourceMappingURL=EquipmentStateMessage.js.map
+//# sourceMappingURL=ControllerConfig.js.map

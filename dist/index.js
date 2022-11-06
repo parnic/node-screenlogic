@@ -7,15 +7,15 @@ const net = require("net");
 const events_1 = require("events");
 // import * as messages from './messages';
 const SLGateway = require("./messages/SLGatewayDataMessage");
-// import { SLChemData, SLControllerConfigData, SLIntellichlorData, SLPoolStatusData, SLReceivePoolStatusMessage, SLScheduleData, SLSystemTimeData } from './messages';
+// import { SLChemData, SLEquipmentConfigData, SLIntellichlorData, SLPoolStatusData, SLReceivePoolStatusMessage, SLScheduleData, SLSystemTimeData } from './messages';
 // import { SLPoolStatusData } from './messages/SLPoolStatusMessage';
 // import { SLIntellichlorData } from './messages/SLIntellichlorConfigMessage';
-// import { SLControllerConfigData } from './messages/SLControllerConfigMessage';
+// import { SLEquipmentConfigData } from './messages/SLEquipmentConfigMessage';
 // import { SLChemData, SLScheduleData, SLSystemTimeData } from './messages';
 const OutgoingMessages_1 = require("./messages/OutgoingMessages");
 const ConnectionMessage_1 = require("./messages/state/ConnectionMessage");
 // import { Inbound } from './messages/SLMessage';
-const EquipmentStateMessage_1 = require("./messages/state/EquipmentStateMessage");
+const EquipmentConfig_1 = require("./messages/state/EquipmentConfig");
 const ChlorMessage_1 = require("./messages/state/ChlorMessage");
 const ChemMessage_1 = require("./messages/state/ChemMessage");
 const ScheduleMessage_1 = require("./messages/state/ScheduleMessage");
@@ -23,6 +23,7 @@ const PumpMessage_1 = require("./messages/state/PumpMessage");
 const CircuitMessage_1 = require("./messages/state/CircuitMessage");
 const HeaterMessage_1 = require("./messages/state/HeaterMessage");
 const SLMessage_1 = require("./messages/SLMessage");
+const EquipmentState_1 = require("./messages/state/EquipmentState");
 const Encoder = require('./PasswordEncoder').HLEncoder;
 var debugFind = require('debug')('sl:find');
 var debugRemote = require('debug')('sl:remote');
@@ -399,7 +400,7 @@ class UnitConnection extends events_1.EventEmitter {
             case 12500: //SLPoolStatusMessage.getAsyncResponseId():
             case 12527: //SLPoolStatusMessage.getResponseId():
                 debugUnit("  it's pool status");
-                let equipmentState = EquipmentStateMessage_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg);
+                let equipmentState = EquipmentState_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg);
                 this.emit('equipmentState', equipmentState);
                 break;
             case 8121: // SLVersionMessage.getResponseId():
@@ -411,9 +412,9 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit("  it's salt cell config");
                 this.emit('intellichlorConfig', ChlorMessage_1.ChlorMessage.decodeIntellichlorConfig(msg));
                 break;
-            case 12533: // SLControllerConfigMessage.getResponseId():
+            case 12533: // SLEquipmentConfigMessage.getResponseId():
                 debugUnit("  it's controller configuration");
-                this.emit('controllerConfig', EquipmentStateMessage_1.EquipmentStateMessage.decodeControllerConfig(msg));
+                this.emit('equipmentConfig', EquipmentConfig_1.EquipmentConfigurationMessage.decodeControllerConfig(msg));
                 break;
             case 12505: // SLChemDataMessage.getAsyncResponseId():
             case 12593: // SLChemDataMessage.getResponseId():
@@ -422,7 +423,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 8111: // SLGetSystemTime.getResponseId():
                 debugUnit("  it's system time");
-                this.emit('getSystemTime', EquipmentStateMessage_1.EquipmentStateMessage.decodeSystemTime(msg));
+                this.emit('getSystemTime', EquipmentState_1.EquipmentStateMessage.decodeSystemTime(msg));
                 break;
             case 12543: // SLGetScheduleData.getResponseId():
                 debugUnit("  it's schedule data");
@@ -430,7 +431,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12581: // SLCancelDelay.getResponseId():
                 debugUnit("  it's a cancel delay ack");
-                this.emit('cancelDelay', EquipmentStateMessage_1.EquipmentStateMessage.decodeCancelDelay(msg));
+                this.emit('cancelDelay', EquipmentState_1.EquipmentStateMessage.decodeCancelDelay(msg));
                 break;
             case 12523: // SLAddClient.getResponseId():
                 debugUnit("  it's an add client ack");
@@ -446,7 +447,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12567: // SLEquipmentConfigurationMessage.getResponseId():
                 debugUnit("  it's equipment configuration");
-                this.emit('equipmentConfiguration', EquipmentStateMessage_1.EquipmentStateMessage.decodeEquipmentConfiguration(msg));
+                this.emit('equipmentConfiguration', EquipmentConfig_1.EquipmentConfigurationMessage.decodeEquipmentConfiguration(msg));
                 break;
             case 12585: // SLGetPumpStatus.getResponseId():
                 debugUnit("  it's pump status");
@@ -454,7 +455,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 9808: // SLGetWeatherForecast.getResponseId():
                 debugUnit("  it's a weather forecast ack");
-                this.emit('weatherForecast', EquipmentStateMessage_1.EquipmentStateMessage.decodeWeatherMessage(msg));
+                this.emit('weatherForecast', EquipmentConfig_1.EquipmentConfigurationMessage.decodeWeatherMessage(msg));
                 break;
             case 12531: // SLSetCircuitStateMessage.getResponseId():
                 debugUnit("  it's circuit toggle ack");
@@ -503,7 +504,7 @@ class UnitConnection extends events_1.EventEmitter {
             // ------------  ASYNC MESSAGES --------------- //
             case 8113: // SLSetSystemTime.getResponseId():
                 debugUnit("  it's a set system time ack");
-                this.emit('setSystemTime', EquipmentStateMessage_1.EquipmentStateMessage.decodeSetSystemTime(msg));
+                this.emit('setSystemTime', EquipmentState_1.EquipmentStateMessage.decodeSetSystemTime(msg));
                 break;
             case 12535: // SLGetHistoryData.getResponseId():
                 debugUnit("  it's a history data query ack");
@@ -511,7 +512,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             case 12502: // SLGetHistoryData.getPayloadId():
                 debugUnit("  it's a history data payload");
-                this.emit('getHistoryData', EquipmentStateMessage_1.EquipmentStateMessage.decodeGetHistory(msg));
+                this.emit('getHistoryData', EquipmentConfig_1.EquipmentConfigurationMessage.decodeGetHistory(msg));
                 break;
             case 12597: // SLGetChemHistoryData.getResponseId():
                 debugUnit("  it's a chem history data query ack");
@@ -614,7 +615,7 @@ class Equipment {
                 debugUnit('received equipmentConfiguration event');
                 resolve(data);
             });
-            exports.screenlogic.write(exports.screenlogic.controller.equipment.createEquipmentConfigurationMessage());
+            exports.screenlogic.write(exports.screenlogic.controller.equipment.createGetEquipmentConfigurationMessage());
         });
     }
     async cancelDelay() {
@@ -651,9 +652,9 @@ class Equipment {
             let _timeout = setTimeout(() => {
                 reject(new Error('time out waiting for controller config'));
             }, exports.screenlogic.netTimeout);
-            exports.screenlogic.once('controllerConfig', (controller) => {
+            exports.screenlogic.once('equipmentConfig', (controller) => {
                 clearTimeout(_timeout);
-                debugUnit('received controllerConfig event');
+                debugUnit('received equipmentConfig event');
                 resolve(controller);
             });
             exports.screenlogic.write(exports.screenlogic.controller.equipment.createGetControllerConfigMessage());
@@ -943,9 +944,9 @@ var HeatModes;
 })(HeatModes = exports.HeatModes || (exports.HeatModes = {}));
 var PumpTypes;
 (function (PumpTypes) {
-    PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVF"] = 1] = "PUMP_TYPE_INTELLIFLOVF";
-    PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVS"] = 2] = "PUMP_TYPE_INTELLIFLOVS";
-    PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVSF"] = 3] = "PUMP_TYPE_INTELLIFLOVSF";
+    PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVF"] = 5] = "PUMP_TYPE_INTELLIFLOVF";
+    PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVS"] = 3] = "PUMP_TYPE_INTELLIFLOVS";
+    PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVSF"] = 4] = "PUMP_TYPE_INTELLIFLOVSF";
 })(PumpTypes = exports.PumpTypes || (exports.PumpTypes = {}));
 ;
 var BodyIndex;

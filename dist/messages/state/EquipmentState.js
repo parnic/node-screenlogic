@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EquipmentStateMessage = void 0;
-const index_1 = require("../../index");
 class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg) {
         let data;
@@ -79,78 +78,6 @@ class EquipmentStateMessage {
         };
         return data;
     }
-    static decodeControllerConfig(msg) {
-        let controllerId = msg.readInt32LE();
-        let minSetPoint = new Array(2);
-        let maxSetPoint = new Array(2);
-        for (let i = 0; i < 2; i++) {
-            minSetPoint[i] = msg.readUInt8();
-            maxSetPoint[i] = msg.readUInt8();
-        }
-        let degC = msg.readUInt8() !== 0;
-        let controllerType = msg.readUInt8();
-        let hwType = msg.readUInt8();
-        let controllerData = msg.readUInt8();
-        let equipFlags = msg.readInt32LE();
-        let genCircuitName = msg.readSLString();
-        let circuitCount = msg.readInt32LE();
-        let bodyArray = new Array(circuitCount);
-        for (let i = 0; i < circuitCount; i++) {
-            bodyArray[i] = {
-                circuitId: msg.readInt32LE() - 499,
-                name: msg.readSLString(),
-                nameIndex: msg.readUInt8(),
-                function: msg.readUInt8(),
-                interface: msg.readUInt8(),
-                flags: msg.readUInt8(),
-                colorSet: msg.readUInt8(),
-                colorPos: msg.readUInt8(),
-                colorStagger: msg.readUInt8(),
-                deviceId: msg.readUInt8(),
-                dfaultRt: msg.readUInt16LE(),
-            };
-            msg.incrementReadOffset(2);
-        }
-        let colorCount = msg.readInt32LE();
-        let colorArray = new Array(colorCount);
-        for (let i = 0; i < colorCount; i++) {
-            colorArray[i] = {
-                name: msg.readSLString(),
-                color: {
-                    r: msg.readInt32LE() & 0xff,
-                    g: msg.readInt32LE() & 0xff,
-                    b: msg.readInt32LE() & 0xff,
-                },
-            };
-        }
-        let pumpCircCount = 8;
-        let pumpCircArray = new Array(pumpCircCount);
-        for (let i = 0; i < pumpCircCount; i++) {
-            pumpCircArray[i] = msg.readUInt8();
-        }
-        let interfaceTabFlags = msg.readInt32LE();
-        let showAlarms = msg.readInt32LE();
-        let data = {
-            controllerId,
-            minSetPoint,
-            maxSetPoint,
-            degC,
-            controllerType,
-            hwType,
-            controllerData,
-            equipFlags,
-            genCircuitName,
-            circuitCount,
-            bodyArray,
-            colorCount,
-            colorArray,
-            pumpCircCount,
-            pumpCircArray,
-            interfaceTabFlags,
-            showAlarms
-        };
-        return data;
-    }
     static decodeSystemTime(msg) {
         let date = msg.readSLDateTime();
         let year = date.getFullYear();
@@ -184,21 +111,6 @@ class EquipmentStateMessage {
         // ack
         return true;
     }
-    isEasyTouch(controllerType) {
-        return controllerType === 14 || controllerType === 13;
-    }
-    isIntelliTouch(controllerType) {
-        return controllerType !== 14 && controllerType !== 13 && controllerType !== 10;
-    }
-    isEasyTouchLite(controllerType, hwType) {
-        return controllerType === 13 && (hwType & 4) !== 0;
-    }
-    isDualBody(controllerType) {
-        return controllerType === 5;
-    }
-    isChem2(controllerType, hwType) {
-        return controllerType === 252 && hwType === 2;
-    }
     static decodeEquipmentConfiguration(msg) {
         let getNumPumps = function () {
             if (flowDataArray === null) {
@@ -206,7 +118,7 @@ class EquipmentStateMessage {
             }
             let numPumps = 0;
             for (var i = 0; i < flowDataArray.length; i += 45) {
-                if (flowDataArray[i] !== 0) {
+                if (flowDataArray[i + 2] !== 0) {
                     numPumps++;
                 }
             }
@@ -219,25 +131,9 @@ class EquipmentStateMessage {
             if (flowDataArray === null || flowDataArray.length < (pumpIndex + 1) * 45) {
                 return 0;
             }
-            // let pumpType = flowDataArray[(45 * pumpIndex) + 2];
-            let pumpType = flowDataArray[(45 * pumpIndex)];
-            if ((pumpType & 128) === 128) {
-                return {
-                    pumpType: index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS,
-                    name: 'Intelliflo VS'
-                };
-            }
-            else if ((pumpType & 64) === 64) {
-                return {
-                    pumpType: index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVSF,
-                    name: 'Intelliflo VSF'
-                };
-            }
-            else {
-                return {
-                    pumpType: index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVF,
-                    name: 'Intelliflo VF'
-                };
+            let pumpType = flowDataArray[(45 * pumpIndex) + 2];
+            if (pumpType <= 3) {
+                return pumpType;
             }
             return 0;
         };
@@ -316,48 +212,32 @@ class EquipmentStateMessage {
             // int iMax = ((Integer) minMax.second).intValue();
             let iMin = minMax[0];
             let iMax = minMax[1];
-            // let iCount = 0;
+            let iCount = 0;
             for (let i = iMin; i < iMax; i++) {
                 // let byCircuit = poolConfig.getEquipconfig().getSpeedDataArray().get(i);
                 let byCircuit = speedDataArray[i];
-                if (byCircuit > 0) {
-                    if (byCircuit >= 128 && byCircuit <= 132) {
-                        // let name = get().deviceIDToString(poolConfig, byCircuit);
+                if (byCircuit.byteValue() > 0) {
+                    if (byCircuit.byteValue() >= 128 && byCircuit.byteValue() <= 132) {
+                        // let name = get().deviceIDToString(poolConfig, byCircuit.byteValue());
                         let name = `string ${byCircuit}`;
-                        let id = byCircuit;
+                        let id = byCircuit.byteValue();
                         result.push([name, id]);
-                        // iCount++;
+                        iCount++;
                     }
                     else {
                         let circuit = byCircuit;
                         if (circuit != null) {
-                            let name2 = 'get name from body array'; //circuit.getM_Name();
-                            let id2 = byCircuit;
+                            let name2 = circuit.getM_Name();
+                            let id2 = byCircuit.byteValue();
                             result.push([name2, id2]);
-                            // iCount++;
+                            iCount++;
                         }
                     }
                 }
             }
-            // if (iCount < iMax - iMin) {
-            // }
+            if (iCount < iMax - iMin) {
+            }
             return result;
-        };
-        let getRange = function () {
-            let ret = { min: 0, max: 0 };
-            ret.max = speedDataArray.length;
-            if (this.isEasyTouch(controllerType)) {
-                ret.max = 4;
-            }
-            if (this.isDualBody(controllerType)) {
-                ret.max = 4;
-                // what is 'isPoolData'?  Define both bodies as pool instead of
-                // sep pool/spa types?
-                // if (isPoolData){
-                //  ret.min = 0 + 4;
-                //  ret.max = 4 + 4;
-                // }
-            }
         };
         let controllerType = msg.readUInt8();
         let hardwareType = msg.readUInt8();
@@ -387,8 +267,7 @@ class EquipmentStateMessage {
         let pumps = [];
         for (let i = 0; i < numPumps; i++) {
             let pump = { id: i + 1 };
-            pump = Object.assign(pump, getPumpType(i));
-            pumps.push(pump);
+            pump.type = getPumpType(i);
         }
         // let sensors = msg.decodeHeaterConfigData(heaterConfigDataArray);
         ///// Heater config
@@ -465,8 +344,7 @@ class EquipmentStateMessage {
                 // }
             }
         }
-        ///// End Valve decode
-        ///// Speed Data decode
+        // msg.valves = valveArray;
         ///// End Valve decode
         ///// Delays
         let delays = {
@@ -482,11 +360,11 @@ class EquipmentStateMessage {
         let speed = [];
         speed = loadSpeedCircuits(speedDataArray, true);
         let data = {
+            // let data: SLEquipmentConfigurationData = {
             controllerType,
             hardwareType,
             expansionsCount,
             version,
-            pumps,
             heaterConfig,
             valves,
             delays,
@@ -604,25 +482,6 @@ class EquipmentStateMessage {
         };
         return data;
     }
-    getCircuitName(poolConfig, circuitIndex) {
-        if (poolConfig.controllerType === 3 || poolConfig.controllerType === 4) {
-            if (circuitIndex == 0) {
-                return "Hight";
-            }
-            if (circuitIndex == 5) {
-                return "Low";
-            }
-        }
-        else if (circuitIndex == 0) {
-            return "Spa";
-        }
-        else {
-            if (circuitIndex == 5) {
-                return "Pool";
-            }
-        }
-        return (circuitIndex <= 0 || circuitIndex >= 5) ? this.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
-    }
 }
 exports.EquipmentStateMessage = EquipmentStateMessage;
-//# sourceMappingURL=EquipmentStateMessage.js.map
+//# sourceMappingURL=EquipmentState.js.map

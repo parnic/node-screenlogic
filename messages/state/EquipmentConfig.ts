@@ -3,8 +3,8 @@ import { PumpTypes } from "../../index";
 import { Inbound } from "../SLMessage";
 
 
-export class EquipmentMessage {
-  public static decodeEquipmentStateResponse(msg: Inbound) {
+export class EquipmentConfigurationMessage {
+/*   public static decodeEquipmentStateResponse(msg: Inbound) {
     let data: SLEquipmentStateData;
     let ok = msg.readInt32LE();
     let freezeMode = msg.readUInt8();
@@ -85,9 +85,9 @@ export class EquipmentMessage {
       alarms,
     };
     return data;
-  }
+  } */
   public static decodeControllerConfig(msg: Inbound) {
-    let controllerId = msg.readInt32LE();
+    let controllerId = msg.readInt32LE() - 99;
 
     let minSetPoint = new Array(2);
     let maxSetPoint = new Array(2);
@@ -135,6 +135,7 @@ export class EquipmentMessage {
       };
     }
 
+    // RSG - This data doesn't look right.  Rely on pump config.
     let pumpCircCount = 8;
     let pumpCircArray = new Array(pumpCircCount);
     for (let i = 0; i < pumpCircCount; i++) {
@@ -165,7 +166,7 @@ export class EquipmentMessage {
     }
     return data;
   }
-  public static decodeSystemTime(msg: Inbound) {
+/*   public static decodeSystemTime(msg: Inbound) {
     let date = msg.readSLDateTime();
     let year = date.getFullYear();
     let month = date.getMonth() + 1; // + 1 is for backward compatibility, SLTime represents months as 1-based
@@ -197,6 +198,25 @@ export class EquipmentMessage {
   public static decodeSetSystemTime(msg: Inbound) {
     // ack
     return true;
+  } */
+  isEasyTouch(controllerType) {
+    return controllerType === 14 || controllerType === 13;
+  }
+
+  isIntelliTouch(controllerType) {
+    return controllerType !== 14 && controllerType !== 13 && controllerType !== 10;
+  }
+
+  isEasyTouchLite(controllerType, hwType) {
+    return controllerType === 13 && (hwType & 4) !== 0;
+  }
+
+  isDualBody(controllerType) {
+    return controllerType === 5;
+  }
+
+  isChem2(controllerType, hwType) {
+    return controllerType === 252 && hwType === 2;
   }
   public static decodeEquipmentConfiguration(msg: Inbound) {
     let getNumPumps = function () {
@@ -206,7 +226,7 @@ export class EquipmentMessage {
 
       let numPumps = 0;
       for (var i = 0; i < flowDataArray.length; i += 45) {
-        if (flowDataArray[i + 2] !== 0) {
+        if (flowDataArray[i] !== 0) {
           numPumps++;
         }
       }
@@ -222,9 +242,27 @@ export class EquipmentMessage {
         return 0;
       }
 
-      let pumpType = flowDataArray[(45 * pumpIndex) + 2];
-      if (pumpType <= 3) {
-        return pumpType as PumpTypes;
+
+      // let pumpType = flowDataArray[(45 * pumpIndex) + 2];
+      let pumpType = flowDataArray[(45 * pumpIndex)  ];
+      if ((pumpType & 128) === 128 ) {
+        return {
+          pumpType: PumpTypes.PUMP_TYPE_INTELLIFLOVS,
+          name: 'Intelliflo VS' 
+        }
+      }
+      else if ((pumpType & 64) === 64){     
+        return {
+          pumpType: PumpTypes.PUMP_TYPE_INTELLIFLOVSF,
+          name: 'Intelliflo VSF' 
+        }
+      }
+      else {     
+        return {
+          pumpType: PumpTypes.PUMP_TYPE_INTELLIFLOVF,
+          name: 'Intelliflo VF' 
+        }
+      
       }
 
       return 0;
@@ -303,31 +341,49 @@ export class EquipmentMessage {
       // int iMax = ((Integer) minMax.second).intValue();
       let iMin = minMax[0];
       let iMax = minMax[1];
-      let iCount = 0;
+      // let iCount = 0;
       for (let i = iMin; i < iMax; i++) {
         // let byCircuit = poolConfig.getEquipconfig().getSpeedDataArray().get(i);
         let byCircuit = speedDataArray[i];
-        if (byCircuit.byteValue() > 0) {
-          if (byCircuit.byteValue() >= 128 && byCircuit.byteValue() <= 132) {
-            // let name = get().deviceIDToString(poolConfig, byCircuit.byteValue());
+        if (byCircuit > 0) {
+          if (byCircuit >= 128 && byCircuit <= 132) {
+            // let name = get().deviceIDToString(poolConfig, byCircuit);
             let name = `string ${byCircuit}`
-            let id = byCircuit.byteValue();
+            let id = byCircuit;
             result.push([name, id]);
-            iCount++;
+            // iCount++;
           } else {
             let circuit = byCircuit;
             if (circuit != null) {
-              let name2 = circuit.getM_Name();
-              let id2 = byCircuit.byteValue();
+              let name2 =  'get name from body array' //circuit.getM_Name();
+              let id2 = byCircuit;
               result.push([name2, id2]);
-              iCount++;
+              // iCount++;
             }
           }
         }
       }
-      if (iCount < iMax - iMin) {
-      }
+      // if (iCount < iMax - iMin) {
+      // }
       return result;
+    }
+
+    let getRange = function () {
+      let ret = { min: 0, max: 0 };
+      ret.max = speedDataArray.length;
+      if (this.isEasyTouch(controllerType)) {
+        ret.max = 4;
+      }
+      if (this.isDualBody(controllerType)) {
+        ret.max = 4
+        // what is 'isPoolData'?  Define both bodies as pool instead of
+        // sep pool/spa types?
+        // if (isPoolData){
+        //  ret.min = 0 + 4;
+        //  ret.max = 4 + 4;
+        // }
+      }
+
     }
     let controllerType = msg.readUInt8();
     let hardwareType = msg.readUInt8();
@@ -358,7 +414,8 @@ export class EquipmentMessage {
     let pumps = [];
     for (let i = 0; i < numPumps; i++) {
       let pump: any = { id: i + 1 };
-      pump.type = getPumpType(i);
+      pump = Object.assign(pump, getPumpType(i));
+      pumps.push(pump);
     }
 
     // let sensors = msg.decodeHeaterConfigData(heaterConfigDataArray);
@@ -413,15 +470,12 @@ export class EquipmentMessage {
         else {
           bPresent = isValvePresent(valveIndex, loadCenterValveData)
         }
-        let sCircuit: string;
         if (bPresent) {
           var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
           deviceId = valveDataArray[valveDataIndex];
 
-          sCircuit = deviceIDToString(deviceId);
           valveName = String.fromCharCode(65 + valveIndex);
           if (deviceId !== 0) {
-            sCircuit = 'Unused';
 
             console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
             // } else if (isSolarValve === true) {
@@ -434,8 +488,7 @@ export class EquipmentMessage {
             valveIndex,
             valveName,
             loadCenterName,
-            deviceId: deviceId,
-            sCircuit
+            deviceId
           }
           valves.push(v);
         }
@@ -444,7 +497,9 @@ export class EquipmentMessage {
       }
 
     }
-    // msg.valves = valveArray;
+    ///// End Valve decode
+    ///// Speed Data decode
+
 
     ///// End Valve decode
 
@@ -459,15 +514,15 @@ export class EquipmentMessage {
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
       spaManualHeat: miscDataArray[4] !== 0
     } as Misc;
-    let speed : any[] = [];
-    speed = loadSpeedCircuits(speedDataArray, true);
-    let data: any = {
-    // let data: SLEquipmentConfigurationData = {
+    let speed: any[] = [];
+    // RSG - speed doesn't look right.
+    // speed = loadSpeedCircuits(speedDataArray, true);
+    let data: SLEquipmentConfigurationData = {
       controllerType,
       hardwareType,
       expansionsCount,
       version,
-
+      pumps,
       heaterConfig,
       valves,
       delays,
@@ -477,8 +532,6 @@ export class EquipmentMessage {
     return data;
 
   }
-
-
 
   public static decodeWeatherMessage(msg: Inbound) {
     let version = msg.readInt32LE();
@@ -593,7 +646,78 @@ export class EquipmentMessage {
     return data;
 
   }
-
+  public getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number) {
+    if (poolConfig.controllerType === 3 || poolConfig.controllerType === 4) {
+      if (circuitIndex == 0) {
+        return "Hight";
+      }
+      if (circuitIndex == 5) {
+        return "Low";
+      }
+    } else if (circuitIndex == 0) {
+      return "Spa";
+    } else {
+      if (circuitIndex == 5) {
+        return "Pool";
+      }
+    }
+    return (circuitIndex <= 0 || circuitIndex >= 5) ? this.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
+  }
+  /* public  getTypeList(poolConfig: SLEquipmentConfigurationData, circuit: number) {
+    let resultList = [];
+    if (circuit.getM_Function() == 2) {
+        CircuitType type = new CircuitType();
+        type.setName(StringLib.string(R.string.Pool));
+        type.setTypeID(2);
+        resultList.add(type);
+    }
+    if (circuit.getM_Function() == 1) {
+        CircuitType type2 = new CircuitType();
+        type2.setName(StringLib.string(R.string.Spa));
+        type2.setTypeID(1);
+        resultList.add(type2);
+    }
+    ArrayList<CircuitType> tempList = poolConfig.getCircuitTypes();
+    Iterator<CircuitType> it = tempList.iterator();
+    while (it.hasNext()) {
+        CircuitType type3 = it.next();
+        boolean hasType = true;
+        switch (type3.getTypeID()) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 6:
+                hasType = false;
+                break;
+        }
+        if (poolConfig.isEasyTouch()) {
+            switch (type3.getTypeID()) {
+                case 6:
+                case 8:
+                case 13:
+                    hasType = false;
+                    break;
+                case 16:
+                    if (poolConfig.getFWVersionNumeric() < 2010.0f && !poolConfig.iseasyTouchLite()) {
+                        hasType = false;
+                        break;
+                    }
+                    break;
+                case 17:
+                    if (poolConfig.getFWVersionNumeric() < 2060.0f && !poolConfig.iseasyTouchLite()) {
+                        hasType = false;
+                        break;
+                    }
+                    break;
+            }
+        }
+        if (hasType) {
+            resultList.add(type3);
+        }
+    }
+    return resultList;
+}*/
 }
 
 export interface SLEquipmentStateData {
@@ -658,10 +782,12 @@ export interface SLEquipmentConfigurationData {
   hardwareType: number;
   expansionsCount: number;
   version: number;
+  pumps: any;
   heaterConfig: HeaterConfig;
   valves: any[];
   delays: Delays;
   misc: Misc;
+  speed: any[]
 }
 
 export interface HeaterConfig {

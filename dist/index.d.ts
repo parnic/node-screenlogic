@@ -6,7 +6,7 @@ import * as net from 'net';
 import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
-import { SLControllerConfigData, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentStateMessage';
+import { SLEquipmentConfigurationData, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentConfig';
 import { SLIntellichlorData } from './messages/state/ChlorMessage';
 import { SLChemData } from './messages/state/ChemMessage';
 import { SLScheduleData } from './messages/state/ScheduleMessage';
@@ -79,7 +79,7 @@ export declare class Equipment {
     getEquipmentConfiguration(): Promise<unknown>;
     cancelDelay(): Promise<boolean>;
     getSystemTime(): Promise<SLSystemTimeData>;
-    getControllerConfig(): Promise<SLControllerConfigData>;
+    getControllerConfig(): Promise<SLEquipmentConfigurationData>;
     getEquipmentState(): Promise<SLEquipmentStateData>;
 }
 export declare class Circuit extends UnitConnection {
@@ -138,9 +138,9 @@ export declare enum HeatModes {
     HEAT_MODE_DONTCHANGE = 4
 }
 export declare enum PumpTypes {
-    PUMP_TYPE_INTELLIFLOVF = 1,
-    PUMP_TYPE_INTELLIFLOVS = 2,
-    PUMP_TYPE_INTELLIFLOVSF = 3
+    PUMP_TYPE_INTELLIFLOVF = 5,
+    PUMP_TYPE_INTELLIFLOVS = 3,
+    PUMP_TYPE_INTELLIFLOVSF = 4
 }
 export declare enum BodyIndex {
     POOL = 0,

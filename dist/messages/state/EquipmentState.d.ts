@@ -1,19 +1,12 @@
 import { Inbound } from "../SLMessage";
 export declare class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg: Inbound): SLEquipmentStateData;
-    static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
     static decodeSystemTime(msg: Inbound): SLSystemTimeData;
     static decodeCancelDelay(msg: Inbound): boolean;
     static decodeSetSystemTime(msg: Inbound): boolean;
-    isEasyTouch(controllerType: any): boolean;
-    isIntelliTouch(controllerType: any): boolean;
-    isEasyTouchLite(controllerType: any, hwType: any): boolean;
-    isDualBody(controllerType: any): boolean;
-    isChem2(controllerType: any, hwType: any): boolean;
-    static decodeEquipmentConfiguration(msg: Inbound): SLEquipmentConfigurationData;
+    static decodeEquipmentConfiguration(msg: Inbound): any;
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
-    getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string;
 }
 export interface SLEquipmentStateData {
     ok: number;
@@ -75,12 +68,10 @@ export interface SLEquipmentConfigurationData {
     hardwareType: number;
     expansionsCount: number;
     version: number;
-    pumps: any;
     heaterConfig: HeaterConfig;
     valves: any[];
     delays: Delays;
     misc: Misc;
-    speed: any[];
 }
 export interface HeaterConfig {
     body1SolarPresent: boolean;
