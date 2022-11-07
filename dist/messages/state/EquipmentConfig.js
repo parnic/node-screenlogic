@@ -100,20 +100,20 @@ class EquipmentConfigurationMessage {
         let equipFlags = msg.readInt32LE();
         let genCircuitName = msg.readSLString();
         let circuitCount = msg.readInt32LE();
-        let bodyArray = new Array(circuitCount);
+        let circuitArray = new Array(circuitCount);
         for (let i = 0; i < circuitCount; i++) {
-            bodyArray[i] = {
+            circuitArray[i] = {
                 circuitId: msg.readInt32LE() - 499,
                 name: msg.readSLString(),
                 nameIndex: msg.readUInt8(),
                 function: msg.readUInt8(),
                 interface: msg.readUInt8(),
-                flags: msg.readUInt8(),
+                freeze: msg.readUInt8(),
                 colorSet: msg.readUInt8(),
                 colorPos: msg.readUInt8(),
                 colorStagger: msg.readUInt8(),
                 deviceId: msg.readUInt8(),
-                dfaultRt: msg.readUInt16LE(),
+                eggTimer: msg.readUInt16LE(),
             };
             msg.incrementReadOffset(2);
         }
@@ -137,6 +137,24 @@ class EquipmentConfigurationMessage {
         }
         let interfaceTabFlags = msg.readInt32LE();
         let showAlarms = msg.readInt32LE();
+        let equipment = {
+            POOL_SOLARPRESENT: (equipFlags & 1) === 1,
+            POOL_SOLARHEATPUMP: (equipFlags & 2) === 1,
+            POOL_CHLORPRESENT: (equipFlags & 4) === 1,
+            POOL_IBRITEPRESENT: (equipFlags & 8) === 1,
+            POOL_IFLOWPRESENT0: (equipFlags & 16) === 1,
+            POOL_IFLOWPRESENT1: (equipFlags & 32) === 1,
+            POOL_IFLOWPRESENT2: (equipFlags & 64) === 1,
+            POOL_IFLOWPRESENT3: (equipFlags & 128) === 1,
+            POOL_IFLOWPRESENT4: (equipFlags & 256) === 1,
+            POOL_IFLOWPRESENT5: (equipFlags & 512) === 1,
+            POOL_IFLOWPRESENT6: (equipFlags & 1024) === 1,
+            POOL_IFLOWPRESENT7: (equipFlags & 2048) === 1,
+            POOL_NO_SPECIAL_LIGHTS: (equipFlags & 4096) === 1,
+            POOL_HEATPUMPHASCOOL: (equipFlags & 8192) === 1,
+            POOL_MAGICSTREAMPRESENT: (equipFlags & 16384) === 1,
+            POOL_ICHEMPRESENT: (equipFlags & 32768) === 1,
+        };
         let data = {
             controllerId,
             minSetPoint,
@@ -145,10 +163,10 @@ class EquipmentConfigurationMessage {
             controllerType,
             hwType,
             controllerData,
-            equipFlags,
+            equipment,
             genCircuitName,
             circuitCount,
-            bodyArray,
+            circuitArray,
             colorCount,
             colorArray,
             pumpCircCount,
@@ -158,39 +176,6 @@ class EquipmentConfigurationMessage {
         };
         return data;
     }
-    /*   public static decodeSystemTime(msg: Inbound) {
-        let date = msg.readSLDateTime();
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1; // + 1 is for backward compatibility, SLTime represents months as 1-based
-        let dayOfWeek = date.getDay(); // should probably be tweaked to adjust what days are 0-6 as SLTime and Javascript start on different days of the week
-        let day = date.getDate();
-        let hour = date.getHours();
-        let minute = date.getMinutes();
-        let second = date.getSeconds();
-        let millisecond = date.getMilliseconds();
-        var adjustForDST = msg.readInt32LE() === 1;
-        let data: SLSystemTimeData = {
-          date,
-          year,
-          month,
-          dayOfWeek,
-          day,
-          hour,
-          minute,
-          second,
-          millisecond,
-          adjustForDST
-        }
-        return data;
-      }
-      public static decodeCancelDelay(msg: Inbound) {
-        // ack
-        return true;
-      }
-      public static decodeSetSystemTime(msg: Inbound) {
-        // ack
-        return true;
-      } */
     isEasyTouch(controllerType) {
         return controllerType === 14 || controllerType === 13;
     }
@@ -384,7 +369,7 @@ class EquipmentConfigurationMessage {
         let flowDataArray = msg.readSLArray();
         let sgDataArray = msg.readSLArray();
         let spaFlowDataArray = msg.readSLArray();
-        let expansionsCount = (controllerData & 192) >> 6;
+        let expansionsCount = (controllerData & 192) >> 6 || 0;
         if (versionDataArray === null || versionDataArray.length < 2) {
             version = 0;
         }

@@ -6,7 +6,7 @@ import * as net from 'net';
 import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
-import { SLEquipmentConfigurationData, SLEquipmentStateData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from './messages/state/EquipmentConfig';
+import { SLControllerConfigData, SLEquipmentConfigurationData, SLEquipmentStateData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from './messages/state/EquipmentConfig';
 import { SLIntellichlorData } from './messages/state/ChlorMessage';
 import { SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { SLScheduleData } from './messages/state/ScheduleMessage';
@@ -63,7 +63,7 @@ export declare class UnitConnection extends EventEmitter {
     write(val: Buffer | string): void;
     keepAliveAsync(): void;
     processData(msg: Buffer): void;
-    close(): Promise<void>;
+    close(): Promise<boolean>;
     connect(): Promise<boolean>;
     login(challengeString: string): void;
     getVersion(): Promise<string>;
@@ -80,7 +80,7 @@ export declare class Equipment {
     getEquipmentConfiguration(): Promise<SLEquipmentConfigurationData>;
     cancelDelay(): Promise<boolean>;
     getSystemTime(): Promise<SLSystemTimeData>;
-    getControllerConfig(): Promise<SLEquipmentConfigurationData>;
+    getControllerConfig(): Promise<SLControllerConfigData>;
     getEquipmentState(): Promise<SLEquipmentStateData>;
 }
 export declare class Circuit extends UnitConnection {

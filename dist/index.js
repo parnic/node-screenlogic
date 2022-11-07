@@ -24,7 +24,7 @@ const CircuitMessage_1 = require("./messages/state/CircuitMessage");
 const HeaterMessage_1 = require("./messages/state/HeaterMessage");
 const SLMessage_1 = require("./messages/SLMessage");
 const EquipmentState_1 = require("./messages/state/EquipmentState");
-const Encoder = require('./PasswordEncoder').HLEncoder;
+const Encoder = require('./utils/PasswordEncoder').HLEncoder;
 var debugFind = require('debug')('sl:find');
 var debugRemote = require('debug')('sl:remote');
 var debugUnit = require('debug')('sl:unit');
@@ -274,14 +274,17 @@ class UnitConnection extends events_1.EventEmitter {
         }
     }
     async close() {
-        if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer)
-            clearTimeout(this._keepAliveTimer);
-        this._keepAliveTimer = null;
-        let removeClient = await this.removeClient();
-        console.log(`Removed client: ${removeClient}`);
-        this.client.setKeepAlive(false);
-        this.client.end(() => {
-            debugUnit(`Client socket closed`);
+        return new Promise(async (resolve, reject) => {
+            if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer)
+                clearTimeout(this._keepAliveTimer);
+            this._keepAliveTimer = null;
+            let removeClient = await this.removeClient();
+            debugUnit(`Removed client: ${removeClient}`);
+            this.client.setKeepAlive(false);
+            this.client.end(() => {
+                debugUnit(`Client socket closed`);
+                resolve(true);
+            });
         });
     }
     async connect() {

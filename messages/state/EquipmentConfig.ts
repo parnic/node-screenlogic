@@ -4,88 +4,88 @@ import { Inbound } from "../SLMessage";
 
 
 export class EquipmentConfigurationMessage {
-/*   public static decodeEquipmentStateResponse(msg: Inbound) {
-    let data: SLEquipmentStateData;
-    let ok = msg.readInt32LE();
-    let freezeMode = msg.readUInt8();
-    let remotes = msg.readUInt8();
-    let poolDelay = msg.readUInt8();
-    let spaDelay = msg.readUInt8();
-    let cleanerDelay = msg.readUInt8();
-    msg.incrementReadOffset(3);
-    let airTemp = msg.readInt32LE();
-    let bodiesCount = msg.readInt32LE();
-    if (bodiesCount > 2) {
-      bodiesCount = 2;
-    }
-
-    let currentTemp = new Array(bodiesCount);
-    let heatStatus = new Array(bodiesCount);
-    let setPoint = new Array(bodiesCount);
-    let coolSetPoint = new Array(bodiesCount);
-    let heatMode = new Array(bodiesCount);
-
-    let bodies = [{ id: 1 } as any, bodiesCount > 1 ? { id: 2 } : undefined];
-
-    for (let i = 0; i < bodiesCount; i++) {
-      let bodyType = msg.readInt32LE();
-      if (bodyType < 0 || bodyType >= 2) {
-        bodyType = 0;
+  /*   public static decodeEquipmentStateResponse(msg: Inbound) {
+      let data: SLEquipmentStateData;
+      let ok = msg.readInt32LE();
+      let freezeMode = msg.readUInt8();
+      let remotes = msg.readUInt8();
+      let poolDelay = msg.readUInt8();
+      let spaDelay = msg.readUInt8();
+      let cleanerDelay = msg.readUInt8();
+      msg.incrementReadOffset(3);
+      let airTemp = msg.readInt32LE();
+      let bodiesCount = msg.readInt32LE();
+      if (bodiesCount > 2) {
+        bodiesCount = 2;
       }
-      bodies[bodyType].currentTemp = currentTemp[bodyType] = msg.readInt32LE();
-      bodies[bodyType].heatStatus = heatStatus[bodyType] = msg.readInt32LE();
-      bodies[bodyType].setPoint = setPoint[bodyType] = msg.readInt32LE();
-      bodies[bodyType].coolSetPoint = coolSetPoint[bodyType] = msg.readInt32LE();
-      bodies[bodyType].heatMode = heatMode[bodyType] = msg.readInt32LE();
-    }
-
-    let circuitCount = msg.readInt32LE();
-    let circuitArray = new Array(circuitCount);
-    for (let i = 0; i < circuitCount; i++) {
-      circuitArray[i] = {
-        id: msg.readInt32LE() - 499,
-        state: msg.readInt32LE(),
-        colorSet: msg.readUInt8(),
-        colorPos: msg.readUInt8(),
-        colorStagger: msg.readUInt8(),
-        delay: msg.readUInt8(),
+  
+      let currentTemp = new Array(bodiesCount);
+      let heatStatus = new Array(bodiesCount);
+      let setPoint = new Array(bodiesCount);
+      let coolSetPoint = new Array(bodiesCount);
+      let heatMode = new Array(bodiesCount);
+  
+      let bodies = [{ id: 1 } as any, bodiesCount > 1 ? { id: 2 } : undefined];
+  
+      for (let i = 0; i < bodiesCount; i++) {
+        let bodyType = msg.readInt32LE();
+        if (bodyType < 0 || bodyType >= 2) {
+          bodyType = 0;
+        }
+        bodies[bodyType].currentTemp = currentTemp[bodyType] = msg.readInt32LE();
+        bodies[bodyType].heatStatus = heatStatus[bodyType] = msg.readInt32LE();
+        bodies[bodyType].setPoint = setPoint[bodyType] = msg.readInt32LE();
+        bodies[bodyType].coolSetPoint = coolSetPoint[bodyType] = msg.readInt32LE();
+        bodies[bodyType].heatMode = heatMode[bodyType] = msg.readInt32LE();
+      }
+  
+      let circuitCount = msg.readInt32LE();
+      let circuitArray = new Array(circuitCount);
+      for (let i = 0; i < circuitCount; i++) {
+        circuitArray[i] = {
+          id: msg.readInt32LE() - 499,
+          state: msg.readInt32LE(),
+          colorSet: msg.readUInt8(),
+          colorPos: msg.readUInt8(),
+          colorStagger: msg.readUInt8(),
+          delay: msg.readUInt8(),
+        };
+      }
+  
+      let pH = msg.readInt32LE() / 100;
+      let orp = msg.readInt32LE();
+      let saturation = msg.readInt32LE() / 100;
+      let saltPPM = msg.readInt32LE() * 50;
+      let pHTank = msg.readInt32LE();
+      let orpTank = msg.readInt32LE();
+      let alarms = msg.readInt32LE();
+  
+      data = {
+        ok,
+        freezeMode,
+        remotes,
+        poolDelay,
+        spaDelay,
+        cleanerDelay,
+        airTemp,
+        bodiesCount,
+        bodies,
+        currentTemp,
+        heatStatus,
+        setPoint,
+        coolSetPoint,
+        heatMode,
+        circuitArray,
+        pH,
+        orp,
+        saturation,
+        saltPPM,
+        pHTank,
+        orpTank,
+        alarms,
       };
-    }
-
-    let pH = msg.readInt32LE() / 100;
-    let orp = msg.readInt32LE();
-    let saturation = msg.readInt32LE() / 100;
-    let saltPPM = msg.readInt32LE() * 50;
-    let pHTank = msg.readInt32LE();
-    let orpTank = msg.readInt32LE();
-    let alarms = msg.readInt32LE();
-
-    data = {
-      ok,
-      freezeMode,
-      remotes,
-      poolDelay,
-      spaDelay,
-      cleanerDelay,
-      airTemp,
-      bodiesCount,
-      bodies,
-      currentTemp,
-      heatStatus,
-      setPoint,
-      coolSetPoint,
-      heatMode,
-      circuitArray,
-      pH,
-      orp,
-      saturation,
-      saltPPM,
-      pHTank,
-      orpTank,
-      alarms,
-    };
-    return data;
-  } */
+      return data;
+    } */
   public static decodeControllerConfig(msg: Inbound) {
     let controllerId = msg.readInt32LE() - 99;
 
@@ -104,20 +104,20 @@ export class EquipmentConfigurationMessage {
     let genCircuitName = msg.readSLString();
 
     let circuitCount = msg.readInt32LE();
-    let bodyArray = new Array(circuitCount);
+    let circuitArray = new Array(circuitCount);
     for (let i = 0; i < circuitCount; i++) {
-      bodyArray[i] = {
+      circuitArray[i] = {
         circuitId: msg.readInt32LE() - 499,
         name: msg.readSLString(),
         nameIndex: msg.readUInt8(),
         function: msg.readUInt8(),
-        interface: msg.readUInt8(),
-        flags: msg.readUInt8(),
+        interface: msg.readUInt8(), // where does this show in the interface?  0 = pool; 1 = spa; 2 = features; 5 = hide
+        freeze: msg.readUInt8(), // 1 = on with freeze active; 0 = not on with freeze active
         colorSet: msg.readUInt8(),
         colorPos: msg.readUInt8(),
         colorStagger: msg.readUInt8(),
-        deviceId: msg.readUInt8(),
-        dfaultRt: msg.readUInt16LE(),
+        deviceId: msg.readUInt8(), // always the same as circuitId - 499;
+        eggTimer: msg.readUInt16LE(),
       };
       msg.incrementReadOffset(2);
     }
@@ -145,6 +145,25 @@ export class EquipmentConfigurationMessage {
     let interfaceTabFlags = msg.readInt32LE();
     let showAlarms = msg.readInt32LE();
 
+   
+    let equipment = {
+      POOL_SOLARPRESENT: (equipFlags & 1) === 1,
+      POOL_SOLARHEATPUMP: (equipFlags & 2) === 1,
+      POOL_CHLORPRESENT: (equipFlags & 4) === 1,
+      POOL_IBRITEPRESENT: (equipFlags & 8) === 1,
+      POOL_IFLOWPRESENT0: (equipFlags & 16) === 1,
+      POOL_IFLOWPRESENT1: (equipFlags & 32) === 1,
+      POOL_IFLOWPRESENT2: (equipFlags & 64) === 1,
+      POOL_IFLOWPRESENT3: (equipFlags & 128) === 1,
+      POOL_IFLOWPRESENT4: (equipFlags & 256) === 1,
+      POOL_IFLOWPRESENT5: (equipFlags & 512) === 1,
+      POOL_IFLOWPRESENT6: (equipFlags & 1024) === 1,
+      POOL_IFLOWPRESENT7: (equipFlags & 2048) === 1,
+      POOL_NO_SPECIAL_LIGHTS: (equipFlags & 4096) === 1,
+      POOL_HEATPUMPHASCOOL: (equipFlags & 8192) === 1,
+      POOL_MAGICSTREAMPRESENT: (equipFlags & 16384) === 1,
+      POOL_ICHEMPRESENT: (equipFlags & 32768) === 1,
+    }
     let data: SLControllerConfigData = {
       controllerId,
       minSetPoint,
@@ -153,10 +172,10 @@ export class EquipmentConfigurationMessage {
       controllerType,
       hwType,
       controllerData,
-      equipFlags,
+      equipment,
       genCircuitName,
       circuitCount,
-      bodyArray,
+      circuitArray,
       colorCount,
       colorArray,
       pumpCircCount,
@@ -166,39 +185,7 @@ export class EquipmentConfigurationMessage {
     }
     return data;
   }
-/*   public static decodeSystemTime(msg: Inbound) {
-    let date = msg.readSLDateTime();
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1; // + 1 is for backward compatibility, SLTime represents months as 1-based
-    let dayOfWeek = date.getDay(); // should probably be tweaked to adjust what days are 0-6 as SLTime and Javascript start on different days of the week
-    let day = date.getDate();
-    let hour = date.getHours();
-    let minute = date.getMinutes();
-    let second = date.getSeconds();
-    let millisecond = date.getMilliseconds();
-    var adjustForDST = msg.readInt32LE() === 1;
-    let data: SLSystemTimeData = {
-      date,
-      year,
-      month,
-      dayOfWeek,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      adjustForDST
-    }
-    return data;
-  }
-  public static decodeCancelDelay(msg: Inbound) {
-    // ack
-    return true;
-  }
-  public static decodeSetSystemTime(msg: Inbound) {
-    // ack
-    return true;
-  } */
+
   isEasyTouch(controllerType) {
     return controllerType === 14 || controllerType === 13;
   }
@@ -244,25 +231,25 @@ export class EquipmentConfigurationMessage {
 
 
       // let pumpType = flowDataArray[(45 * pumpIndex) + 2];
-      let pumpType = flowDataArray[(45 * pumpIndex)  ];
-      if ((pumpType & 128) === 128 ) {
+      let pumpType = flowDataArray[(45 * pumpIndex)];
+      if ((pumpType & 128) === 128) {
         return {
           pumpType: PumpTypes.PUMP_TYPE_INTELLIFLOVS,
-          name: 'Intelliflo VS' 
+          name: 'Intelliflo VS'
         }
       }
-      else if ((pumpType & 64) === 64){     
+      else if ((pumpType & 64) === 64) {
         return {
           pumpType: PumpTypes.PUMP_TYPE_INTELLIFLOVSF,
-          name: 'Intelliflo VSF' 
+          name: 'Intelliflo VSF'
         }
       }
-      else {     
+      else {
         return {
           pumpType: PumpTypes.PUMP_TYPE_INTELLIFLOVF,
-          name: 'Intelliflo VF' 
+          name: 'Intelliflo VF'
         }
-      
+
       }
 
       return 0;
@@ -331,7 +318,7 @@ export class EquipmentConfigurationMessage {
           return 'Freeze';
       }
     };
-    let loadSpeedCircuits = (speedDataArray, isPool)=> {
+    let loadSpeedCircuits = (speedDataArray, isPool) => {
       // let  loadSpeedCircuits(poolConfig,isPool) {
       // ArrayList<Pair<String, Integer>> result = new ArrayList<>();
       let result = new Array();
@@ -355,7 +342,7 @@ export class EquipmentConfigurationMessage {
           } else {
             let circuit = byCircuit;
             if (circuit != null) {
-              let name2 =  'get name from body array' //circuit.getM_Name();
+              let name2 = 'get name from body array' //circuit.getM_Name();
               let id2 = byCircuit;
               result.push([name2, id2]);
               // iCount++;
@@ -404,7 +391,7 @@ export class EquipmentConfigurationMessage {
     let sgDataArray = msg.readSLArray();
     let spaFlowDataArray = msg.readSLArray();
 
-    let expansionsCount = (controllerData & 192) >> 6;
+    let expansionsCount = (controllerData & 192) >> 6 || 0;
     if (versionDataArray === null || versionDataArray.length < 2) {
       version = 0;
     }
@@ -753,15 +740,46 @@ export interface SLControllerConfigData {
   circuitCount: number,
   hwType;
   controllerData;
-  equipFlags;
+  equipment: Equipment;
   genCircuitName;
   interfaceTabFlags: number;
-  bodyArray: any[];
+  circuitArray: Circuit[];
   colorCount: number;
   colorArray: any[];
   pumpCircCount: number;
   pumpCircArray: any[];
   showAlarms: number;
+}
+export interface Equipment {
+    POOL_SOLARPRESENT: boolean,
+    POOL_SOLARHEATPUMP: boolean,
+    POOL_CHLORPRESENT: boolean,
+    POOL_IBRITEPRESENT: boolean,
+    POOL_IFLOWPRESENT0: boolean,
+    POOL_IFLOWPRESENT1: boolean,
+    POOL_IFLOWPRESENT2: boolean,
+    POOL_IFLOWPRESENT3: boolean,
+    POOL_IFLOWPRESENT4: boolean,
+    POOL_IFLOWPRESENT5: boolean,
+    POOL_IFLOWPRESENT6: boolean,
+    POOL_IFLOWPRESENT7: boolean,
+    POOL_NO_SPECIAL_LIGHTS: boolean,
+    POOL_HEATPUMPHASCOOL: boolean,
+    POOL_MAGICSTREAMPRESENT: boolean,
+    POOL_ICHEMPRESENT: boolean
+
+}
+export interface Circuit {
+  circuitId: number,
+  name: string,
+  nameIndex: number,
+  function: number,
+  interface: number,
+  onWithFreeze: number,
+  colorSet?: number,
+  colorPos?: number,
+  colorStagger?: number,
+  eggTimer: number
 }
 
 export interface SLSystemTimeData {

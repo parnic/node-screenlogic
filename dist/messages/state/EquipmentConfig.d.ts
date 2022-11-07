@@ -44,15 +44,45 @@ export interface SLControllerConfigData {
     circuitCount: number;
     hwType: any;
     controllerData: any;
-    equipFlags: any;
+    equipment: Equipment;
     genCircuitName: any;
     interfaceTabFlags: number;
-    bodyArray: any[];
+    circuitArray: Circuit[];
     colorCount: number;
     colorArray: any[];
     pumpCircCount: number;
     pumpCircArray: any[];
     showAlarms: number;
+}
+export interface Equipment {
+    POOL_SOLARPRESENT: boolean;
+    POOL_SOLARHEATPUMP: boolean;
+    POOL_CHLORPRESENT: boolean;
+    POOL_IBRITEPRESENT: boolean;
+    POOL_IFLOWPRESENT0: boolean;
+    POOL_IFLOWPRESENT1: boolean;
+    POOL_IFLOWPRESENT2: boolean;
+    POOL_IFLOWPRESENT3: boolean;
+    POOL_IFLOWPRESENT4: boolean;
+    POOL_IFLOWPRESENT5: boolean;
+    POOL_IFLOWPRESENT6: boolean;
+    POOL_IFLOWPRESENT7: boolean;
+    POOL_NO_SPECIAL_LIGHTS: boolean;
+    POOL_HEATPUMPHASCOOL: boolean;
+    POOL_MAGICSTREAMPRESENT: boolean;
+    POOL_ICHEMPRESENT: boolean;
+}
+export interface Circuit {
+    circuitId: number;
+    name: string;
+    nameIndex: number;
+    function: number;
+    interface: number;
+    onWithFreeze: number;
+    colorSet?: number;
+    colorPos?: number;
+    colorStagger?: number;
+    eggTimer: number;
 }
 export interface SLSystemTimeData {
     date: Date;
