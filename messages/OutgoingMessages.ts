@@ -94,6 +94,12 @@ export class EquipmentCommands extends Commands {
     this.writeInt32LE(0);
     return this.toBuffer();
   }
+  public createGetCustomNamesMessage() {
+    this.messageId = 12562;
+    this.createBaseMessage();
+    this.writeInt32LE(0);
+    return this.toBuffer();
+  }
   public createWeatherMessage() {
     this.messageId = 9807;
     this.createBaseMessage();

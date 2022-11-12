@@ -650,6 +650,18 @@ export class EquipmentConfigurationMessage {
     }
     return (circuitIndex <= 0 || circuitIndex >= 5) ? this.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
   }
+  public static decodeCustomNames(msg: Inbound) {
+    let nameCount = msg.readInt32LE();
+    // msg.incrementReadOffset(0);
+    let customNames:string[] = [];
+    let ro = msg.readOffset;
+    for (let i = 0; i < nameCount; i++){
+      let n = msg.readSLString();
+      customNames.push(n);
+    }
+    return customNames;
+
+  }
   /* public  getTypeList(poolConfig: SLEquipmentConfigurationData, circuit: number) {
     let resultList = [];
     if (circuit.getM_Function() == 2) {

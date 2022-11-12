@@ -19,6 +19,7 @@ export declare class EquipmentCommands extends Commands {
     createGetEquipmentConfigurationMessage(): Buffer;
     createGetSystemTimeMessage(): Buffer;
     createCancelDelayMessage(): Buffer;
+    createGetCustomNamesMessage(): Buffer;
     createWeatherMessage(): Buffer;
     createSetSystemTimeMessage(date: Date, shouldAdjustForDST: boolean): Buffer;
     createGetHistoryMessage(fromTime: Date, toTime: Date): Buffer;

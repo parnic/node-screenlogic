@@ -552,6 +552,10 @@ export class UnitConnection extends EventEmitter {
         debugUnit("  it's a set circuit runtime ack");
         this.emit('setCircuitRuntimebyId', CircuitMessage.decodeSetCircuitRunTime(msg));
         break;
+      case 12563: 
+        debugUnit("  it's a get custom names packet");
+        this.emit('getCustomNames', EquipmentConfigurationMessage.decodeCustomNames(msg));
+        break;
       case 12587: // SLSetPumpSpeed.getResponseId():
         debugUnit("  it's a set pump flow ack");
         this.emit('setPumpSpeed', PumpMessage.decodeSetPumpSpeed(msg));
@@ -736,6 +740,20 @@ export class Equipment {
       screenlogic.write(screenlogic.controller.equipment.createEquipmentStateMessage());
     })
   }
+  async getCustomNames(): Promise<string[]> {
+    return new Promise(async (resolve, reject) => {
+      debugUnit('[%d] sending get custom names: %d...', screenlogic.senderId);
+      let _timeout = setTimeout(() => {
+        reject(new Error('time out waiting for custom names'));
+      }, screenlogic.netTimeout);
+      screenlogic.once('getCustomNames', (customNames) => {
+        clearTimeout(_timeout);
+        debugUnit('received getCustomNames event');
+        resolve(customNames);
+      })
+      screenlogic.write(screenlogic.controller.equipment.createGetCustomNamesMessage());
+    });
+  }
 }
 
 export class Circuit extends UnitConnection {
@@ -890,7 +908,7 @@ export class Schedule extends UnitConnection {
   }
   async getScheduleData(scheduleType: SchedTypes): Promise<SLScheduleData[]> {
     return new Promise(async (resolve, reject) => {
-      debugUnit('[%d] sending set schedule data query for scheduleType: %d...', screenlogic.senderId, scheduleType);
+      debugUnit('[%d] sending get schedule data query for scheduleType: %d...', screenlogic.senderId, scheduleType);
       let _timeout = setTimeout(() => {
         reject(new Error('time out waiting for schedule data'));
       }, screenlogic.netTimeout);

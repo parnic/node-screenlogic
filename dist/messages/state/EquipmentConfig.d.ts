@@ -10,6 +10,7 @@ export declare class EquipmentConfigurationMessage {
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
     getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string;
+    static decodeCustomNames(msg: Inbound): string[];
 }
 export interface SLEquipmentStateData {
     ok: number;

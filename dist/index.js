@@ -500,6 +500,10 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit("  it's a set circuit runtime ack");
                 this.emit('setCircuitRuntimebyId', CircuitMessage_1.CircuitMessage.decodeSetCircuitRunTime(msg));
                 break;
+            case 12563:
+                debugUnit("  it's a get custom names packet");
+                this.emit('getCustomNames', EquipmentConfig_1.EquipmentConfigurationMessage.decodeCustomNames(msg));
+                break;
             case 12587: // SLSetPumpSpeed.getResponseId():
                 debugUnit("  it's a set pump flow ack");
                 this.emit('setPumpSpeed', PumpMessage_1.PumpMessage.decodeSetPumpSpeed(msg));
@@ -677,6 +681,20 @@ class Equipment {
             exports.screenlogic.write(exports.screenlogic.controller.equipment.createEquipmentStateMessage());
         });
     }
+    async getCustomNames() {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending get custom names: %d...', exports.screenlogic.senderId);
+            let _timeout = setTimeout(() => {
+                reject(new Error('time out waiting for custom names'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('getCustomNames', (customNames) => {
+                clearTimeout(_timeout);
+                debugUnit('received getCustomNames event');
+                resolve(customNames);
+            });
+            exports.screenlogic.write(exports.screenlogic.controller.equipment.createGetCustomNamesMessage());
+        });
+    }
 }
 exports.Equipment = Equipment;
 class Circuit extends UnitConnection {
@@ -831,7 +849,7 @@ class Schedule extends UnitConnection {
     }
     async getScheduleData(scheduleType) {
         return new Promise(async (resolve, reject) => {
-            debugUnit('[%d] sending set schedule data query for scheduleType: %d...', exports.screenlogic.senderId, scheduleType);
+            debugUnit('[%d] sending get schedule data query for scheduleType: %d...', exports.screenlogic.senderId, scheduleType);
             let _timeout = setTimeout(() => {
                 reject(new Error('time out waiting for schedule data'));
             }, exports.screenlogic.netTimeout);

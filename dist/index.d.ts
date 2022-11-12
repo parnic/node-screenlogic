@@ -82,6 +82,7 @@ export declare class Equipment {
     getSystemTime(): Promise<SLSystemTimeData>;
     getControllerConfig(): Promise<SLControllerConfigData>;
     getEquipmentState(): Promise<SLEquipmentStateData>;
+    getCustomNames(): Promise<string[]>;
 }
 export declare class Circuit extends UnitConnection {
     sendLightCommand(command: LightCommands): Promise<boolean>;
