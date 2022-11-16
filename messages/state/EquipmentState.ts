@@ -1,6 +1,7 @@
 
 import { PumpTypes } from "../../index";
 import { Inbound } from "../SLMessage";
+import { Delays, Misc, SLEquipmentStateData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from "./EquipmentConfig";
 
 
 export class EquipmentStateMessage {
@@ -70,11 +71,6 @@ export class EquipmentStateMessage {
       airTemp,
       bodiesCount,
       bodies,
-      currentTemp,
-      heatStatus,
-      setPoint,
-      coolSetPoint,
-      heatMode,
       circuitArray,
       pH,
       orp,
@@ -516,146 +512,4 @@ export class EquipmentStateMessage {
 
   }
 
-}
-
-export interface SLEquipmentStateData {
-  ok: number;
-  freezeMode: number;
-  remotes: number;
-  poolDelay: number;
-  spaDelay: number;
-  cleanerDelay: number;
-  airTemp: number;
-  bodiesCount: number;
-  bodies: {}[],
-  currentTemp: any[];
-  heatStatus: any[];
-  setPoint: any[];
-  coolSetPoint: any[];
-  heatMode: any[];
-  circuitArray: any[];
-  pH: number;
-  orp: number;
-  saturation: number;
-  saltPPM: number;
-  pHTank: number;
-  orpTank: number;
-  alarms: number;
-}
-export interface SLControllerConfigData {
-  controllerId: number;
-  minSetPoint: number[];
-  maxSetPoint: number[];
-  degC: boolean;
-  controllerType;
-  circuitCount: number,
-  hwType;
-  controllerData;
-  equipFlags;
-  genCircuitName;
-  interfaceTabFlags: number;
-  bodyArray: any[];
-  colorCount: number;
-  colorArray: any[];
-  pumpCircCount: number;
-  pumpCircArray: any[];
-  showAlarms: number;
-}
-
-export interface SLSystemTimeData {
-  date: Date;
-  year: any;
-  month: any;
-  dayOfWeek: any;
-  day: any;
-  hour: any;
-  minute: any;
-  second: any;
-  millisecond: any;
-  adjustForDST: boolean;
-}
-
-export interface SLEquipmentConfigurationData {
-  controllerType: number;
-  hardwareType: number;
-  expansionsCount: number;
-  version: number;
-  heaterConfig: HeaterConfig;
-  valves: any[];
-  delays: Delays;
-  misc: Misc;
-}
-
-export interface HeaterConfig {
-  body1SolarPresent: boolean,
-  body2SolarPresent: boolean,
-  thermaFloCoolPresent: boolean,
-  solarHeatPumpPresent: boolean,
-  thermaFloPresent: boolean,
-}
-
-export interface Delays {
-  poolPumpOnDuringHeaterCooldown: boolean,
-  spaPumpOnDuringHeaterCooldown: boolean,
-  pumpOffDuringValveAction
-}
-
-export interface Misc {
-  intelliChem: boolean,
-  spaManualHeat: boolean
-}
-
-export interface Valves {
-  loadCenterIndex: number,
-  valveIndex: number,
-  valveName: string,
-  loadCenterName: string,
-  deviceId: any
-}
-
-export interface SLWeatherForecastData {
-  version: number;
-  zip: string;
-  lastUpdate: Date;
-  lastRequest: Date;
-  dateText: string;
-  text: string;
-  currentTemperature: number;
-  humidity: number;
-  wind: string;
-  pressure: number;
-  dewPoint: number;
-  windChill: number;
-  visibility: number;
-  dayData: SLWeatherForecastDayData[];
-  sunrise: number;
-  sunset: number;
-}
-export interface SLWeatherForecastDayData {
-  dayTime: Date;
-  highTemp: number;
-  lowTemp: number;
-  text: string;
-}
-
-export interface TimeTimePointPairs {
-  on: Date;
-  off: Date;
-}
-export interface TimeTempPointPairs {
-  time: Date;
-  temp: number;
-}
-
-export interface SLHistoryData {
-  airTemps: TimeTempPointPairs[];
-  poolTemps: TimeTempPointPairs[];
-  poolSetPointTemps: TimeTempPointPairs[];
-  spaTemps: TimeTempPointPairs[];
-  spaSetPointTemps: TimeTempPointPairs[];
-  poolRuns: TimeTimePointPairs[];
-  spaRuns: TimeTimePointPairs[];
-  solarRuns: TimeTimePointPairs[];
-  heaterRuns: TimeTimePointPairs[];
-  lightRuns: TimeTimePointPairs[];
 }

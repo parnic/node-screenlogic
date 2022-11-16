@@ -28,7 +28,7 @@ export declare class RemoteLogin extends EventEmitter {
     private _client;
     private _gateway;
     connect(): Promise<SLGateway.SLGateWayData>;
-    private close;
+    closeAsync(): Promise<unknown>;
 }
 export declare class UnitConnection extends EventEmitter {
     constructor();
@@ -63,9 +63,9 @@ export declare class UnitConnection extends EventEmitter {
     write(val: Buffer | string): void;
     keepAliveAsync(): void;
     processData(msg: Buffer): void;
-    close(): Promise<boolean>;
-    connect(): Promise<boolean>;
-    login(challengeString: string): void;
+    closeAsync(): Promise<boolean>;
+    connectAsync(): Promise<boolean>;
+    login(challengeString: string): Promise<unknown>;
     getVersion(): Promise<string>;
     addClient(clientId?: number): Promise<boolean>;
     removeClient(): Promise<boolean>;

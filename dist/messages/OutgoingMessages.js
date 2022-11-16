@@ -40,14 +40,14 @@ class ConnectionCommands extends Commands {
     createAddClientMessage() {
         this.messageId = 12522;
         this.createBaseMessage();
-        this.writeInt32LE(0);
+        this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(this.unit.clientId);
         return this.toBuffer();
     }
     createRemoveClientMessage() {
         this.messageId = 12524;
         this.createBaseMessage();
-        this.writeInt32LE(0);
+        this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(this.unit.clientId);
         return this.toBuffer();
     }

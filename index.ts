@@ -150,9 +150,9 @@ export class RemoteLogin extends EventEmitter {
             reject(new Error(`Message of length <= 4 is invalid.`));
           }
         }
-        self.close();
+        self.closeAsync();
       }).on('close', function (had_error) {
-        debugRemote('remote login server connection closed');
+        debugRemote('Gateway server connection closed (close emit)');
         self.emit('close', had_error);
       }).on('error', function (e) {
         debugRemote('error: %o', e);
@@ -171,8 +171,16 @@ export class RemoteLogin extends EventEmitter {
     )
   };
 
-  private close() {
-    this._client.end();
+  public async closeAsync() {
+    let self = this;
+    return new Promise(async (resolve, reject) => {
+      debugRemote(`Gateway request to close.`);
+      self._client.end(() => {
+        debugUnit(`Gateway closed`);
+        resolve(true);
+      });
+    });
+
   }
 }
 
@@ -184,11 +192,6 @@ export class UnitConnection extends EventEmitter {
     this.client.setKeepAlive(true, 10 * 1000);
     this._buffer = Buffer.alloc(1024);
     this._bufferIdx = 0;
-    // this._expectedMsgLen = 0;
-    var self = this;
-    // this.SLMessages.init(this);
-
-
   }
   private serverPort: number;
   private serverAddress: string;
@@ -210,7 +213,7 @@ export class UnitConnection extends EventEmitter {
   public set senderId(val: number) { this._senderId = val; }
   // public SLMessages = slmessage;
   public controller: Controller;
-  public netTimeout: number = 1000;
+  public netTimeout: number = 1000;  // set back to 1s after testing
   private _keepAliveDuration: number = 30 * 1000;
   private _keepAliveTimer: NodeJS.Timeout;
   private _expectedMsgLen: number;
@@ -229,9 +232,28 @@ export class UnitConnection extends EventEmitter {
       debugUnit('closed');
       self.emit('close', had_error);
     }).on('error', function (e) {
+      // often, during debugging, the socket will timeout
+      debugUnit(`Unit error: ${JSON.stringify(e)}`);
+      /*       if (typeof (e as any).code !== 'undefined' && (e as any).code === 'ECONNRESET') {
+              (async () => {
+                try {
+                  await this.connectAsync();
+                  console.log(`Client successfully reconnected`);
+                }
+                catch (err) {
+                  debugUnit('error: %o', e);
+                  self.emit('error', e);
+                } 
+              }) 
+      
+            }
+            else { */
       debugUnit('error: %o', e);
       self.emit('error', e);
-    });
+    }).on('clientError', function (err, socket) {
+      if (err.code === 'ECONNRESET' || !socket.writable) socket.end('HTTP/2 400 Bad Request\n');
+      debugUnit('client error\n', err);
+    });;
     this.serverPort = port;
     this.serverAddress = address;
     this.password = password;
@@ -260,7 +282,12 @@ export class UnitConnection extends EventEmitter {
     );
   }
   public write(val: Buffer | string) {
-    this.client.write(val);
+    try {
+      this.client.write(val);
+    }
+    catch (err) {
+      debugUnit(`Error writing to net: ${err.message}`);
+    }
   }
   public keepAliveAsync() {
     let self = this;
@@ -316,55 +343,89 @@ export class UnitConnection extends EventEmitter {
     }
   }
 
-  async close(): Promise<boolean> {
+  async closeAsync(): Promise<boolean> {
+    let self = this;
     return new Promise(async (resolve, reject) => {
-      if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer) clearTimeout(this._keepAliveTimer);
-      this._keepAliveTimer = null;
-      let removeClient = await this.removeClient();
-      debugUnit(`Removed client: ${removeClient}`);
-      this.client.setKeepAlive(false);
-      this.client.end(() => {
-        debugUnit(`Client socket closed`);
+      try {
+        
+        if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer) clearTimeout(this._keepAliveTimer);
+        this._keepAliveTimer = null;
+        if (self.client.destroyed) {
+          resolve(true);
+        }
+        else {
+          let removeClient = await self.removeClient();
+          debugUnit(`Removed client: ${removeClient}`);
+          self.client.setKeepAlive(false);
+          self.client.end(() => {
+            debugUnit(`Client socket closed`);
+            resolve(true);
+          });
+          resolve(true);
+        }
+      } catch (error) {
+        debugUnit(`caught error in closeAsync ${error.message}... returning anwyay`);
         resolve(true);
-      });
+      }
+
     });
   }
 
-  public async connect(): Promise<boolean> {
+  public async connectAsync(): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
-
-      debugUnit('connecting...');
-      var self = this;
-      this.client.connect(this.serverPort, this.serverAddress, function () {
-        // _this.onConnected();
-        debugUnit('connected');
-
-        debugUnit('sending init message...');
-        self.write('CONNECTSERVERHOST\r\n\r\n');
-
+      try {
+        
+        debugUnit('connecting...');
+        var self = this;
+        this.client.connect(this.serverPort, this.serverAddress, function () {
+        debugUnit('connected, sending init message...');
+        self.write('CONNECTSERVERHOST\r\n\r\n');    
         debugUnit('sending challenge message...');
         let _timeout = setTimeout(() => {
           if (typeof reject === 'function') reject(new Error(`timeout`));
         }, screenlogic.netTimeout)
-        self.once('loggedIn', function () {
-          resolve(true);
-          clearTimeout(_timeout);
-          reject = undefined;
-        }).once('loginFailed', function () {
-          reject(new Error(`Login Failed`));
-          clearTimeout(_timeout);
-          reject = undefined;
+        self.once('challengeString', async function (challengeString) {
+          debugUnit('   challenge string emit');
+          try {
+            await this.login(challengeString);
+            resolve(true);
+          } catch (error) {
+            reject(error);
+          }
+          finally {
+            clearTimeout(_timeout);
+          }
         })
-
+        
         screenlogic.write(screenlogic.controller.connection.createChallengeMessage());
       });
+    } catch (error) {
+        debugUnit(`Caught connectAsync error ${error.message}; rethrowing...`)
+        throw error;
+    }
     })
   }
 
-  login(challengeString: string) {
-    debugUnit('sending login message...');
-    var password = new Encoder(this.password).getEncryptedPassword(challengeString);
-    screenlogic.write(screenlogic.controller.connection.createLoginMessage(password));
+  async login(challengeString: string) {
+    let self = this;
+    return new Promise(async (resolve, reject) => {
+      debugUnit('sending login message...');
+      let _timeout = setTimeout(() => {
+        reject(new Error('time out waiting for challenge string'));
+      }, screenlogic.netTimeout);
+      self.once('loggedIn', () => {
+        clearTimeout(_timeout);
+        debugUnit('received loggedIn event');
+        resolve(true);
+        self.removeListener('loginFailed', function () { });
+      }).once('loginFailed', function () {
+        clearTimeout(_timeout);
+        debugUnit('loginFailed');
+        reject(new Error('Login Failed'));
+      })
+      var password = new Encoder(this.password).getEncryptedPassword(challengeString);
+      screenlogic.write(screenlogic.controller.connection.createLoginMessage(password));
+    })
   }
   async getVersion(): Promise<string> {
     let self = this;
@@ -403,17 +464,23 @@ export class UnitConnection extends EventEmitter {
   async removeClient(): Promise<boolean> {
     let self = this;
     return new Promise(async (resolve, reject) => {
-      debugUnit('[%d] sending remove client command, clientId %d...', this.senderId, this.clientId);
-      let _timeout = setTimeout(() => {
-        reject(new Error('time out waiting for remove client response'));
-      }, screenlogic.netTimeout);
-      self.once('removeClient', (clientAck) => {
-        clearTimeout(_timeout);
-        debugUnit('received removeClient event');
-        resolve(true);
-      })
-      screenlogic.write(screenlogic.controller.connection.createRemoveClientMessage());
-    });
+      try {
+        
+        debugUnit('[%d] sending remove client command, clientId %d...', this.senderId, this.clientId);
+        let _timeout = setTimeout(() => {
+          reject(new Error('time out waiting for remove client response'));
+        }, screenlogic.netTimeout);
+        self.once('removeClient', (clientAck) => {
+          clearTimeout(_timeout);
+          debugUnit('received removeClient event');
+          resolve(true);
+        })
+        screenlogic.write(screenlogic.controller.connection.createRemoveClientMessage());
+      } catch (error) {
+          debugUnit(`caught remove client error ${error.message}, rethrowing...`);
+          throw error;
+      }
+      });
   }
 
   async pingServer(): Promise<boolean> {
@@ -441,8 +508,8 @@ export class UnitConnection extends EventEmitter {
       case 15:  //SLChallengeMessage.getResponseId():
         debugUnit("  it's a challenge response");
         let challengeString = ConnectionMessage.decodeChallengeResponse(msg);
-        // this.challengeString = new SLChallengeMessage(buf).get();
-        this.login(challengeString);
+        this.emit('challengeString', challengeString)
+        // this.login(challengeString);
         break;
       case 28: //SLLoginMessage.getResponseId():
         debugUnit("  it's a login response");
@@ -552,7 +619,7 @@ export class UnitConnection extends EventEmitter {
         debugUnit("  it's a set circuit runtime ack");
         this.emit('setCircuitRuntimebyId', CircuitMessage.decodeSetCircuitRunTime(msg));
         break;
-      case 12563: 
+      case 12563:
         debugUnit("  it's a get custom names packet");
         this.emit('getCustomNames', EquipmentConfigurationMessage.decodeCustomNames(msg));
         break;
@@ -848,16 +915,23 @@ export class Pump extends UnitConnection {
   }
   async getPumpStatus(pumpId): Promise<SLPumpStatusData> {
     return new Promise(async (resolve, reject) => {
-      debugUnit('[%d] sending get pump status command for pumpId: %d...', screenlogic.senderId, pumpId);
-      let _timeout = setTimeout(() => {
-        reject(new Error('time out waiting for pump status response'));
-      }, screenlogic.netTimeout);
-      screenlogic.once('getPumpStatus', (data) => {
-        clearTimeout(_timeout);
-        debugUnit('received getPumpStatus event');
-        resolve(data);
-      })
-      screenlogic.write(screenlogic.controller.pumps.createPumpStatusMessage(pumpId));
+      try {
+
+        debugUnit('[%d] sending get pump status command for pumpId: %d...', screenlogic.senderId, pumpId);
+        let _timeout = setTimeout(() => {
+          reject(new Error('time out waiting for pump status response'));
+        }, screenlogic.netTimeout);
+        screenlogic.once('getPumpStatus', (data) => {
+          clearTimeout(_timeout);
+          debugUnit('received getPumpStatus event');
+          resolve(data);
+        })
+        screenlogic.write(screenlogic.controller.pumps.createPumpStatusMessage(pumpId));
+      }
+      catch (err) {
+        debugUnit(`Error getting pump status: ${err.message}`);
+        reject(err);
+      }
     });
   }
 }

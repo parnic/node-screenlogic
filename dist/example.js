@@ -57,11 +57,11 @@ async function app() {
     })
         .on('loginFailed', function () {
         console.log(' unable to login (wrong password?)');
-        client.close();
+        client.closeAsync();
     });
     try {
         client.init(unit.ipAddr, unit.port, password, 12345);
-        await client.connect();
+        await client.connectAsync();
         let addClient = await client.addClient();
         console.log(`Add client result: ${addClient}`);
         // EQUIPMENT
@@ -69,6 +69,8 @@ async function app() {
         console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
         let result = await client.getVersion();
         console.log(`Pool Version: ${result}`);
+        let customNames = await client.equipment.getCustomNames();
+        console.log(`customNames: ${customNames}`);
         let controller = await client.equipment.getEquipmentConfiguration();
         console.log(`Controller: ${JSON.stringify(controller)}`);
         let equipConfig = await client.equipment.getEquipmentConfiguration();
@@ -126,13 +128,13 @@ async function app() {
         console.log(`circ run res: ${circRun}`);
         setTimeout(async () => {
             console.log(`closing connection after 60s`);
-            await client.close();
+            await client.closeAsync();
         }, 60 * 1000);
         console.log(`Waiting 60s.`);
     }
     catch (error) {
         console.log(`Error: ${error.message}`);
-        client.close();
+        client.closeAsync();
     }
 }
 app()

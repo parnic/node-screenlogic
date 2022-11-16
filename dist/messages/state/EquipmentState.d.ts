@@ -17,13 +17,8 @@ export interface SLEquipmentStateData {
     cleanerDelay: number;
     airTemp: number;
     bodiesCount: number;
-    bodies: {}[];
-    currentTemp: any[];
-    heatStatus: any[];
-    setPoint: any[];
-    coolSetPoint: any[];
-    heatMode: any[];
-    circuitArray: any[];
+    bodies: SLEquipmentStateBodyData[];
+    circuitArray: SLCircuitArray[];
     pH: number;
     orp: number;
     saturation: number;
@@ -31,6 +26,21 @@ export interface SLEquipmentStateData {
     pHTank: number;
     orpTank: number;
     alarms: number;
+}
+export interface SLCircuitArray {
+    id: number;
+    state: number;
+    colorSet: number;
+    colorPos: number;
+    colorStagger: number;
+    delay: number;
+}
+export interface SLEquipmentStateBodyData {
+    currentTemp: number;
+    heatStatus: number;
+    setPoint: number;
+    coolSetPoint: number;
+    heatMode: number;
 }
 export interface SLControllerConfigData {
     controllerId: number;

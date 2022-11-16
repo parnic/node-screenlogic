@@ -38,5 +38,22 @@
         "DEBUG": "*"
       }
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch LOOP",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/dist/example -- loop.js",
+      "__preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "DEBUG": "*"
+      }
+    },
   ]
 }

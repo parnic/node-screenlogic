@@ -68,3 +68,8 @@ messages/.DS_Store
 
 dist/example copy.d.ts
 dist/example -- LOCAL.d.ts
+dist/example -- loop.d.ts
+dist/example -- loop.js
+dist/example -- loop.js.map
+example -- loop.ts
+output.json

@@ -4,89 +4,7 @@ import { Inbound } from "../SLMessage";
 
 
 export class EquipmentConfigurationMessage {
-  /*   public static decodeEquipmentStateResponse(msg: Inbound) {
-      let data: SLEquipmentStateData;
-      let ok = msg.readInt32LE();
-      let freezeMode = msg.readUInt8();
-      let remotes = msg.readUInt8();
-      let poolDelay = msg.readUInt8();
-      let spaDelay = msg.readUInt8();
-      let cleanerDelay = msg.readUInt8();
-      msg.incrementReadOffset(3);
-      let airTemp = msg.readInt32LE();
-      let bodiesCount = msg.readInt32LE();
-      if (bodiesCount > 2) {
-        bodiesCount = 2;
-      }
-  
-      let currentTemp = new Array(bodiesCount);
-      let heatStatus = new Array(bodiesCount);
-      let setPoint = new Array(bodiesCount);
-      let coolSetPoint = new Array(bodiesCount);
-      let heatMode = new Array(bodiesCount);
-  
-      let bodies = [{ id: 1 } as any, bodiesCount > 1 ? { id: 2 } : undefined];
-  
-      for (let i = 0; i < bodiesCount; i++) {
-        let bodyType = msg.readInt32LE();
-        if (bodyType < 0 || bodyType >= 2) {
-          bodyType = 0;
-        }
-        bodies[bodyType].currentTemp = currentTemp[bodyType] = msg.readInt32LE();
-        bodies[bodyType].heatStatus = heatStatus[bodyType] = msg.readInt32LE();
-        bodies[bodyType].setPoint = setPoint[bodyType] = msg.readInt32LE();
-        bodies[bodyType].coolSetPoint = coolSetPoint[bodyType] = msg.readInt32LE();
-        bodies[bodyType].heatMode = heatMode[bodyType] = msg.readInt32LE();
-      }
-  
-      let circuitCount = msg.readInt32LE();
-      let circuitArray = new Array(circuitCount);
-      for (let i = 0; i < circuitCount; i++) {
-        circuitArray[i] = {
-          id: msg.readInt32LE() - 499,
-          state: msg.readInt32LE(),
-          colorSet: msg.readUInt8(),
-          colorPos: msg.readUInt8(),
-          colorStagger: msg.readUInt8(),
-          delay: msg.readUInt8(),
-        };
-      }
-  
-      let pH = msg.readInt32LE() / 100;
-      let orp = msg.readInt32LE();
-      let saturation = msg.readInt32LE() / 100;
-      let saltPPM = msg.readInt32LE() * 50;
-      let pHTank = msg.readInt32LE();
-      let orpTank = msg.readInt32LE();
-      let alarms = msg.readInt32LE();
-  
-      data = {
-        ok,
-        freezeMode,
-        remotes,
-        poolDelay,
-        spaDelay,
-        cleanerDelay,
-        airTemp,
-        bodiesCount,
-        bodies,
-        currentTemp,
-        heatStatus,
-        setPoint,
-        coolSetPoint,
-        heatMode,
-        circuitArray,
-        pH,
-        orp,
-        saturation,
-        saltPPM,
-        pHTank,
-        orpTank,
-        alarms,
-      };
-      return data;
-    } */
-  public static decodeControllerConfig(msg: Inbound) {
+   public static decodeControllerConfig(msg: Inbound) {
     let controllerId = msg.readInt32LE() - 99;
 
     let minSetPoint = new Array(2);
@@ -148,21 +66,21 @@ export class EquipmentConfigurationMessage {
    
     let equipment = {
       POOL_SOLARPRESENT: (equipFlags & 1) === 1,
-      POOL_SOLARHEATPUMP: (equipFlags & 2) === 1,
-      POOL_CHLORPRESENT: (equipFlags & 4) === 1,
-      POOL_IBRITEPRESENT: (equipFlags & 8) === 1,
-      POOL_IFLOWPRESENT0: (equipFlags & 16) === 1,
-      POOL_IFLOWPRESENT1: (equipFlags & 32) === 1,
-      POOL_IFLOWPRESENT2: (equipFlags & 64) === 1,
-      POOL_IFLOWPRESENT3: (equipFlags & 128) === 1,
-      POOL_IFLOWPRESENT4: (equipFlags & 256) === 1,
-      POOL_IFLOWPRESENT5: (equipFlags & 512) === 1,
-      POOL_IFLOWPRESENT6: (equipFlags & 1024) === 1,
-      POOL_IFLOWPRESENT7: (equipFlags & 2048) === 1,
-      POOL_NO_SPECIAL_LIGHTS: (equipFlags & 4096) === 1,
-      POOL_HEATPUMPHASCOOL: (equipFlags & 8192) === 1,
-      POOL_MAGICSTREAMPRESENT: (equipFlags & 16384) === 1,
-      POOL_ICHEMPRESENT: (equipFlags & 32768) === 1,
+      POOL_SOLARHEATPUMP: (equipFlags & 2) === 2,
+      POOL_CHLORPRESENT: (equipFlags & 4) === 4,
+      POOL_IBRITEPRESENT: (equipFlags & 8) === 8,
+      POOL_IFLOWPRESENT0: (equipFlags & 16) === 16,
+      POOL_IFLOWPRESENT1: (equipFlags & 32) === 32,
+      POOL_IFLOWPRESENT2: (equipFlags & 64) === 64,
+      POOL_IFLOWPRESENT3: (equipFlags & 128) === 128,
+      POOL_IFLOWPRESENT4: (equipFlags & 256) === 256,
+      POOL_IFLOWPRESENT5: (equipFlags & 512) === 512,
+      POOL_IFLOWPRESENT6: (equipFlags & 1024) === 1024,
+      POOL_IFLOWPRESENT7: (equipFlags & 2048) === 2048,
+      POOL_NO_SPECIAL_LIGHTS: (equipFlags & 4096) === 4096,
+      POOL_HEATPUMPHASCOOL: (equipFlags & 8192) === 8192,
+      POOL_MAGICSTREAMPRESENT: (equipFlags & 16384) === 16384,
+      POOL_ICHEMPRESENT: (equipFlags & 32768) === 32768
     }
     let data: SLControllerConfigData = {
       controllerId,
@@ -514,7 +432,8 @@ export class EquipmentConfigurationMessage {
       valves,
       delays,
       misc,
-      speed
+      speed,
+      numPumps
     };
     return data;
 
@@ -817,7 +736,8 @@ export interface SLEquipmentConfigurationData {
   valves: Valves[];
   delays: Delays;
   misc: Misc;
-  speed: any[]
+  speed: any[],
+  numPumps: number;
 }
 
 export interface HeaterConfig {

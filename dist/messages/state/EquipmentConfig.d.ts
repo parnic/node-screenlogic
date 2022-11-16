@@ -108,6 +108,7 @@ export interface SLEquipmentConfigurationData {
     delays: Delays;
     misc: Misc;
     speed: any[];
+    numPumps: number;
 }
 export interface HeaterConfig {
     body1SolarPresent: boolean;
