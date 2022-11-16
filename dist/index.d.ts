@@ -6,12 +6,13 @@ import * as net from 'net';
 import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
-import { SLControllerConfigData, SLEquipmentConfigurationData, SLEquipmentStateData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from './messages/state/EquipmentConfig';
+import { SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from './messages/state/EquipmentConfig';
 import { SLIntellichlorData } from './messages/state/ChlorMessage';
 import { SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { SLScheduleData } from './messages/state/ScheduleMessage';
 import { SLPumpStatusData } from './messages/state/PumpMessage';
 import { Inbound } from './messages/SLMessage';
+import { SLEquipmentStateData } from './messages/state/EquipmentState';
 export declare class FindUnits extends EventEmitter {
     constructor();
     private finder;

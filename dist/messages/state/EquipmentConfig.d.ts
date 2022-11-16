@@ -12,30 +12,6 @@ export declare class EquipmentConfigurationMessage {
     getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string;
     static decodeCustomNames(msg: Inbound): string[];
 }
-export interface SLEquipmentStateData {
-    ok: number;
-    freezeMode: number;
-    remotes: number;
-    poolDelay: number;
-    spaDelay: number;
-    cleanerDelay: number;
-    airTemp: number;
-    bodiesCount: number;
-    bodies: {}[];
-    currentTemp: any[];
-    heatStatus: any[];
-    setPoint: any[];
-    coolSetPoint: any[];
-    heatMode: any[];
-    circuitArray: any[];
-    pH: number;
-    orp: number;
-    saturation: number;
-    saltPPM: number;
-    pHTank: number;
-    orpTank: number;
-    alarms: number;
-}
 export interface SLControllerConfigData {
     controllerId: number;
     minSetPoint: number[];
@@ -79,11 +55,12 @@ export interface Circuit {
     nameIndex: number;
     function: number;
     interface: number;
-    onWithFreeze: number;
+    freeze: number;
     colorSet?: number;
     colorPos?: number;
     colorStagger?: number;
     eggTimer: number;
+    deviceId: number;
 }
 export interface SLSystemTimeData {
     date: Date;

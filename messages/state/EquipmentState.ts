@@ -1,7 +1,7 @@
 
 import { PumpTypes } from "../../index";
 import { Inbound } from "../SLMessage";
-import { Delays, Misc, SLEquipmentStateData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from "./EquipmentConfig";
+import { Delays, Misc, SLHistoryData, SLSystemTimeData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from "./EquipmentConfig";
 
 
 export class EquipmentStateMessage {
@@ -41,7 +41,7 @@ export class EquipmentStateMessage {
     }
 
     let circuitCount = msg.readInt32LE();
-    let circuitArray = new Array(circuitCount);
+    let circuitArray:SLEquipmentCircuitArrayState[] = new Array(circuitCount);
     for (let i = 0; i < circuitCount; i++) {
       circuitArray[i] = {
         id: msg.readInt32LE() - 499,
@@ -512,4 +512,39 @@ export class EquipmentStateMessage {
 
   }
 
+}
+
+export interface SLEquipmentStateData {
+  ok: number;
+  freezeMode: number;
+  remotes: number;
+  poolDelay: number;
+  spaDelay: number;
+  cleanerDelay: number;
+  airTemp: number;
+  bodiesCount: number;
+  bodies: SLEquipmentBodyState[],
+  circuitArray: SLEquipmentCircuitArrayState[];
+  pH: number;
+  orp: number;
+  saturation: number;
+  saltPPM: number;
+  pHTank: number;
+  orpTank: number;
+  alarms: number;
+}
+export interface SLEquipmentBodyState {
+  currentTemp: number,
+  heatStatus: number,
+  setPoint: number,
+  coolSetPoint: number,
+  heatMode: number
+}
+export interface SLEquipmentCircuitArrayState {
+  id: number,
+  state: number,
+  colorSet: number,
+  colorPos: number,
+  colorStagger: number,
+  delay: number
 }
