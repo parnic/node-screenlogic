@@ -69,7 +69,8 @@ export class FindUnits extends EventEmitter {
 
         debugFind(`Screenlogic finder searching for local units...`,);
         let _timeout = setTimeoutSync(() => {
-          reject(new Error('time out waiting for remove client response'));
+          debugFind(`No units found searching locally.`)
+          resolve({});
         }, 2000);
         self.once('serverFound', (unit) => {
           clearTimeout(_timeout);
