@@ -115,6 +115,9 @@ class Inbound extends SLMessage {
     incrementReadOffset(val) {
         this._smartBuffer.readOffset = this._smartBuffer.readOffset + val;
     }
+    toString() {
+        return this._smartBuffer.toString();
+    }
 }
 exports.Inbound = Inbound;
 class Outbound extends SLMessage {

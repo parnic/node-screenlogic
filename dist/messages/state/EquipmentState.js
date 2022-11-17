@@ -477,6 +477,11 @@ class EquipmentStateMessage {
         };
         return data;
     }
+    static decodeGeneric(msg) {
+        console.log(`Data is ${msg.length} long...`);
+        console.log(msg.toString());
+        // 8300 is sent when a schedule changes - SL says this is a "HLM_SYSCONFIG_NOTIFYNEEDWRITEFLASH = 8300;"
+    }
 }
 exports.EquipmentStateMessage = EquipmentStateMessage;
 //# sourceMappingURL=EquipmentState.js.map

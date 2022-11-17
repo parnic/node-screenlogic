@@ -133,6 +133,9 @@ export class Inbound extends SLMessage{
   incrementReadOffset(val: number) {
     this._smartBuffer.readOffset = this._smartBuffer.readOffset + val;
   }
+  toString(){
+    return this._smartBuffer.toString();
+  }
 }
 
 

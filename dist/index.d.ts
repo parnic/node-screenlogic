@@ -19,6 +19,7 @@ export declare class FindUnits extends EventEmitter {
     private bound;
     private message;
     search(): void;
+    searchAsync(): Promise<unknown>;
     foundServer(msg: any, remote: any): void;
     sendServerBroadcast(): void;
     close(): void;
@@ -37,6 +38,7 @@ export declare class UnitConnection extends EventEmitter {
     private serverAddress;
     private password;
     protected client: net.Socket;
+    private isConnected;
     private _clientId;
     get clientId(): number;
     set clientId(val: number);

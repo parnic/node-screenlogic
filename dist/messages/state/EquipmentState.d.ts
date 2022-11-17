@@ -8,6 +8,7 @@ export declare class EquipmentStateMessage {
     static decodeEquipmentConfiguration(msg: Inbound): any;
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
+    static decodeGeneric(msg: Inbound): void;
 }
 export interface SLEquipmentStateData {
     ok: number;

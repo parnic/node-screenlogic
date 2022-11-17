@@ -73,3 +73,6 @@ dist/example -- loop.js
 dist/example -- loop.js.map
 example -- loop.ts
 output.json
+dist/example - find units.d.ts
+dist/example - find units.js
+dist/example - find units.js.map
