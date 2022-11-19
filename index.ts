@@ -24,6 +24,7 @@ var debugRemote = require('debug')('sl:remote');
 var debugUnit = require('debug')('sl:unit');
 import { setTimeout } from "timers/promises";
 import { setTimeout as setTimeoutSync } from "timers";
+import { Socket } from 'dgram';
 export class FindUnits extends EventEmitter {
   constructor() {
     super();
@@ -205,9 +206,6 @@ export class RemoteLogin extends EventEmitter {
 export class UnitConnection extends EventEmitter {
   constructor() {
     super();
-
-    this.client = new net.Socket();
-    this.client.setKeepAlive(true, 10 * 1000);
     this._buffer = Buffer.alloc(1024);
     this._bufferIdx = 0;
   }
@@ -245,8 +243,11 @@ export class UnitConnection extends EventEmitter {
   public pump: Pump;
   public init(address: string, port: number, password: string, senderId?: number) {
     let self = this;
+    this.client = new net.Socket();
+    this.client.setKeepAlive(true, 10 * 1000);
     this.client.on('data', function (msg) {
       self.processData(msg);
+      self.emit('bytesRead', self.client.bytesRead);
     }).on('close', function (had_error) {
       debugUnit(`closed.  any error? ${had_error}`);
       self.emit('close', had_error);
@@ -288,6 +289,7 @@ export class UnitConnection extends EventEmitter {
   public write(val: Buffer | string) {
     try {
       this.client.write(val);
+      this.emit('bytesWritten', this.client.bytesWritten);
     }
     catch (err) {
       debugUnit(`Error writing to net: ${err.message}`);
@@ -364,11 +366,17 @@ export class UnitConnection extends EventEmitter {
             debugUnit(`Removed client: ${removeClient}`);
           }
           self.client.setKeepAlive(false);
-          self.client.end(() => {
-            debugUnit(`Client socket closed`);
-            resolve(true);
-          });
+          self.client.destroy();
           self.isConnected = false;
+          self.client.removeAllListeners();
+          self.removeAllListeners();
+          self.client = undefined;
+          resolve(true);
+          // () => {
+          //   debugUnit(`Client socket closed`);
+          //   resolve(true);
+          //   self.client.
+          // });
           // resolve(true);
         }
       } catch (error) {
@@ -439,6 +447,21 @@ export class UnitConnection extends EventEmitter {
       var password = new Encoder(this.password).getEncryptedPassword(challengeString);
       screenlogic.write(screenlogic.controller.connection.createLoginMessage(password));
     })
+  }
+  public bytesRead(){
+    return this.client.bytesRead;
+  }
+  public bytesWritten(){
+    return this.client.bytesWritten;
+  }
+  public status(){
+    return {
+      destroyed: this.client.destroyed,
+      connecting: this.client.connecting,
+      // pending: this.client.pending, // should be here but isn't?
+      timeout: this.client.timeout,
+      readyState: this.client.readyState,
+    }
   }
   async getVersion(): Promise<string> {
     let self = this;

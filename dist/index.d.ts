@@ -69,6 +69,14 @@ export declare class UnitConnection extends EventEmitter {
     closeAsync(): Promise<boolean>;
     connectAsync(): Promise<boolean>;
     login(challengeString: string): Promise<unknown>;
+    bytesRead(): number;
+    bytesWritten(): number;
+    status(): {
+        destroyed: boolean;
+        connecting: boolean;
+        timeout: number;
+        readyState: net.SocketReadyState;
+    };
     getVersion(): Promise<string>;
     addClient(clientId?: number): Promise<boolean>;
     removeClient(): Promise<boolean>;

@@ -57,22 +57,14 @@ typings/
 # dotenv environment variables file
 .env
 
-dist/example copy.js
-dist/example copy.js.map
-example copy.ts
-dist/example -- LOCAL.js
-dist/example -- LOCAL.js.map
-example -- LOCAL.ts
+
+
 messages/.DS_Store
 .vscode/launch.json
 
-dist/example copy.d.ts
-dist/example -- LOCAL.d.ts
-dist/example -- loop.d.ts
-dist/example -- loop.js
-dist/example -- loop.js.map
-example -- loop.ts
+
 output.json
-dist/example - find units.d.ts
-dist/example - find units.js
-dist/example - find units.js.map
+dist/example *.*
+example *.*
+output*.*
+clean.*

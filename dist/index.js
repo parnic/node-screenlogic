@@ -191,8 +191,6 @@ class UnitConnection extends events_1.EventEmitter {
         this._senderId = 0;
         this.netTimeout = 2000; // set back to 1s after testing
         this._keepAliveDuration = 30 * 1000;
-        this.client = new net.Socket();
-        this.client.setKeepAlive(true, 10 * 1000);
         this._buffer = Buffer.alloc(1024);
         this._bufferIdx = 0;
     }
@@ -207,8 +205,11 @@ class UnitConnection extends events_1.EventEmitter {
     set senderId(val) { this._senderId = val; }
     init(address, port, password, senderId) {
         let self = this;
+        this.client = new net.Socket();
+        this.client.setKeepAlive(true, 10 * 1000);
         this.client.on('data', function (msg) {
             self.processData(msg);
+            self.emit('bytesRead', self.client.bytesRead);
         }).on('close', function (had_error) {
             debugUnit(`closed.  any error? ${had_error}`);
             self.emit('close', had_error);
@@ -250,6 +251,7 @@ class UnitConnection extends events_1.EventEmitter {
     write(val) {
         try {
             this.client.write(val);
+            this.emit('bytesWritten', this.client.bytesWritten);
         }
         catch (err) {
             debugUnit(`Error writing to net: ${err.message}`);
@@ -324,11 +326,17 @@ class UnitConnection extends events_1.EventEmitter {
                         debugUnit(`Removed client: ${removeClient}`);
                     }
                     self.client.setKeepAlive(false);
-                    self.client.end(() => {
-                        debugUnit(`Client socket closed`);
-                        resolve(true);
-                    });
+                    self.client.destroy();
                     self.isConnected = false;
+                    self.client.removeAllListeners();
+                    self.removeAllListeners();
+                    self.client = undefined;
+                    resolve(true);
+                    // () => {
+                    //   debugUnit(`Client socket closed`);
+                    //   resolve(true);
+                    //   self.client.
+                    // });
                     // resolve(true);
                 }
             }
@@ -399,6 +407,21 @@ class UnitConnection extends events_1.EventEmitter {
             var password = new Encoder(this.password).getEncryptedPassword(challengeString);
             exports.screenlogic.write(exports.screenlogic.controller.connection.createLoginMessage(password));
         });
+    }
+    bytesRead() {
+        return this.client.bytesRead;
+    }
+    bytesWritten() {
+        return this.client.bytesWritten;
+    }
+    status() {
+        return {
+            destroyed: this.client.destroyed,
+            connecting: this.client.connecting,
+            // pending: this.client.pending, // should be here but isn't?
+            timeout: this.client.timeout,
+            readyState: this.client.readyState,
+        };
     }
     async getVersion() {
         let self = this;
