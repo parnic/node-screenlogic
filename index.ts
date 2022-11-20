@@ -132,14 +132,14 @@ export class RemoteLogin extends EventEmitter {
 
 
   public connect(): Promise<SLGateway.SLGateWayData> {
+    var self = this;
     return new Promise((resolve, reject) => {
       debugRemote('connecting to dispatcher...');
-      var self = this;
-      this._client.on('data', function (buf) {
+      self._client.on('data', function (buf) {
         // _this.onClientMessage(msg);
 
         if (buf.length > 4) {
-          let message = new Inbound(this.controllerId, screenlogic.senderId);
+          let message = new Inbound(screenlogic.controllerId, screenlogic.senderId);
           message.readFromBuffer(buf);
           var msgType = buf.readInt16LE(2);
           debugRemote(`received message of length ${buf.length} and messageId ${message.messageId}`);
@@ -151,7 +151,7 @@ export class RemoteLogin extends EventEmitter {
                 resolve(unit);
               }
               else
-                this.emit('gatewayFound', new SLGateway.SLReceiveGatewayDataMessage(buf));
+                self.emit('gatewayFound', new SLGateway.SLReceiveGatewayDataMessage(buf));
               break;
             default:
               debugRemote("  it's unknown. type: " + msgType);
@@ -182,7 +182,7 @@ export class RemoteLogin extends EventEmitter {
           self.emit('error', e);
       });
 
-      this._client.connect(500, 'screenlogicserver.pentair.com', function () {
+      self._client.connect(500, 'screenlogicserver.pentair.com', function () {
         debugRemote('connected to dispatcher');
         self._client.write(self._gateway.createSendGatewayMessage(self.systemName));
       })
@@ -388,12 +388,12 @@ export class UnitConnection extends EventEmitter {
   }
 
   public async connectAsync(): Promise<boolean> {
+    var self = this;
     return new Promise(async (resolve, reject) => {
       try {
         debugUnit('connecting...');
-        var self = this;
         let connected = false;
-        this.client.on('ready', () => {
+        self.client.on('ready', () => {
           debugUnit('connected, sending init message...');
           self.write('CONNECTSERVERHOST\r\n\r\n');
           debugUnit('sending challenge message...');
@@ -403,7 +403,7 @@ export class UnitConnection extends EventEmitter {
           self.once('challengeString', async function (challengeString) {
             debugUnit('   challenge string emit');
             try {
-              await this.login(challengeString);
+              await self.loginAsync(challengeString);
               resolve(true);
             } catch (error) {
               reject(error);
@@ -415,7 +415,7 @@ export class UnitConnection extends EventEmitter {
           screenlogic.controller.connection.sendChallengeMessage();
         })
 
-        this.client.connect(this.serverPort, this.serverAddress, function () {
+        self.client.connect(self.serverPort, self.serverAddress, function () {
           connected = true;
         });
       } catch (error) {
@@ -444,7 +444,7 @@ export class UnitConnection extends EventEmitter {
         debugUnit('loginFailed');
         reject(new Error('Login Failed'));
       })
-      var password = new Encoder(this.password).getEncryptedPassword(challengeString);
+      var password = new Encoder(self.password).getEncryptedPassword(challengeString);
       screenlogic.controller.connection.sendLoginMessage(password);
     })
   }
@@ -476,7 +476,7 @@ export class UnitConnection extends EventEmitter {
     let self = this;
     return new Promise(async (resolve, reject) => {
 
-      debugUnit('[%d] sending version query...', this.senderId);
+      debugUnit('[%d] sending version query...', self.senderId);
       let _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for version'));
       }, screenlogic.netTimeout);
@@ -511,7 +511,7 @@ export class UnitConnection extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       try {
 
-        debugUnit(`[${this.senderId}] sending remove client command, clientId ${this.clientId}...`,);
+        debugUnit(`[${self.senderId}] sending remove client command, clientId ${self.clientId}...`,);
         let _timeout = setTimeoutSync(() => {
           reject(new Error('time out waiting for remove client response'));
         }, screenlogic.netTimeout);
@@ -531,7 +531,7 @@ export class UnitConnection extends EventEmitter {
   async pingServerAsync(): Promise<boolean> {
     let self = this;
     return new Promise(async (resolve, reject) => {
-      debugUnit('[%d] pinging server', this.senderId);
+      debugUnit('[%d] pinging server', self.senderId);
       let _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for ping server response'));
       }, screenlogic.netTimeout);
