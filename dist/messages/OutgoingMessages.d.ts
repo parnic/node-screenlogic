@@ -6,50 +6,50 @@ export declare class Commands extends Outbound {
     constructor(unit: UnitConnection);
 }
 export declare class ConnectionCommands extends Commands {
-    createLoginMessage(password?: string[]): Buffer;
-    createChallengeMessage(): Buffer;
-    createVersionMessage(): Buffer;
-    createAddClientMessage(): Buffer;
-    createRemoveClientMessage(): Buffer;
-    createPingMessage(): Buffer;
+    sendLoginMessage(password?: string[]): void;
+    sendChallengeMessage(): void;
+    sendVersionMessage(): void;
+    sendAddClientMessage(): void;
+    sendRemoveClientMessage(): void;
+    sendPingMessage(): void;
 }
 export declare class EquipmentCommands extends Commands {
-    createEquipmentStateMessage(): Buffer;
-    createGetControllerConfigMessage(): Buffer;
-    createGetEquipmentConfigurationMessage(): Buffer;
-    createGetSystemTimeMessage(): Buffer;
-    createCancelDelayMessage(): Buffer;
-    createGetCustomNamesMessage(): Buffer;
-    createWeatherMessage(): Buffer;
-    createSetSystemTimeMessage(date: Date, shouldAdjustForDST: boolean): Buffer;
-    createGetHistoryMessage(fromTime: Date, toTime: Date): Buffer;
+    sendGetEquipmentStateMessage(): void;
+    sendGetControllerConfigMessage(): void;
+    sendGetEquipmentConfigurationMessage(): void;
+    sendGetSystemTimeMessage(): void;
+    sendCancelDelayMessage(): void;
+    sendGetCustomNamesMessage(): void;
+    sendGetWeatherMessage(): void;
+    sendSetSystemTimeMessage(date: Date, shouldAdjustForDST: boolean): void;
+    sendGetHistoryMessage(fromTime: Date, toTime: Date): void;
 }
 export declare class CircuitCommands extends Commands {
-    createSetCircuitMessage(circuitId: number, circuitState: boolean): Buffer;
-    createIntellibriteMessage(command: LightCommands): Buffer;
-    createSetCircuitRuntimeMessage(circuitId: number, runTime: number): Buffer;
+    sendSetCircuitMessage(circuitId: number, circuitState: boolean): void;
+    sendIntellibriteMessage(command: LightCommands): void;
+    sendSetCircuitRuntimeMessage(circuitId: number, runTime: number): void;
 }
 export declare class ChlorCommands extends Commands {
-    createSetChlorOutputMessage(poolOutput: number, spaOutput: number): Buffer;
-    createSaltCellConfigMessage(): Buffer;
+    sendSetChlorOutputMessage(poolOutput: number, spaOutput: number): void;
+    sendGetSaltCellConfigMessage(): void;
 }
 export declare class ChemCommands extends Commands {
-    createChemStatusMessage(): Buffer;
-    createGetChemHistoryMessage(fromTime: Date, toTime: Date): Buffer;
+    sendGetChemStatusMessage(): void;
+    sendGetChemHistoryMessage(fromTime: Date, toTime: Date): void;
 }
 export declare class BodyCommands extends Commands {
-    createSetPointMessage(bodyType: number, temperature: number): Buffer;
-    createHeatModeMessage(bodyType: number, heatMode: number): Buffer;
+    sendSetPointMessage(bodyType: number, temperature: number): void;
+    sendHeatModeMessage(bodyType: number, heatMode: number): void;
 }
 export declare class ScheduleCommands extends Commands {
-    createGetSchedulesMessage(schedType: number): Buffer;
-    createAddScheduleEventMessage(schedType: number): Buffer;
-    createDeleteScheduleEventMessage(schedId: number): Buffer;
-    createSetScheduleEventMessage(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number): Buffer;
+    sendGetSchedulesMessage(schedType: number): void;
+    sendAddScheduleEventMessage(schedType: number): void;
+    sendDeleteScheduleEventMessage(schedId: number): void;
+    sendSetScheduleEventMessage(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number): void;
 }
 export declare class PumpCommands extends Commands {
-    createPumpStatusMessage(pumpId: number): Buffer;
-    setPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPM?: boolean): Buffer;
+    sendGetPumpStatusMessage(pumpId: number): void;
+    sendSetPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPM?: boolean): void;
 }
 export declare class OutboundGateway extends Outbound {
     createSendGatewayMessage(systemName: string): Buffer;

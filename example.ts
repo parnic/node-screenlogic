@@ -69,76 +69,76 @@ async function app() {
   try {
     client.init(unit.ipAddr, unit.port, password, 12345);
     await client.connectAsync();
-    let addClient = await client.addClient();
+    let addClient = await client.addClientAsync();
     console.log(`Add client result: ${addClient}`);
 
     // EQUIPMENT
-    let equipmentState = await client.equipment.getEquipmentState();
+    let equipmentState = await client.equipment.getEquipmentStateAsync();
     console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
-    let result = await client.getVersion();
+    let result = await client.getVersionAsync();
     console.log(`Pool Version: ${result}`);
-    let customNames = await client.equipment.getCustomNames();
+    let customNames = await client.equipment.getCustomNamesAsync();
     console.log(`customNames: ${customNames}`);
-    let controller = await client.equipment.getEquipmentConfiguration();
+    let controller = await client.equipment.getEquipmentConfigurationAsync();
     console.log(`Controller: ${JSON.stringify(controller)}`);
-    let equipConfig = await client.equipment.getEquipmentConfiguration();
+    let equipConfig = await client.equipment.getEquipmentConfigurationAsync();
     console.log(`Equipment config: ${JSON.stringify(equipConfig)}`);
-    let cancelDelay = await client.equipment.cancelDelay();
+    let cancelDelay = await client.equipment.cancelDelayAsync();
     console.log(`Cancel delay: ${cancelDelay}`);
-    let weatherForecast = await client.equipment.getWeatherForecast();
+    let weatherForecast = await client.equipment.getWeatherForecastAsync();
     console.log(`Weather: ${JSON.stringify(weatherForecast)}`); 
-    let systemTime = await client.equipment.getSystemTime();
+    let systemTime = await client.equipment.getSystemTimeAsync();
     console.log(`System Time: ${JSON.stringify(systemTime)}`)
     let dt = systemTime.date;
     dt.setHours(12); 
-    let sysTime = await screenlogic.equipment.setSystemTime(dt, true);
+    let sysTime = await screenlogic.equipment.setSystemTimeAsync(dt, true);
     console.log(`set time result: ${sysTime}`);
-    let hist = await screenlogic.equipment.getHistoryData()
+    let hist = await screenlogic.equipment.getHistoryDataAsync()
     console.log(`history data: ${JSON.stringify(hist)}`)
 
     // CHLOR
-    let intellichlor = await client.chlor.getIntellichlorConfig();
+    let intellichlor = await client.chlor.getIntellichlorConfigAsync();
     console.log(`Intellichlor: ${JSON.stringify(intellichlor)}`);
-    let chlorOutput = await client.chlor.setIntellichlorOutput(12,0);
+    let chlorOutput = await client.chlor.setIntellichlorOutputAsync(12,0);
     console.log(`Chlor output: ${JSON.stringify(chlorOutput)}`)
 
     // CHEM
-    let chem = await client.chem.getChemicalData();
+    let chem = await client.chem.getChemicalDataAsync();
     console.log(`Chem data: ${JSON.stringify(chem)}`);
-    let chemHist = await screenlogic.chem.getChemHistoryData()
+    let chemHist = await screenlogic.chem.getChemHistoryDataAsync()
     console.log(`history data: ${JSON.stringify(chemHist)}`)
 
     // SCHEDULES
-    let recurringSched = await client.schedule.getScheduleData(0);
+    let recurringSched = await client.schedule.getScheduleDataAsync(0);
     console.log(`reccuring schedules: ${JSON.stringify(recurringSched)}`);
-    let runOnceSched = await client.schedule.getScheduleData(1);
+    let runOnceSched = await client.schedule.getScheduleDataAsync(1);
     console.log(`Run once schedules: ${JSON.stringify(runOnceSched)}`);
-    let addSched = await client.schedule.addNewScheduleEvent(SchedTypes.RECURRING);
+    let addSched = await client.schedule.addNewScheduleEventAsync(SchedTypes.RECURRING);
     console.log(`Add sched response: ${addSched}`);
-    let setSched = await client.schedule.setScheduleEventById(10, 2,500,1200,127,0,1,99);
+    let setSched = await client.schedule.setScheduleEventByIdAsync(10, 2,500,1200,127,0,1,99);
     console.log(`Set sched result: ${setSched}`);
-    let delSched = await client.schedule.deleteScheduleEventById(10);
+    let delSched = await client.schedule.deleteScheduleEventByIdAsync(10);
     console.log(`Deleted sched result: ${delSched}`);
 
     // PUMPS
-    let pumpStatus = await client.pump.getPumpStatus(0);
+    let pumpStatus = await client.pump.getPumpStatusAsync(0);
     console.log(`Pump 0: ${JSON.stringify(pumpStatus)}`);
-    let pumpRes = await client.pump.setPumpSpeed(0,1,2000,true);
+    let pumpRes = await client.pump.setPumpSpeedAsync(0,1,2000,true);
     console.log(`Pump speed response: ${pumpRes}`)
     
     // BODIES
-    let setPointChanged = await client.bodies.setSetPoint(1, 101)
+    let setPointChanged = await client.bodies.setSetPointAsync(1, 101)
     console.log(`set point changed: ${setPointChanged}`);
-    let heatModeRes = await client.bodies.setHeatMode(1, HeatModes.HEAT_MODE_HEATPUMP);
+    let heatModeRes = await client.bodies.setHeatModeAsync(1, HeatModes.HEAT_MODE_HEATPUMP);
     console.log(`heat mode result: ${heatModeRes}`);
     
     // CIRCUITS
-    let lightRes = await client.circuits.sendLightCommand(LightCommands.LIGHT_CMD_COLOR_MODE_PARTY);
+    let lightRes = await client.circuits.sendLightCommandAsync(LightCommands.LIGHT_CMD_COLOR_MODE_PARTY);
     console.log(`Light result: ${lightRes}`);
     // NOT WORKING...    
-    let cstate = await client.circuits.setCircuitState(3, true);
+    let cstate = await client.circuits.setCircuitStateAsync(3, true);
     console.log(`Circuit state: ${JSON.stringify(cstate)}`);
-    let circRun = await client.circuits.setCircuitRuntimebyId(4, 5);
+    let circRun = await client.circuits.setCircuitRuntimebyIdAsync(4, 5);
     console.log(`circ run res: ${circRun}`);
     
    setTimeout(async () => {

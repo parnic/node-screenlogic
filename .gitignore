@@ -68,3 +68,4 @@ dist/example *.*
 example *.*
 output*.*
 clean.*
+example - find units.ts

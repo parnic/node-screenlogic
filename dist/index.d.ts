@@ -68,59 +68,64 @@ export declare class UnitConnection extends EventEmitter {
     processData(msg: Buffer): void;
     closeAsync(): Promise<boolean>;
     connectAsync(): Promise<boolean>;
-    login(challengeString: string): Promise<unknown>;
+    loginAsync(challengeString: string): Promise<unknown>;
     bytesRead(): number;
     bytesWritten(): number;
     status(): {
         destroyed: boolean;
         connecting: boolean;
+        timeout: any;
+        readyState: string;
+    } | {
+        destroyed: boolean;
+        connecting: boolean;
         timeout: number;
         readyState: net.SocketReadyState;
     };
-    getVersion(): Promise<string>;
-    addClient(clientId?: number): Promise<boolean>;
-    removeClient(): Promise<boolean>;
-    pingServer(): Promise<boolean>;
+    getVersionAsync(): Promise<string>;
+    addClientAsync(clientId?: number): Promise<boolean>;
+    removeClientAsync(): Promise<boolean>;
+    pingServerAsync(): Promise<boolean>;
     onClientMessage(msg: Inbound): void;
 }
 export declare let screenlogic: UnitConnection;
 export declare class Equipment {
-    setSystemTime(date: Date, shouldAdjustForDST: boolean): Promise<SLSystemTimeData>;
-    getWeatherForecast(): Promise<SLWeatherForecastData>;
-    getHistoryData(fromTime?: Date, toTime?: Date): Promise<SLHistoryData>;
-    getEquipmentConfiguration(): Promise<SLEquipmentConfigurationData>;
-    cancelDelay(): Promise<boolean>;
-    getSystemTime(): Promise<SLSystemTimeData>;
-    getControllerConfig(): Promise<SLControllerConfigData>;
-    getEquipmentState(): Promise<SLEquipmentStateData>;
-    getCustomNames(): Promise<string[]>;
+    setSystemTimeAsync(date: Date, shouldAdjustForDST: boolean): Promise<SLSystemTimeData>;
+    getWeatherForecastAsync(): Promise<SLWeatherForecastData>;
+    getHistoryDataAsync(fromTime?: Date, toTime?: Date): Promise<SLHistoryData>;
+    getEquipmentConfigurationAsync(): Promise<SLEquipmentConfigurationData>;
+    cancelDelayAsync(): Promise<boolean>;
+    getSystemTimeAsync(): Promise<SLSystemTimeData>;
+    getControllerConfigAsync(): Promise<SLControllerConfigData>;
+    getEquipmentStateAsync(): Promise<SLEquipmentStateData>;
+    getCustomNamesAsync(): Promise<string[]>;
 }
 export declare class Circuit extends UnitConnection {
-    sendLightCommand(command: LightCommands): Promise<boolean>;
-    setCircuitRuntimebyId(circuitId: any, runTime: any): Promise<boolean>;
-    setCircuitState(circuitId: number, circuitState: boolean): Promise<boolean>;
+    sendLightCommandAsync(command: LightCommands): Promise<boolean>;
+    setCircuitRuntimebyIdAsync(circuitId: any, runTime: any): Promise<boolean>;
+    setCircuitStateAsync(circuitId: number, circuitState: boolean): Promise<boolean>;
 }
 export declare class Body extends UnitConnection {
-    setSetPoint(bodyIndex: BodyIndex, temperature: any): Promise<boolean>;
-    setHeatMode(bodyIndex: BodyIndex, heatMode: HeatModes): Promise<boolean>;
+    setSetPointAsync(bodyIndex: BodyIndex, temperature: any): Promise<boolean>;
+    setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes): Promise<boolean>;
 }
 export declare class Pump extends UnitConnection {
-    setPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): Promise<boolean>;
-    getPumpStatus(pumpId: any): Promise<SLPumpStatusData>;
+    setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): Promise<boolean>;
+    getPumpStatusAsync(pumpId: any): Promise<SLPumpStatusData>;
 }
 export declare class Schedule extends UnitConnection {
-    setScheduleEventById(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number): Promise<boolean>;
-    addNewScheduleEvent(scheduleType: SchedTypes): Promise<boolean>;
-    deleteScheduleEventById(scheduleId: number): Promise<boolean>;
-    getScheduleData(scheduleType: SchedTypes): Promise<SLScheduleData[]>;
+    setScheduleEventByIdAsync(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number): Promise<boolean>;
+    addNewScheduleEventAsync(scheduleType: SchedTypes): Promise<boolean>;
+    deleteScheduleEventByIdAsync(scheduleId: number): Promise<boolean>;
+    getScheduleDataAsync(scheduleType: SchedTypes): Promise<SLScheduleData[]>;
 }
 export declare class Chem extends UnitConnection {
-    getChemHistoryData(fromTime?: Date, toTime?: Date): Promise<SLChemHistory>;
-    getChemicalData(): Promise<SLChemData>;
+    getChemHistoryDataAsync(fromTime?: Date, toTime?: Date): Promise<SLChemHistory>;
+    getChemicalDataAsync(): Promise<SLChemData>;
 }
 export declare class Chlor extends UnitConnection {
-    setIntellichlorOutput(poolOutput: number, spaOutput: number): Promise<boolean>;
-    getIntellichlorConfig(): Promise<SLIntellichlorData>;
+    setIntellichlorOutputAsync(poolOutput: number, spaOutput: number): Promise<boolean>;
+    getIntellichlorConfigAsync(): Promise<SLIntellichlorData>;
 }
 export declare enum LightCommands {
     LIGHT_CMD_LIGHTS_OFF = 0,
