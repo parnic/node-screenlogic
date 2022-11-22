@@ -7,7 +7,7 @@ import { Delays, Misc, SLHistoryData, SLSystemTimeData, SLWeatherForecastData, S
 export class EquipmentStateMessage {
    public static decodeEquipmentStateResponse(msg: Inbound) {
     let data: SLEquipmentStateData;
-    let ok = msg.readInt32LE();
+    let panelMode = msg.readInt32LE();
     let freezeMode = msg.readUInt8();
     let remotes = msg.readUInt8();
     let poolDelay = msg.readUInt8();
@@ -62,7 +62,7 @@ export class EquipmentStateMessage {
     let alarms = msg.readInt32LE();
 
     data = {
-      ok,
+      panelMode,
       freezeMode,
       remotes,
       poolDelay,
@@ -519,7 +519,7 @@ export class EquipmentStateMessage {
 }
 
 export interface SLEquipmentStateData {
-  ok: number;
+  panelMode: number;
   freezeMode: number;
   remotes: number;
   poolDelay: number;

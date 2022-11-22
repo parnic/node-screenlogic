@@ -225,7 +225,7 @@ class UnitConnection extends events_1.EventEmitter {
         this.serverPort = port;
         this.serverAddress = address;
         this.password = password;
-        this.senderId = senderId;
+        this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
         this.clientId = Math.round(Math.random() * 100000);
         this.controller = {
             circuits: new OutgoingMessages_1.CircuitCommands(this),

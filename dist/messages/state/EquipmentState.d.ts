@@ -11,7 +11,7 @@ export declare class EquipmentStateMessage {
     static decodeGeneric(msg: Inbound): void;
 }
 export interface SLEquipmentStateData {
-    ok: number;
+    panelMode: number;
     freezeMode: number;
     remotes: number;
     poolDelay: number;

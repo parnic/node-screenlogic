@@ -4,7 +4,7 @@ exports.EquipmentStateMessage = void 0;
 class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg) {
         let data;
-        let ok = msg.readInt32LE();
+        let panelMode = msg.readInt32LE();
         let freezeMode = msg.readUInt8();
         let remotes = msg.readUInt8();
         let poolDelay = msg.readUInt8();
@@ -53,7 +53,7 @@ class EquipmentStateMessage {
         let orpTank = msg.readInt32LE();
         let alarms = msg.readInt32LE();
         data = {
-            ok,
+            panelMode,
             freezeMode,
             remotes,
             poolDelay,
