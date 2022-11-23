@@ -72,7 +72,7 @@ export class FindUnits extends EventEmitter {
         let _timeout = setTimeoutSync(() => {
           debugFind(`No units found searching locally.`)
           resolve({});
-        }, 2000);
+        }, 10000);
         self.once('serverFound', (unit) => {
           clearTimeout(_timeout);
           debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);
@@ -230,7 +230,7 @@ export class UnitConnection extends EventEmitter {
   public set senderId(val: number) { this._senderId = val; }
   // public SLMessages = slmessage;
   public controller: Controller;
-  public netTimeout: number = 2000;  // set back to 1s after testing
+  public netTimeout: number = 10000;  // set back to 1s after testing
   private _keepAliveDuration: number = 30 * 1000;
   private _keepAliveTimer: NodeJS.Timeout;
   private _expectedMsgLen: number;
@@ -570,6 +570,11 @@ export class UnitConnection extends EventEmitter {
         let equipmentState = EquipmentStateMessage.decodeEquipmentStateResponse(msg);
         this.emit('equipmentState', equipmentState);
         break;
+      case 12521: // SLVersionMessage.getResponseId():
+        debugUnit("  it's set circuit info");
+        let circuit = ConnectionMessage.decodeVersionResponse(msg);
+        this.emit('circuit', circuit);
+        break;
       case 8121: // SLVersionMessage.getResponseId():
         debugUnit("  it's version");
         let ver = ConnectionMessage.decodeVersionResponse(msg);
@@ -660,7 +665,7 @@ export class UnitConnection extends EventEmitter {
         debugUnit("  it's a set schedule event ack");
         this.emit('setScheduleEventById', ScheduleMessage.decodeSetSchedule(msg));
         break;
-      case 12550: // SLSetCircuitRuntimeById.getResponseId():
+      case 12551: // SLSetCircuitRuntimeById.getResponseId():
         debugUnit("  it's a set circuit runtime ack");
         this.emit('setCircuitRuntimebyId', CircuitMessage.decodeSetCircuitRunTime(msg));
         break;
@@ -898,6 +903,20 @@ export class Circuit extends UnitConnection {
       screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime);
     });
   }
+  async setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
+      debugUnit(`[${screenlogic.senderId}] sending set circuit command: controllerId: ${ this.controllerId}, circuitId: ${circuitId}, nameIndex: ${nameIndex} circuitFunc: ${circuitFunction} circInterface: ${circuitInterface} freeze: ${freeze ? 'true' : 'false'} colorPos: ${colorPos}...`);
+      let _timeout = setTimeoutSync(() => {
+        reject(new Error('time out waiting for set circuit state response'));
+      }, screenlogic.netTimeout);
+      screenlogic.once('circuit', (data) => {
+        clearTimeout(_timeout);
+        debugUnit('received circuit event');
+        resolve(data);
+      })
+      screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos);
+    })
+  }
   async setCircuitStateAsync(circuitId: number, circuitState: boolean): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', screenlogic.senderId, this.controllerId, circuitId, circuitState);
@@ -909,7 +928,7 @@ export class Circuit extends UnitConnection {
         debugUnit('received circuitStateChanged event');
         resolve(data);
       })
-      screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, circuitState);
+      screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState);
     })
   }
 }

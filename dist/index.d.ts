@@ -103,6 +103,7 @@ export declare class Equipment {
 export declare class Circuit extends UnitConnection {
     sendLightCommandAsync(command: LightCommands): Promise<boolean>;
     setCircuitRuntimebyIdAsync(circuitId: any, runTime: any): Promise<boolean>;
+    setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number): Promise<boolean>;
     setCircuitStateAsync(circuitId: number, circuitState: boolean): Promise<boolean>;
 }
 export declare class Body extends UnitConnection {

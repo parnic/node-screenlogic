@@ -126,7 +126,20 @@ export class EquipmentCommands extends Commands {
 }
 
 export class CircuitCommands extends Commands {
-  public sendSetCircuitMessage(circuitId: number, circuitState: boolean) {
+  public sendSetCircuitMessage(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number) {
+    this.messageId = 12520;
+    this.createBaseMessage();
+    this.writeInt32LE(this.controllerId);
+    this.writeInt32LE(circuitId + 499);
+    this.writeInt32LE(nameIndex);
+    this.writeInt32LE(circuitInterface);
+    this.writeInt32LE(circuitFunction);
+    this.writeInt32LE(freeze ? 1 : 0); // could be other bits; this is a flag
+    this.writeInt32LE(colorPos);
+    this.encode();
+    this.unit.write(this.toBuffer());
+  }
+  public sendSetCircuitStateMessage(circuitId: number, circuitState: boolean) {
     this.messageId = 12530;
     this.createBaseMessage();
     // this.addHeader(this.senderId, this.messageId);

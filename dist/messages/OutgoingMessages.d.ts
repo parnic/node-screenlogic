@@ -25,7 +25,8 @@ export declare class EquipmentCommands extends Commands {
     sendGetHistoryMessage(fromTime: Date, toTime: Date): void;
 }
 export declare class CircuitCommands extends Commands {
-    sendSetCircuitMessage(circuitId: number, circuitState: boolean): void;
+    sendSetCircuitMessage(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number): void;
+    sendSetCircuitStateMessage(circuitId: number, circuitState: boolean): void;
     sendIntellibriteMessage(command: LightCommands): void;
     sendSetCircuitRuntimeMessage(circuitId: number, runTime: number): void;
 }

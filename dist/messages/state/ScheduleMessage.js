@@ -31,7 +31,7 @@ class ScheduleMessage {
         return data;
     }
     static decodeAddSchedule(msg) {
-        return msg.readUInt32LE();
+        return msg.readUInt32LE() - 699;
     }
     static decodeDeleteSchedule(msg) {
         // ack

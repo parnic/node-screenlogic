@@ -31,7 +31,7 @@ export class ScheduleMessage {
     return data;
   }
   public static decodeAddSchedule(msg: Inbound):number{
-    return msg.readUInt32LE();
+    return msg.readUInt32LE() - 699;
   }
   public static decodeDeleteSchedule(msg: Inbound){
     // ack

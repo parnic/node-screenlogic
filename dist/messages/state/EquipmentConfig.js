@@ -35,6 +35,10 @@ class EquipmentConfigurationMessage {
             };
             msg.incrementReadOffset(2);
         }
+        for (let i = 0; i < circuitArray.length; i++) {
+            // normalize to 1 based ids for default names; 100 based for custom names
+            circuitArray[i].nameIndex = circuitArray[i].nameIndex < 101 ? circuitArray[i].nameIndex + 1 : circuitArray[i].nameIndex + 99;
+        }
         let colorCount = msg.readInt32LE();
         let colorArray = new Array(colorCount);
         for (let i = 0; i < colorCount; i++) {
