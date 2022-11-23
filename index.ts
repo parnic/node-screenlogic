@@ -999,7 +999,7 @@ export class Schedule extends UnitConnection {
       screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
     });
   }
-  async addNewScheduleEventAsync(scheduleType: SchedTypes): Promise<boolean> {
+  async addNewScheduleEventAsync(scheduleType: SchedTypes): Promise<number> {
     return new Promise(async (resolve, reject) => {
       debugUnit('[%d] sending add new schedule event command for scheduleType: %d...', screenlogic.senderId, scheduleType);
       let _timeout = setTimeoutSync(() => {

@@ -30,9 +30,8 @@ export class ScheduleMessage {
     }
     return data;
   }
-  public static decodeAddSchedule(msg: Inbound){
-    // ack
-    return true;
+  public static decodeAddSchedule(msg: Inbound):number{
+    return msg.readUInt32LE();
   }
   public static decodeDeleteSchedule(msg: Inbound){
     // ack
