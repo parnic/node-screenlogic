@@ -572,7 +572,7 @@ export class UnitConnection extends EventEmitter {
         break;
       case 12521: // SLVersionMessage.getResponseId():
         debugUnit("  it's set circuit info");
-        let circuit = ConnectionMessage.decodeVersionResponse(msg);
+        let circuit = CircuitMessage.decodeSetCircuit(msg);
         this.emit('circuit', circuit);
         break;
       case 8121: // SLVersionMessage.getResponseId():
