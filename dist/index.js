@@ -250,8 +250,13 @@ class UnitConnection extends events_1.EventEmitter {
     }
     write(val) {
         try {
-            this.client.write(val);
-            this.emit('bytesWritten', this.client.bytesWritten);
+            if (!this.client.writable) {
+                debugUnit('Socket not writeable.');
+            }
+            else {
+                this.client.write(val);
+                this.emit('bytesWritten', this.client.bytesWritten);
+            }
         }
         catch (err) {
             debugUnit(`Error writing to net: ${err.message}`);

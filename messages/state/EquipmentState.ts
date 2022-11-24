@@ -512,9 +512,7 @@ export class EquipmentStateMessage {
 
   }
   public static decodeGeneric(msg: Inbound){
-    console.log(`Data is ${msg.length} long...`);
-    console.log(msg.toString());
-    // 8300 is sent when a schedule changes - SL says this is a "HLM_SYSCONFIG_NOTIFYNEEDWRITEFLASH = 8300;"
+    console.log(`Possible unknown string: ${msg.toString()}`);
   }
 }
 

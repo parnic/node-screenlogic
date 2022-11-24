@@ -288,8 +288,13 @@ export class UnitConnection extends EventEmitter {
   }
   public write(val: Buffer | string) {
     try {
-      this.client.write(val);
-      this.emit('bytesWritten', this.client.bytesWritten);
+      if (!this.client.writable){
+        debugUnit('Socket not writeable.');
+      }
+      else {
+        this.client.write(val);
+        this.emit('bytesWritten', this.client.bytesWritten);
+      }
     }
     catch (err) {
       debugUnit(`Error writing to net: ${err.message}`);
