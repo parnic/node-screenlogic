@@ -449,7 +449,7 @@ export class UnitConnection extends EventEmitter {
         debugUnit('loginFailed');
         reject(new Error('Login Failed'));
       })
-      var password = new Encoder(self.password).getEncryptedPassword(challengeString);
+      var password = new Encoder(self.password.toString()).getEncryptedPassword(challengeString);
       screenlogic.controller.connection.sendLoginMessage(password);
     })
   }

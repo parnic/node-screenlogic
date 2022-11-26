@@ -409,7 +409,7 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('loginFailed');
                 reject(new Error('Login Failed'));
             });
-            var password = new Encoder(self.password).getEncryptedPassword(challengeString);
+            var password = new Encoder(self.password.toString()).getEncryptedPassword(challengeString);
             exports.screenlogic.controller.connection.sendLoginMessage(password);
         });
     }
