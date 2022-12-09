@@ -1,7 +1,7 @@
 import { Inbound } from "../SLMessage";
 export declare class ScheduleMessage {
     static decodeGetScheduleMessage(msg: Inbound): SLScheduleData[];
-    static decodeAddSchedule(msg: Inbound): boolean;
+    static decodeAddSchedule(msg: Inbound): number;
     static decodeDeleteSchedule(msg: Inbound): boolean;
     static decodeSetSchedule(msg: Inbound): boolean;
 }

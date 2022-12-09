@@ -63,7 +63,7 @@ class FindUnits extends events_1.EventEmitter {
                 let _timeout = (0, timers_1.setTimeout)(() => {
                     debugFind(`No units found searching locally.`);
                     resolve({});
-                }, 2000);
+                }, 10000);
                 self.once('serverFound', (unit) => {
                     clearTimeout(_timeout);
                     debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);
@@ -189,7 +189,7 @@ class UnitConnection extends events_1.EventEmitter {
         // private _expectedMsgLen: number;
         // private challengeString;
         this._senderId = 0;
-        this.netTimeout = 2000; // set back to 1s after testing
+        this.netTimeout = 10000; // set back to 1s after testing
         this._keepAliveDuration = 30 * 1000;
         this._buffer = Buffer.alloc(1024);
         this._bufferIdx = 0;
@@ -250,8 +250,13 @@ class UnitConnection extends events_1.EventEmitter {
     }
     write(val) {
         try {
-            this.client.write(val);
-            this.emit('bytesWritten', this.client.bytesWritten);
+            if (!this.client.writable) {
+                debugUnit('Socket not writeable.');
+            }
+            else {
+                this.client.write(val);
+                this.emit('bytesWritten', this.client.bytesWritten);
+            }
         }
         catch (err) {
             debugUnit(`Error writing to net: ${err.message}`);
@@ -404,7 +409,7 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('loginFailed');
                 reject(new Error('Login Failed'));
             });
-            var password = new Encoder(self.password).getEncryptedPassword(challengeString);
+            var password = new Encoder(self.password.toString()).getEncryptedPassword(challengeString);
             exports.screenlogic.controller.connection.sendLoginMessage(password);
         });
     }
@@ -525,6 +530,11 @@ class UnitConnection extends events_1.EventEmitter {
                 let equipmentState = EquipmentState_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg);
                 this.emit('equipmentState', equipmentState);
                 break;
+            case 12521: // SLVersionMessage.getResponseId():
+                debugUnit("  it's set circuit info");
+                let circuit = CircuitMessage_1.CircuitMessage.decodeSetCircuit(msg);
+                this.emit('circuit', circuit);
+                break;
             case 8121: // SLVersionMessage.getResponseId():
                 debugUnit("  it's version");
                 let ver = ConnectionMessage_1.ConnectionMessage.decodeVersionResponse(msg);
@@ -615,7 +625,7 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit("  it's a set schedule event ack");
                 this.emit('setScheduleEventById', ScheduleMessage_1.ScheduleMessage.decodeSetSchedule(msg));
                 break;
-            case 12550: // SLSetCircuitRuntimeById.getResponseId():
+            case 12551: // SLSetCircuitRuntimeById.getResponseId():
                 debugUnit("  it's a set circuit runtime ack");
                 this.emit('setCircuitRuntimebyId', CircuitMessage_1.CircuitMessage.decodeSetCircuitRunTime(msg));
                 break;
@@ -846,6 +856,20 @@ class Circuit extends UnitConnection {
             exports.screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime);
         });
     }
+    async setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos) {
+        return new Promise(async (resolve, reject) => {
+            debugUnit(`[${exports.screenlogic.senderId}] sending set circuit command: controllerId: ${this.controllerId}, circuitId: ${circuitId}, nameIndex: ${nameIndex} circuitFunc: ${circuitFunction} circInterface: ${circuitInterface} freeze: ${freeze ? 'true' : 'false'} colorPos: ${colorPos}...`);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for set circuit state response'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('circuit', (data) => {
+                clearTimeout(_timeout);
+                debugUnit('received circuit event');
+                resolve(data);
+            });
+            exports.screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos);
+        });
+    }
     async setCircuitStateAsync(circuitId, circuitState) {
         return new Promise(async (resolve, reject) => {
             debugUnit('[%d] sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', exports.screenlogic.senderId, this.controllerId, circuitId, circuitState);
@@ -857,7 +881,7 @@ class Circuit extends UnitConnection {
                 debugUnit('received circuitStateChanged event');
                 resolve(data);
             });
-            exports.screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, circuitState);
+            exports.screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState);
         });
     }
 }

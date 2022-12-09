@@ -103,6 +103,7 @@ export declare class Equipment {
 export declare class Circuit extends UnitConnection {
     sendLightCommandAsync(command: LightCommands): Promise<boolean>;
     setCircuitRuntimebyIdAsync(circuitId: any, runTime: any): Promise<boolean>;
+    setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number): Promise<boolean>;
     setCircuitStateAsync(circuitId: number, circuitState: boolean): Promise<boolean>;
 }
 export declare class Body extends UnitConnection {
@@ -115,7 +116,7 @@ export declare class Pump extends UnitConnection {
 }
 export declare class Schedule extends UnitConnection {
     setScheduleEventByIdAsync(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number): Promise<boolean>;
-    addNewScheduleEventAsync(scheduleType: SchedTypes): Promise<boolean>;
+    addNewScheduleEventAsync(scheduleType: SchedTypes): Promise<number>;
     deleteScheduleEventByIdAsync(scheduleId: number): Promise<boolean>;
     getScheduleDataAsync(scheduleType: SchedTypes): Promise<SLScheduleData[]>;
 }

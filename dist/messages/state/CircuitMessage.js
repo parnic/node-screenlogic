@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CircuitMessage = void 0;
 class CircuitMessage {
+    static decodeSetCircuit(msg) {
+        return true;
+    }
     static decodeSetCircuitState(msg) {
         // ack
         return true;
