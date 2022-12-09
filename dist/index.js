@@ -63,7 +63,7 @@ class FindUnits extends events_1.EventEmitter {
                 let _timeout = (0, timers_1.setTimeout)(() => {
                     debugFind(`No units found searching locally.`);
                     resolve({});
-                }, 10000);
+                }, 2500);
                 self.once('serverFound', (unit) => {
                     clearTimeout(_timeout);
                     debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);
@@ -189,7 +189,7 @@ class UnitConnection extends events_1.EventEmitter {
         // private _expectedMsgLen: number;
         // private challengeString;
         this._senderId = 0;
-        this.netTimeout = 10000; // set back to 1s after testing
+        this.netTimeout = 2500; // set back to 1s after testing
         this._keepAliveDuration = 30 * 1000;
         this._buffer = Buffer.alloc(1024);
         this._bufferIdx = 0;

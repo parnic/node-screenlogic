@@ -72,7 +72,7 @@ export class FindUnits extends EventEmitter {
         let _timeout = setTimeoutSync(() => {
           debugFind(`No units found searching locally.`)
           resolve({});
-        }, 10000);
+        }, 2500);
         self.once('serverFound', (unit) => {
           clearTimeout(_timeout);
           debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);
@@ -230,7 +230,7 @@ export class UnitConnection extends EventEmitter {
   public set senderId(val: number) { this._senderId = val; }
   // public SLMessages = slmessage;
   public controller: Controller;
-  public netTimeout: number = 10000;  // set back to 1s after testing
+  public netTimeout: number = 2500;  // set back to 1s after testing
   private _keepAliveDuration: number = 30 * 1000;
   private _keepAliveTimer: NodeJS.Timeout;
   private _expectedMsgLen: number;
