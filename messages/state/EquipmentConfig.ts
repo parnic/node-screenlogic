@@ -390,7 +390,7 @@ export class EquipmentConfigurationMessage {
           }
           let v: any = {
             loadCenterIndex,
-            valveIndex,
+            valveIndex: valveIndex + 1,
             valveName,
             loadCenterName,
             deviceId

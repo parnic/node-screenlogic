@@ -894,9 +894,9 @@ class Body extends UnitConnection {
 }
 exports.Body = Body;
 class Pump extends UnitConnection {
-    async setPumpSpeedAsync(pumpId, circuitId, speed, isRPMs) {
+    async setPumpSpeedAsync(pumpId, circuitId, setPoint, isRPMs) {
         return new Promise(async (resolve, reject) => {
-            debugUnit('[%d] sending set pump flow command for pumpId: %d, circuitId: %d, setPoint: %d, isRPMs: %d...', exports.screenlogic.senderId, pumpId, circuitId, speed, isRPMs);
+            debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${setPoint}, isRPMs: ${isRPMs}}`);
             let _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for set pump speed response'));
                 exports.screenlogic.removeListener('setPumpSpeed', () => { });
@@ -906,7 +906,7 @@ class Pump extends UnitConnection {
                 debugUnit('received setPumpSpeed event');
                 resolve(data);
             });
-            exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
+            exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, setPoint, isRPMs);
         });
     }
     async getPumpStatusAsync(pumpId) {

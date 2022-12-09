@@ -110,7 +110,7 @@ export declare class Body extends UnitConnection {
     setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes): Promise<boolean>;
 }
 export declare class Pump extends UnitConnection {
-    setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): Promise<boolean>;
+    setPumpSpeedAsync(pumpId: number, circuitId: number, setPoint: number, isRPMs?: boolean): Promise<boolean>;
     getPumpStatusAsync(pumpId: any): Promise<SLPumpStatusData>;
 }
 export declare class Schedule extends UnitConnection {

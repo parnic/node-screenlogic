@@ -361,7 +361,7 @@ class EquipmentConfigurationMessage {
                     }
                     let v = {
                         loadCenterIndex,
-                        valveIndex,
+                        valveIndex: valveIndex + 1,
                         valveName,
                         loadCenterName,
                         deviceId

@@ -121,9 +121,10 @@ async function app() {
     console.log(`Deleted sched result: ${delSched}`);
 
     // PUMPS
-    let pumpStatus = await client.pump.getPumpStatusAsync(0);
-    console.log(`Pump 0: ${JSON.stringify(pumpStatus)}`);
-    let pumpRes = await client.pump.setPumpSpeedAsync(0,1,2000,true);
+    let pumpStatus = await client.pump.getPumpStatusAsync(1);
+    console.log(`Pump 1: ${JSON.stringify(pumpStatus)}`);
+    let pumpCircuits = [{"circuitId":1,"speed":2500,"isRPMs":true},{"circuitId":6,"speed":2000,"isRPMs":true},{"circuitId":7,"speed":2500,"isRPMs":true},{"circuitId":8,"speed":3250,"isRPMs":true},{"circuitId":18,"speed":1040,"isRPMs":true},{"circuitId":0,"speed":1000,"isRPMs":true},{"circuitId":0,"speed":1000,"isRPMs":true},{"circuitId":0,"speed":1000,"isRPMs":true}];
+    let pumpRes = await client.pump.setPumpSpeedAsync(0,4,1030,true);
     console.log(`Pump speed response: ${pumpRes}`)
     
     // BODIES

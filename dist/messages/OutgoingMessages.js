@@ -201,7 +201,7 @@ class BodyCommands extends Commands {
         this.messageId = 12538;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
-        this.writeInt32LE(bodyType || 0);
+        this.writeInt32LE((bodyType - 1) || 0);
         this.writeInt32LE(heatMode || 0);
         this.unit.write(this.toBuffer());
     }
@@ -250,23 +250,18 @@ class PumpCommands extends Commands {
         this.messageId = 12584;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
-        this.writeInt32LE(pumpId);
+        this.writeInt32LE(pumpId - 1);
         this.unit.write(this.toBuffer());
     }
-    sendSetPumpSpeed(pumpId, circuitId, speed, isRPM) {
-        if (typeof isRPM === 'undefined') {
-            if (speed < 200)
-                isRPM = false;
-            else
-                isRPM = true;
-        }
+    sendSetPumpSpeed(pumpId, circuitId, setPoint, isRPMs) {
         this.messageId = 12586;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId); // Always 0 in my case
-        this.writeInt32LE(pumpId); // presumably pumpId, always 0 in my case
+        this.writeInt32LE(pumpId - 1);
+        this.writeInt32LE(0); // Always 0 in my case
         this.writeInt32LE(circuitId); // This is indexed to the array of circuits returned in GetPumpStatus
-        this.writeInt32LE(speed);
-        this.writeInt32LE(isRPM ? 1 : 0); // 0 for GPM, 1 for RPMs
+        this.writeInt32LE(setPoint);
+        this.writeInt32LE(isRPMs);
         this.unit.write(this.toBuffer());
     }
 }
