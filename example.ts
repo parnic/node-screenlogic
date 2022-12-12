@@ -22,7 +22,7 @@ async function app() {
   const password = '1111';
 
   let gateway = new RemoteLogin(systemName);
-  var unit = await gateway.connect();
+  var unit = await gateway.connectAsync();
 
   if (!unit || !unit.gatewayFound || unit.ipAddr === '') {
     console.log('no unit found by that name');

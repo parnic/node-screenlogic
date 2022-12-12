@@ -113,7 +113,7 @@ class RemoteLogin extends events_1.EventEmitter {
         this._client = new net.Socket();
         this._gateway = new OutgoingMessages_1.OutboundGateway(0, 0); // controllerid, senderid
     }
-    connect() {
+    async connectAsync() {
         var self = this;
         return new Promise((resolve, reject) => {
             debugRemote('connecting to dispatcher...');

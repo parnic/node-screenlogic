@@ -29,7 +29,7 @@ export declare class RemoteLogin extends EventEmitter {
     systemName: string;
     private _client;
     private _gateway;
-    connect(): Promise<SLGateway.SLGateWayData>;
+    connectAsync(): Promise<SLGateway.SLGateWayData>;
     closeAsync(): Promise<unknown>;
 }
 export declare class UnitConnection extends EventEmitter {
