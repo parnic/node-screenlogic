@@ -131,7 +131,7 @@ export class RemoteLogin extends EventEmitter {
   private _gateway: OutboundGateway;
 
 
-  public connect(): Promise<SLGateway.SLGateWayData> {
+  public async connectAsync(): Promise<SLGateway.SLGateWayData> {
     var self = this;
     return new Promise((resolve, reject) => {
       debugRemote('connecting to dispatcher...');
