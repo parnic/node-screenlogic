@@ -241,24 +241,20 @@ export class UnitConnection extends EventEmitter {
   public chlor: Chlor;
   public schedule: Schedule;
   public pump: Pump;
+  public reconnect = function(){
+    let self = this;
+    debugUnit(`Unit had an unexpected error/timeout/clientError - reconnecting.`)
+    self.client.removeAllListeners();
+    setTimeoutSync(async () => { try { 
+      await self.closeAsync();
+      await self.connectAsync(); 
+    } catch (err) { } }, 1000);
+  }
   public init(address: string, port: number, password: string, senderId?: number) {
     let self = this;
-    this.client = new net.Socket();
-    this.client.setKeepAlive(true, 10 * 1000);
-    this.client.on('data', function (msg) {
-      self.emit('bytesRead', self.client.bytesRead);
-      self.processData(msg);
-    }).on('close', function (had_error) {
-      debugUnit(`closed.  any error? ${had_error}`);
-      self.emit('close', had_error);
-    }).on('error', function (e) {
-      // often, during debugging, the socket will timeout
-      debugUnit(`error event for unit: ${e.message}`);
-      self.emit('error', e);
-    }).on('clientError', function (err, socket) {
-      if (err.code === 'ECONNRESET' || !socket.writable) socket.end('HTTP/2 400 Bad Request\n');
-      debugUnit('client error\n', err);
-    });
+
+    
+    
     this.serverPort = port;
     this.serverAddress = address;
     this.password = password;
@@ -281,7 +277,7 @@ export class UnitConnection extends EventEmitter {
     this.chlor = new Chlor();
     this.schedule = new Schedule();
     this.pump = new Pump();
-    this._keepAliveTimer = setTimeoutSync(async () => {
+    this._keepAliveTimer = setTimeoutSync(() => {
       self.keepAliveAsync()
     }, this._keepAliveDuration || 30000
     );
@@ -396,9 +392,47 @@ export class UnitConnection extends EventEmitter {
     var self = this;
     return new Promise(async (resolve, reject) => {
       try {
+
+        let opts = {
+          allowHalfOpen: false,
+          keepAlive: true,
+          keepAliveInitialDelay: 5
+       };
+        self.client = new net.Socket(opts);
+        self.client.setKeepAlive(true, 10 * 1000);
+        self.client.on('data', function (msg) {
+          self.emit('bytesRead', self.client.bytesRead);
+          self.processData(msg);
+        }).once('close', function (had_error) {
+          debugUnit(`closed.  any error? ${had_error}`);
+          self.emit('close', had_error);
+        })
+        .once('end', function (e) {
+          // often, during debugging, the socket will timeout
+          debugUnit(`end event for unit: ${e.message}`);
+          self.emit('end', e);
+        })
+        .once('error', function (e) {
+          // often, during debugging, the socket will timeout
+          debugUnit(`error event for unit: ${e.message}`);
+          // self.emit('error', e);
+          self.reconnect();
+        })
+        .once('timeout', function (e) {
+          // often, during debugging, the socket will timeout
+          debugUnit(`timeout event for unit: ${e.message}`);
+          self.emit('timeout', e);
+          self.reconnect();
+        })
+        .once('clientError', function (err, socket) {
+          if (err.code === 'ECONNRESET' || !socket.writable) socket.end('HTTP/2 400 Bad Request\n');
+          debugUnit('client error\n', err);
+          self.reconnect();
+        });
+
         debugUnit('connecting...');
         let connected = false;
-        self.client.on('ready', () => {
+        self.client.once('ready', () => {
           debugUnit('connected, sending init message...');
           self.write('CONNECTSERVERHOST\r\n\r\n');
           debugUnit('sending challenge message...');

@@ -62,6 +62,7 @@ export declare class UnitConnection extends EventEmitter {
     chlor: Chlor;
     schedule: Schedule;
     pump: Pump;
+    reconnect: () => void;
     init(address: string, port: number, password: string, senderId?: number): void;
     write(val: Buffer | string): void;
     keepAliveAsync(): void;
