@@ -371,7 +371,7 @@ class UnitConnection extends events_1.EventEmitter {
                 })
                     .once('error', function (e) {
                     // often, during debugging, the socket will timeout
-                    debugUnit(`error event for unit: ${e.message}`);
+                    debugUnit(`error event for unit: ${typeof e !== 'undefined' ? e.message : 'unknown unit'}`);
                     // self.emit('error', e);
                     self.reconnect();
                 })
