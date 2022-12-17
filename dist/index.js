@@ -59,15 +59,17 @@ class FindUnits extends events_1.EventEmitter {
         let self = this;
         return new Promise(async (resolve, reject) => {
             try {
+                let units = [];
                 debugFind(`Screenlogic finder searching for local units...`);
-                let _timeout = (0, timers_1.setTimeout)(() => {
-                    debugFind(`No units found searching locally.`);
-                    resolve({});
-                }, 2500);
-                self.once('serverFound', (unit) => {
-                    clearTimeout(_timeout);
+                (0, timers_1.setTimeout)(() => {
+                    if (units.length === 0)
+                        debugFind(`No units found searching locally.`);
+                    self.removeAllListeners();
+                    resolve(units);
+                }, 5000);
+                self.on('serverFound', (unit) => {
                     debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);
-                    resolve(unit);
+                    units.push(unit);
                 });
             }
             catch (error) {
