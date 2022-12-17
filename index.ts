@@ -67,16 +67,16 @@ export class FindUnits extends EventEmitter {
     let self = this;
     return new Promise(async (resolve, reject) => {
       try {
-
+        let units = [];
         debugFind(`Screenlogic finder searching for local units...`,);
-        let _timeout = setTimeoutSync(() => {
-          debugFind(`No units found searching locally.`)
-          resolve({});
-        }, 2500);
-        self.once('serverFound', (unit) => {
-          clearTimeout(_timeout);
+        setTimeoutSync(() => {
+          if (units.length === 0) debugFind(`No units found searching locally.`)
+          self.removeAllListeners();
+          resolve(units);
+        }, 5000);
+        self.on('serverFound', (unit) => {
           debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);
-          resolve(unit);
+          units.push(unit);
         })
       } catch (error) {
         debugFind(`Screenlogic caught searchAsync error ${error.message}, rethrowing...`);
