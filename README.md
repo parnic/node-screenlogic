@@ -90,7 +90,7 @@ When a local or remote server is found, create and connect to a new UnitConnecti
 
 ```javascript
 let client = ScreenLogic.screenlogic;
-client.init(ipAddr, port, password);  // ipAddr and password as strings; port as integere
+client.init(systemName, ipAddr, port, password);  // ipAddr and password as strings; port as integere
 await client.connectAsync();
 ```
 
@@ -203,7 +203,7 @@ Examples:
 
 ```javascript
 let client = ScreenLogic.screenlogic;
-client.init(unit.ipAddr, unit.port, password);
+client.init(systemName, unit.ipAddr, unit.port, password);
 await client.connectAsync();
 ```
 
@@ -216,7 +216,7 @@ Previously, `senderId` would be an optional 16-bit integer that can be added to 
 Examples:
 
 ```javascript
-client.init('10.0.0.85', 80, '1234', senderId?);
+client.init('Pentair: 00-00-00', '10.0.0.85', 80, '1234', senderId?);
 ```
 
 #### connectAsync()

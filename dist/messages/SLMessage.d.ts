@@ -4,7 +4,7 @@ export declare class SLMessage {
     static MSG_ID: number;
     constructor(controllerId: number, senderId: number);
     protected _wroteSize: boolean;
-    messageId: number;
+    action: number;
     senderId: number;
     controllerId: number;
     protected dataLength: number;
@@ -13,6 +13,7 @@ export declare class SLMessage {
     get length(): number;
     static slackForAlignment(val: any): number;
     getDayValue(dayName: any): number;
+    toBuffer(): Buffer;
 }
 export declare class Inbound extends SLMessage {
     readFromBuffer(buf: Buffer): void;

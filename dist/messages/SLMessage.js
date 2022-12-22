@@ -32,6 +32,9 @@ class SLMessage {
         }
         return 0;
     }
+    toBuffer() {
+        return this._smartBuffer.toBuffer();
+    }
 }
 exports.SLMessage = SLMessage;
 ;
@@ -63,7 +66,7 @@ class Inbound extends SLMessage {
     decode() {
         this._smartBuffer.readOffset = 0;
         this.senderId = this._smartBuffer.readUInt16LE();
-        this.messageId = this._smartBuffer.readUInt16LE();
+        this.action = this._smartBuffer.readUInt16LE();
         // this.messageId = this._smartBuffer.readInt16LE(2);
         this.dataLength = this._smartBuffer.readInt32LE();
     }
@@ -127,7 +130,7 @@ class Outbound extends SLMessage {
     }
     addHeader() {
         this._smartBuffer.writeUInt16LE(this.senderId);
-        this._smartBuffer.writeUInt16LE(this.messageId);
+        this._smartBuffer.writeUInt16LE(this.action);
         this._wroteSize = false;
     }
     encodeDayMask(daysArray) {

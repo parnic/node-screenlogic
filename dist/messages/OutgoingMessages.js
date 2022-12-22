@@ -11,7 +11,7 @@ class Commands extends SLMessage_1.Outbound {
 exports.Commands = Commands;
 class ConnectionCommands extends Commands {
     sendLoginMessage(password) {
-        this.messageId = 27;
+        this.action = 27;
         this.createBaseMessage();
         // this.addHeader(this.senderId, this.messageId)
         this.writeInt32LE(348); // schema
@@ -28,31 +28,31 @@ class ConnectionCommands extends Commands {
         this.unit.write(this.toBuffer());
     }
     sendChallengeMessage() {
-        this.messageId = 14;
+        this.action = 14;
         this.createBaseMessage();
         this.unit.write(this.toBuffer());
     }
     sendVersionMessage() {
-        this.messageId = 8120;
+        this.action = 8120;
         this.createBaseMessage();
         this.unit.write(this.toBuffer());
     }
     sendAddClientMessage() {
-        this.messageId = 12522;
+        this.action = 12522;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(this.unit.clientId);
         this.unit.write(this.toBuffer());
     }
     sendRemoveClientMessage() {
-        this.messageId = 12524;
+        this.action = 12524;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(this.unit.clientId);
         this.unit.write(this.toBuffer());
     }
     sendPingMessage() {
-        this.messageId = 16;
+        this.action = 16;
         this.createBaseMessage();
         this.unit.write(this.toBuffer());
     }
@@ -61,58 +61,58 @@ exports.ConnectionCommands = ConnectionCommands;
 ;
 class EquipmentCommands extends Commands {
     sendGetEquipmentStateMessage() {
-        this.messageId = 12526;
+        this.action = 12526;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendGetControllerConfigMessage() {
-        this.messageId = 12532; // controller config
+        this.action = 12532; // controller config
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendGetEquipmentConfigurationMessage() {
-        this.messageId = 12566; //equipconfg
+        this.action = 12566; //equipconfg
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendGetSystemTimeMessage() {
-        this.messageId = 8110;
+        this.action = 8110;
         this.createBaseMessage();
         this.unit.write(this.toBuffer());
     }
     sendCancelDelayMessage() {
-        this.messageId = 12580;
+        this.action = 12580;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendGetCustomNamesMessage() {
-        this.messageId = 12562;
+        this.action = 12562;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendGetWeatherMessage() {
-        this.messageId = 9807;
+        this.action = 9807;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendSetSystemTimeMessage(date, shouldAdjustForDST) {
-        this.messageId = 8112;
+        this.action = 8112;
         this.createBaseMessage();
         this.writeSLDateTime(date);
         this.writeInt32LE(shouldAdjustForDST ? 1 : 0);
         this.unit.write(this.toBuffer());
     }
     sendGetHistoryMessage(fromTime, toTime) {
-        this.messageId = 12534;
+        this.action = 12534;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
         this.writeSLDateTime(fromTime);
@@ -124,7 +124,7 @@ class EquipmentCommands extends Commands {
 exports.EquipmentCommands = EquipmentCommands;
 class CircuitCommands extends Commands {
     sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos) {
-        this.messageId = 12520;
+        this.action = 12520;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
         this.writeInt32LE(circuitId + 499);
@@ -139,7 +139,7 @@ class CircuitCommands extends Commands {
         this.unit.write(this.toBuffer());
     }
     sendSetCircuitStateMessage(circuitId, circuitState) {
-        this.messageId = 12530;
+        this.action = 12530;
         this.createBaseMessage();
         // this.addHeader(this.senderId, this.messageId);
         // this._controllerId = controllerId;
@@ -150,14 +150,14 @@ class CircuitCommands extends Commands {
         this.unit.write(this.toBuffer());
     }
     sendIntellibriteMessage(command) {
-        this.messageId = 12556;
+        this.action = 12556;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(command || 0);
         this.unit.write(this.toBuffer());
     }
     sendSetCircuitRuntimeMessage(circuitId, runTime) {
-        this.messageId = 12550;
+        this.action = 12550;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(circuitId + 499);
@@ -168,7 +168,7 @@ class CircuitCommands extends Commands {
 exports.CircuitCommands = CircuitCommands;
 class ChlorCommands extends Commands {
     sendSetChlorOutputMessage(poolOutput, spaOutput) {
-        this.messageId = 12576;
+        this.action = 12576;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(poolOutput || 0);
@@ -178,7 +178,7 @@ class ChlorCommands extends Commands {
         this.unit.write(this.toBuffer());
     }
     sendGetSaltCellConfigMessage() {
-        this.messageId = 12572;
+        this.action = 12572;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.unit.write(this.toBuffer());
@@ -187,13 +187,13 @@ class ChlorCommands extends Commands {
 exports.ChlorCommands = ChlorCommands;
 class ChemCommands extends Commands {
     sendGetChemStatusMessage() {
-        this.messageId = 12592;
+        this.action = 12592;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.unit.write(this.toBuffer());
     }
     sendGetChemHistoryMessage(fromTime, toTime) {
-        this.messageId = 12596;
+        this.action = 12596;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeSLDateTime(fromTime);
@@ -205,7 +205,7 @@ class ChemCommands extends Commands {
 exports.ChemCommands = ChemCommands;
 class BodyCommands extends Commands {
     sendSetPointMessage(bodyType, temperature) {
-        this.messageId = 12528;
+        this.action = 12528;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(bodyType || 0);
@@ -213,7 +213,7 @@ class BodyCommands extends Commands {
         this.unit.write(this.toBuffer());
     }
     sendHeatModeMessage(bodyType, heatMode) {
-        this.messageId = 12538;
+        this.action = 12538;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE((bodyType - 1) || 0);
@@ -224,28 +224,28 @@ class BodyCommands extends Commands {
 exports.BodyCommands = BodyCommands;
 class ScheduleCommands extends Commands {
     sendGetSchedulesMessage(schedType) {
-        this.messageId = 12542;
+        this.action = 12542;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(schedType);
         this.unit.write(this.toBuffer());
     }
     sendAddScheduleEventMessage(schedType) {
-        this.messageId = 12544;
+        this.action = 12544;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(schedType);
         this.unit.write(this.toBuffer());
     }
     sendDeleteScheduleEventMessage(schedId) {
-        this.messageId = 12546;
+        this.action = 12546;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
         this.writeInt32LE(schedId + 699);
         this.unit.write(this.toBuffer());
     }
     sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
-        this.messageId = 12548;
+        this.action = 12548;
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(scheduleId + 699);
@@ -262,28 +262,35 @@ class ScheduleCommands extends Commands {
 exports.ScheduleCommands = ScheduleCommands;
 class PumpCommands extends Commands {
     sendGetPumpStatusMessage(pumpId) {
-        this.messageId = 12584;
+        this.action = 12584;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
         this.writeInt32LE(pumpId - 1);
         this.unit.write(this.toBuffer());
     }
-    sendSetPumpSpeed(pumpId, circuitId, setPoint, isRPMs) {
-        this.messageId = 12586;
+    sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs) {
+        this.action = 12586;
+        if (typeof isRPMs === 'undefined') {
+            if (speed < 400) {
+                isRPMs = false;
+            }
+            else
+                isRPMs = true;
+        }
+        let _isRPMs = isRPMs ? 1 : 0;
         this.createBaseMessage();
-        this.writeInt32LE(this.controllerId); // Always 0 in my case
+        this.writeInt32LE(this.controllerId);
         this.writeInt32LE(pumpId - 1);
-        this.writeInt32LE(0); // Always 0 in my case
         this.writeInt32LE(circuitId); // This is indexed to the array of circuits returned in GetPumpStatus
-        this.writeInt32LE(setPoint);
-        this.writeInt32LE(isRPMs);
+        this.writeInt32LE(speed);
+        this.writeInt32LE(_isRPMs);
         this.unit.write(this.toBuffer());
     }
 }
 exports.PumpCommands = PumpCommands;
 class OutboundGateway extends SLMessage_1.Outbound {
     createSendGatewayMessage(systemName) {
-        this.messageId = 18003; // SLSendGatewayDataMessage.MSG_ID;
+        this.action = 18003; // SLSendGatewayDataMessage.MSG_ID;
         this.createBaseMessage();
         this.writeSLString(systemName);
         this.writeSLString(systemName);

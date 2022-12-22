@@ -52,7 +52,7 @@ export class FindUnits extends EventEmitter {
       self.emit('error', e);
     });
   }
-  private finder;
+  private finder: Socket;
   private bound: boolean;
   private message: Buffer;
   search() {
@@ -142,8 +142,8 @@ export class RemoteLogin extends EventEmitter {
           let message = new Inbound(screenlogic.controllerId, screenlogic.senderId);
           message.readFromBuffer(buf);
           var msgType = buf.readInt16LE(2);
-          debugRemote(`received message of length ${buf.length} and messageId ${message.messageId}`);
-          switch (message.messageId) {
+          debugRemote(`received message of length ${buf.length} and messageId ${message.action}`);
+          switch (message.action) {
             case 18004: // SLGatewayDataMessage.getResponseId():
               debugRemote("  it's a gateway response");
               if (typeof resolve !== 'undefined') {
@@ -209,6 +209,7 @@ export class UnitConnection extends EventEmitter {
     this._buffer = Buffer.alloc(1024);
     this._bufferIdx = 0;
   }
+  public systemName: string;
   private serverPort: number;
   private serverAddress: string;
   private password: string;
@@ -220,6 +221,7 @@ export class UnitConnection extends EventEmitter {
   private _controllerId: number = 0;
   public get controllerId(): number { return this._controllerId };
   public set controllerId(val: number) { this._controllerId = val; }
+  protected _isMock: boolean = false;
 
   private _buffer: Buffer;
   private _bufferIdx: number;
@@ -241,25 +243,46 @@ export class UnitConnection extends EventEmitter {
   public chlor: Chlor;
   public schedule: Schedule;
   public pump: Pump;
-  public reconnect = function(){
-    let self = this;
-    debugUnit(`Unit had an unexpected error/timeout/clientError - reconnecting.`)
-    self.client.removeAllListeners();
-    setTimeoutSync(async () => { try { 
-      await self.closeAsync();
-      await self.connectAsync(); 
-    } catch (err) { } }, 1000);
-  }
-  public init(address: string, port: number, password: string, senderId?: number) {
-    let self = this;
+  public reconnectAsync = async () => {
+    try {
 
-    
-    
+      let self = this;
+      debugUnit(`Unit had an unexpected error/timeout/clientError - reconnecting.`)
+      self.client.removeAllListeners();
+      // await setTimeout(1000);
+      await self.closeAsync();
+      await self.connectAsync();
+    }
+    catch (err) {
+      debugUnit(`Error trying to reconnect: ${err.message}`);
+    }
+  }
+  public initMock(systemName: string, address: string, port: number, password: string, senderId?: number) {
+    this.systemName = systemName;
     this.serverPort = port;
     this.serverAddress = address;
     this.password = password;
-    this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1,Math.trunc(Math.random()*10000)),10000);
+    this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
     this.clientId = Math.round(Math.random() * 100000);
+    this._initCommands();
+    this._isMock = true;
+  }
+  public init(systemName: string, address: string, port: number, password: string, senderId?: number) {
+    let self = this;
+    this.systemName = systemName;
+    this.serverPort = port;
+    this.serverAddress = address;
+    this.password = password;
+    this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
+    this.clientId = Math.round(Math.random() * 100000);
+    this._initCommands();
+    this._isMock = false;
+    this._keepAliveTimer = setTimeoutSync(() => {
+      self.keepAliveAsync()
+    }, this._keepAliveDuration || 30000
+    );
+  }
+  private _initCommands() {
     this.controller = {
       circuits: new CircuitCommands(this),
       connection: new ConnectionCommands(this),
@@ -277,14 +300,11 @@ export class UnitConnection extends EventEmitter {
     this.chlor = new Chlor();
     this.schedule = new Schedule();
     this.pump = new Pump();
-    this._keepAliveTimer = setTimeoutSync(() => {
-      self.keepAliveAsync()
-    }, this._keepAliveDuration || 30000
-    );
   }
   public write(val: Buffer | string) {
+    if (this._isMock){debugUnit(`Skipping write because of mock port`)};
     try {
-      if (!this.client.writable){
+      if (!this.client.writable) {
         debugUnit('Socket not writeable.');
       }
       else {
@@ -315,7 +335,7 @@ export class UnitConnection extends EventEmitter {
     }
   }
 
-  processData(msg: Buffer) {
+  public processData(msg: Buffer) {
     // ensure we can hold this message
     if (this._buffer.length < msg.length + this._bufferIdx) {
       this._buffer = Buffer.alloc(msg.length + this._buffer.length, this._buffer);
@@ -338,7 +358,7 @@ export class UnitConnection extends EventEmitter {
       if (b.length > 4) {
         let message = new Inbound(this.controllerId, this.senderId);
         message.readFromBuffer(b);
-        // this.onClientMessage(this.buffer.slice(0, this.expectedMsgLen));
+        if (!this._isMock) this.toLogEmit(message, 'in');
         this.onClientMessage(message);
       }
       this._bufferIdx = 0;
@@ -349,6 +369,22 @@ export class UnitConnection extends EventEmitter {
     if (toRead < msg.length) {
       this.processData(msg.slice(toRead, msg.length));
     }
+  }
+
+  toLogEmit(message, dir) {
+    let data = {
+      systemName: this.systemName,
+      action: message.action,
+      controllerId: message.controllerId,
+      clientId: this.clientId,
+      senderId: this.senderId,
+      serverAddress: this.serverAddress,
+      serverPort: this.serverPort,
+      data: message.toBuffer().toJSON().data,
+      proto: 'screenlogic',
+      dir
+    };
+    this.emit('slLogMessage', data);
   }
 
   async closeAsync(): Promise<boolean> {
@@ -397,38 +433,39 @@ export class UnitConnection extends EventEmitter {
           allowHalfOpen: false,
           keepAlive: true,
           keepAliveInitialDelay: 5
-       };
+        };
         self.client = new net.Socket(opts);
         self.client.setKeepAlive(true, 10 * 1000);
         self.client.on('data', function (msg) {
           self.emit('bytesRead', self.client.bytesRead);
           self.processData(msg);
-        }).once('close', function (had_error) {
-          debugUnit(`closed.  any error? ${had_error}`);
-          self.emit('close', had_error);
         })
-        .once('end', function (e) {
-          // often, during debugging, the socket will timeout
-          debugUnit(`end event for unit: ${e.message}`);
-          self.emit('end', e);
-        })
-        .once('error', function (e) {
-          // often, during debugging, the socket will timeout
-          debugUnit(`error event for unit: ${typeof e !== 'undefined' ? e.message : 'unknown unit'}`);
-          // self.emit('error', e);
-          self.reconnect();
-        })
-        .once('timeout', function (e) {
-          // often, during debugging, the socket will timeout
-          debugUnit(`timeout event for unit: ${e.message}`);
-          self.emit('timeout', e);
-          self.reconnect();
-        })
-        .once('clientError', function (err, socket) {
-          if (err.code === 'ECONNRESET' || !socket.writable) socket.end('HTTP/2 400 Bad Request\n');
-          debugUnit('client error\n', err);
-          self.reconnect();
-        });
+          .once('close', function (had_error) {
+            debugUnit(`closed.  any error? ${had_error}`);
+            self.emit('close', had_error);
+          })
+          .once('end', function (e) {
+            // often, during debugging, the socket will timeout
+            debugUnit(`end event for unit: ${e.message}`);
+            self.emit('end', e);
+          })
+          .once('error', async function (e) {
+            // often, during debugging, the socket will timeout
+            debugUnit(`error event for unit: ${typeof e !== 'undefined' ? e.message : 'unknown unit'}`);
+            // self.emit('error', e);
+            await self.reconnectAsync();
+          })
+          .once('timeout', async function (e) {
+            // often, during debugging, the socket will timeout
+            debugUnit(`timeout event for unit: ${e.message}`);
+            self.emit('timeout', e);
+            await self.reconnectAsync();
+          })
+          .once('clientError', async function (err, socket) {
+            if (err.code === 'ECONNRESET' || !socket.writable) socket.end('HTTP/2 400 Bad Request\n');
+            debugUnit('client error\n', err);
+            await self.reconnectAsync();
+          });
 
         debugUnit('connecting...');
         let connected = false;
@@ -588,7 +625,7 @@ export class UnitConnection extends EventEmitter {
 
     // var msgType = buf.readInt16LE(2);
     // console.log(`got a message ${msg.messageId}`)
-    switch (msg.messageId) {
+    switch (msg.action) {
       case 15:  //SLChallengeMessage.getResponseId():
         debugUnit("  it's a challenge response");
         let challengeString = ConnectionMessage.decodeChallengeResponse(msg);
@@ -759,7 +796,7 @@ export class UnitConnection extends EventEmitter {
         break;
       default:
         EquipmentStateMessage.decodeGeneric(msg);
-        debugUnit("  it's an unknown type: %d", msg.messageId);
+        debugUnit("  it's an unknown type: %d", msg.action);
         break;
     }
   }
@@ -944,7 +981,7 @@ export class Circuit extends UnitConnection {
   }
   async setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
-      debugUnit(`[${screenlogic.senderId}] sending set circuit command: controllerId: ${ this.controllerId}, circuitId: ${circuitId}, nameIndex: ${nameIndex} circuitFunc: ${circuitFunction} circInterface: ${circuitInterface} freeze: ${freeze ? 'true' : 'false'} colorPos: ${colorPos}...`);
+      debugUnit(`[${screenlogic.senderId}] sending set circuit command: controllerId: ${this.controllerId}, circuitId: ${circuitId}, nameIndex: ${nameIndex} circuitFunc: ${circuitFunction} circInterface: ${circuitInterface} freeze: ${freeze ? 'true' : 'false'} colorPos: ${colorPos}...`);
       let _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for set circuit state response'));
       }, screenlogic.netTimeout);
@@ -1003,9 +1040,9 @@ export class Body extends UnitConnection {
   }
 }
 export class Pump extends UnitConnection {
-  async setPumpSpeedAsync(pumpId: number, circuitId: number, setPoint: number, isRPMs?: boolean): Promise<boolean> {
+  async setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
-      debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${setPoint}, isRPMs: ${isRPMs}}`);
+      debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${speed}, isRPMs: ${isRPMs}}`);
       let _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for set pump speed response'));
         screenlogic.removeListener('setPumpSpeed', () => { });
@@ -1015,7 +1052,7 @@ export class Pump extends UnitConnection {
         debugUnit('received setPumpSpeed event');
         resolve(data);
       })
-      screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, setPoint, isRPMs);
+      screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
     });
   }
   async getPumpStatusAsync(pumpId): Promise<SLPumpStatusData> {

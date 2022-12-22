@@ -67,7 +67,7 @@ async function app() {
     });
   
   try {
-    client.init(unit.ipAddr, unit.port, password, 12345);
+    client.init(systemName, unit.ipAddr, unit.port, password, 12345);
     await client.connectAsync();
     let addClient = await client.addClientAsync();
     console.log(`Add client result: ${addClient}`);

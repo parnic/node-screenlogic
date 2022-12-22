@@ -22,7 +22,7 @@ export class SLMessage {
     this.senderId = senderId;
   }
   protected _wroteSize: boolean;
-  public messageId: number;
+  public action: number;
   public senderId: number = 0;
   public controllerId: number = 0;
   protected dataLength: number;
@@ -40,7 +40,9 @@ export class SLMessage {
     }
     return 0;
   }
-
+  public toBuffer(){
+    return this._smartBuffer.toBuffer();
+  }
 };
 
 export class Inbound extends SLMessage{
@@ -75,7 +77,7 @@ export class Inbound extends SLMessage{
   decode() {
   this._smartBuffer.readOffset = 0;
   this.senderId = this._smartBuffer.readUInt16LE();
-  this.messageId = this._smartBuffer.readUInt16LE();
+  this.action = this._smartBuffer.readUInt16LE();
   // this.messageId = this._smartBuffer.readInt16LE(2);
   this.dataLength = this._smartBuffer.readInt32LE();
   }
@@ -147,7 +149,7 @@ export class Outbound extends SLMessage{
   public addHeader() {
 
     this._smartBuffer.writeUInt16LE(this.senderId);
-    this._smartBuffer.writeUInt16LE(this.messageId);
+    this._smartBuffer.writeUInt16LE(this.action);
 
     this._wroteSize = false;
   }

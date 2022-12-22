@@ -125,8 +125,8 @@ class RemoteLogin extends events_1.EventEmitter {
                     let message = new SLMessage_1.Inbound(exports.screenlogic.controllerId, exports.screenlogic.senderId);
                     message.readFromBuffer(buf);
                     var msgType = buf.readInt16LE(2);
-                    debugRemote(`received message of length ${buf.length} and messageId ${message.messageId}`);
-                    switch (message.messageId) {
+                    debugRemote(`received message of length ${buf.length} and messageId ${message.action}`);
+                    switch (message.action) {
                         case 18004: // SLGatewayDataMessage.getResponseId():
                             debugRemote("  it's a gateway response");
                             if (typeof resolve !== 'undefined') {
@@ -188,22 +188,24 @@ class UnitConnection extends events_1.EventEmitter {
         super();
         this.isConnected = false;
         this._controllerId = 0;
+        this._isMock = false;
         // private _expectedMsgLen: number;
         // private challengeString;
         this._senderId = 0;
         this.netTimeout = 2500; // set back to 1s after testing
         this._keepAliveDuration = 30 * 1000;
-        this.reconnect = function () {
-            let self = this;
-            debugUnit(`Unit had an unexpected error/timeout/clientError - reconnecting.`);
-            self.client.removeAllListeners();
-            (0, timers_1.setTimeout)(async () => {
-                try {
-                    await self.closeAsync();
-                    await self.connectAsync();
-                }
-                catch (err) { }
-            }, 1000);
+        this.reconnectAsync = async () => {
+            try {
+                let self = this;
+                debugUnit(`Unit had an unexpected error/timeout/clientError - reconnecting.`);
+                self.client.removeAllListeners();
+                // await setTimeout(1000);
+                await self.closeAsync();
+                await self.connectAsync();
+            }
+            catch (err) {
+                debugUnit(`Error trying to reconnect: ${err.message}`);
+            }
         };
         this._buffer = Buffer.alloc(1024);
         this._bufferIdx = 0;
@@ -217,13 +219,31 @@ class UnitConnection extends events_1.EventEmitter {
     get senderId() { return this._senderId; }
     ;
     set senderId(val) { this._senderId = val; }
-    init(address, port, password, senderId) {
-        let self = this;
+    initMock(systemName, address, port, password, senderId) {
+        this.systemName = systemName;
         this.serverPort = port;
         this.serverAddress = address;
         this.password = password;
         this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
         this.clientId = Math.round(Math.random() * 100000);
+        this._initCommands();
+        this._isMock = true;
+    }
+    init(systemName, address, port, password, senderId) {
+        let self = this;
+        this.systemName = systemName;
+        this.serverPort = port;
+        this.serverAddress = address;
+        this.password = password;
+        this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
+        this.clientId = Math.round(Math.random() * 100000);
+        this._initCommands();
+        this._isMock = false;
+        this._keepAliveTimer = (0, timers_1.setTimeout)(() => {
+            self.keepAliveAsync();
+        }, this._keepAliveDuration || 30000);
+    }
+    _initCommands() {
         this.controller = {
             circuits: new OutgoingMessages_1.CircuitCommands(this),
             connection: new OutgoingMessages_1.ConnectionCommands(this),
@@ -241,11 +261,12 @@ class UnitConnection extends events_1.EventEmitter {
         this.chlor = new Chlor();
         this.schedule = new Schedule();
         this.pump = new Pump();
-        this._keepAliveTimer = (0, timers_1.setTimeout)(() => {
-            self.keepAliveAsync();
-        }, this._keepAliveDuration || 30000);
     }
     write(val) {
+        if (this._isMock) {
+            debugUnit(`Skipping write because of mock port`);
+        }
+        ;
         try {
             if (!this.client.writable) {
                 debugUnit('Socket not writeable.');
@@ -301,7 +322,8 @@ class UnitConnection extends events_1.EventEmitter {
             if (b.length > 4) {
                 let message = new SLMessage_1.Inbound(this.controllerId, this.senderId);
                 message.readFromBuffer(b);
-                // this.onClientMessage(this.buffer.slice(0, this.expectedMsgLen));
+                if (!this._isMock)
+                    this.toLogEmit(message, 'in');
                 this.onClientMessage(message);
             }
             this._bufferIdx = 0;
@@ -311,6 +333,21 @@ class UnitConnection extends events_1.EventEmitter {
         if (toRead < msg.length) {
             this.processData(msg.slice(toRead, msg.length));
         }
+    }
+    toLogEmit(message, dir) {
+        let data = {
+            systemName: this.systemName,
+            action: message.action,
+            controllerId: message.controllerId,
+            clientId: this.clientId,
+            senderId: this.senderId,
+            serverAddress: this.serverAddress,
+            serverPort: this.serverPort,
+            data: message.toBuffer().toJSON().data,
+            proto: 'screenlogic',
+            dir
+        };
+        this.emit('slLogMessage', data);
     }
     async closeAsync() {
         let self = this;
@@ -362,7 +399,8 @@ class UnitConnection extends events_1.EventEmitter {
                 self.client.on('data', function (msg) {
                     self.emit('bytesRead', self.client.bytesRead);
                     self.processData(msg);
-                }).once('close', function (had_error) {
+                })
+                    .once('close', function (had_error) {
                     debugUnit(`closed.  any error? ${had_error}`);
                     self.emit('close', had_error);
                 })
@@ -371,23 +409,23 @@ class UnitConnection extends events_1.EventEmitter {
                     debugUnit(`end event for unit: ${e.message}`);
                     self.emit('end', e);
                 })
-                    .once('error', function (e) {
+                    .once('error', async function (e) {
                     // often, during debugging, the socket will timeout
                     debugUnit(`error event for unit: ${typeof e !== 'undefined' ? e.message : 'unknown unit'}`);
                     // self.emit('error', e);
-                    self.reconnect();
+                    await self.reconnectAsync();
                 })
-                    .once('timeout', function (e) {
+                    .once('timeout', async function (e) {
                     // often, during debugging, the socket will timeout
                     debugUnit(`timeout event for unit: ${e.message}`);
                     self.emit('timeout', e);
-                    self.reconnect();
+                    await self.reconnectAsync();
                 })
-                    .once('clientError', function (err, socket) {
+                    .once('clientError', async function (err, socket) {
                     if (err.code === 'ECONNRESET' || !socket.writable)
                         socket.end('HTTP/2 400 Bad Request\n');
                     debugUnit('client error\n', err);
-                    self.reconnect();
+                    await self.reconnectAsync();
                 });
                 debugUnit('connecting...');
                 let connected = false;
@@ -543,7 +581,7 @@ class UnitConnection extends events_1.EventEmitter {
         debugUnit('received message of length %d', msg.length);
         // var msgType = buf.readInt16LE(2);
         // console.log(`got a message ${msg.messageId}`)
-        switch (msg.messageId) {
+        switch (msg.action) {
             case 15: //SLChallengeMessage.getResponseId():
                 debugUnit("  it's a challenge response");
                 let challengeString = ConnectionMessage_1.ConnectionMessage.decodeChallengeResponse(msg);
@@ -710,7 +748,7 @@ class UnitConnection extends events_1.EventEmitter {
                 break;
             default:
                 EquipmentState_1.EquipmentStateMessage.decodeGeneric(msg);
-                debugUnit("  it's an unknown type: %d", msg.messageId);
+                debugUnit("  it's an unknown type: %d", msg.action);
                 break;
         }
     }
@@ -952,9 +990,9 @@ class Body extends UnitConnection {
 }
 exports.Body = Body;
 class Pump extends UnitConnection {
-    async setPumpSpeedAsync(pumpId, circuitId, setPoint, isRPMs) {
+    async setPumpSpeedAsync(pumpId, circuitId, speed, isRPMs) {
         return new Promise(async (resolve, reject) => {
-            debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${setPoint}, isRPMs: ${isRPMs}}`);
+            debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${speed}, isRPMs: ${isRPMs}}`);
             let _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for set pump speed response'));
                 exports.screenlogic.removeListener('setPumpSpeed', () => { });
@@ -964,7 +1002,7 @@ class Pump extends UnitConnection {
                 debugUnit('received setPumpSpeed event');
                 resolve(data);
             });
-            exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, setPoint, isRPMs);
+            exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
         });
     }
     async getPumpStatusAsync(pumpId) {

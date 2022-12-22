@@ -34,6 +34,7 @@ export declare class RemoteLogin extends EventEmitter {
 }
 export declare class UnitConnection extends EventEmitter {
     constructor();
+    systemName: string;
     private serverPort;
     private serverAddress;
     private password;
@@ -45,6 +46,7 @@ export declare class UnitConnection extends EventEmitter {
     private _controllerId;
     get controllerId(): number;
     set controllerId(val: number);
+    protected _isMock: boolean;
     private _buffer;
     private _bufferIdx;
     private _senderId;
@@ -62,11 +64,14 @@ export declare class UnitConnection extends EventEmitter {
     chlor: Chlor;
     schedule: Schedule;
     pump: Pump;
-    reconnect: () => void;
-    init(address: string, port: number, password: string, senderId?: number): void;
+    reconnectAsync: () => Promise<void>;
+    initMock(systemName: string, address: string, port: number, password: string, senderId?: number): void;
+    init(systemName: string, address: string, port: number, password: string, senderId?: number): void;
+    private _initCommands;
     write(val: Buffer | string): void;
     keepAliveAsync(): void;
     processData(msg: Buffer): void;
+    toLogEmit(message: any, dir: any): void;
     closeAsync(): Promise<boolean>;
     connectAsync(): Promise<boolean>;
     loginAsync(challengeString: string): Promise<unknown>;
@@ -112,7 +117,7 @@ export declare class Body extends UnitConnection {
     setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes): Promise<boolean>;
 }
 export declare class Pump extends UnitConnection {
-    setPumpSpeedAsync(pumpId: number, circuitId: number, setPoint: number, isRPMs?: boolean): Promise<boolean>;
+    setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): Promise<boolean>;
     getPumpStatusAsync(pumpId: any): Promise<SLPumpStatusData>;
 }
 export declare class Schedule extends UnitConnection {

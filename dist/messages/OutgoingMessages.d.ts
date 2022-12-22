@@ -50,7 +50,7 @@ export declare class ScheduleCommands extends Commands {
 }
 export declare class PumpCommands extends Commands {
     sendGetPumpStatusMessage(pumpId: number): void;
-    sendSetPumpSpeed(pumpId: number, circuitId: number, setPoint: number, isRPMs?: boolean): void;
+    sendSetPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): void;
 }
 export declare class OutboundGateway extends Outbound {
     createSendGatewayMessage(systemName: string): Buffer;
