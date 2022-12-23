@@ -68,10 +68,10 @@ export declare class UnitConnection extends EventEmitter {
     initMock(systemName: string, address: string, port: number, password: string, senderId?: number): void;
     init(systemName: string, address: string, port: number, password: string, senderId?: number): void;
     private _initCommands;
-    write(val: Buffer | string): void;
+    write(bytes: Buffer | string): void;
     keepAliveAsync(): void;
     processData(msg: Buffer): void;
-    toLogEmit(message: any, dir: any): void;
+    toLogEmit(message: any, direction: any): void;
     closeAsync(): Promise<boolean>;
     connectAsync(): Promise<boolean>;
     loginAsync(challengeString: string): Promise<unknown>;

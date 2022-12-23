@@ -262,7 +262,7 @@ class UnitConnection extends events_1.EventEmitter {
         this.schedule = new Schedule();
         this.pump = new Pump();
     }
-    write(val) {
+    write(bytes) {
         if (this._isMock) {
             debugUnit(`Skipping write because of mock port`);
         }
@@ -272,7 +272,7 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('Socket not writeable.');
             }
             else {
-                this.client.write(val);
+                this.client.write(bytes);
                 this.emit('bytesWritten', this.client.bytesWritten);
             }
         }
@@ -322,8 +322,7 @@ class UnitConnection extends events_1.EventEmitter {
             if (b.length > 4) {
                 let message = new SLMessage_1.Inbound(this.controllerId, this.senderId);
                 message.readFromBuffer(b);
-                if (!this._isMock)
-                    this.toLogEmit(message, 'in');
+                this.toLogEmit(message, 'in');
                 this.onClientMessage(message);
             }
             this._bufferIdx = 0;
@@ -334,7 +333,9 @@ class UnitConnection extends events_1.EventEmitter {
             this.processData(msg.slice(toRead, msg.length));
         }
     }
-    toLogEmit(message, dir) {
+    toLogEmit(message, direction) {
+        if (this._isMock)
+            return;
         let data = {
             systemName: this.systemName,
             action: message.action,
@@ -343,9 +344,9 @@ class UnitConnection extends events_1.EventEmitter {
             senderId: this.senderId,
             serverAddress: this.serverAddress,
             serverPort: this.serverPort,
-            data: message.toBuffer().toJSON().data,
-            proto: 'screenlogic',
-            dir
+            payload: message.toBuffer().toJSON().data,
+            protocol: 'screenlogic',
+            dir: direction
         };
         this.emit('slLogMessage', data);
     }
@@ -450,7 +451,8 @@ class UnitConnection extends events_1.EventEmitter {
                             clearTimeout(_timeout);
                         }
                     });
-                    exports.screenlogic.controller.connection.sendChallengeMessage();
+                    let msg = exports.screenlogic.controller.connection.sendChallengeMessage();
+                    this.toLogEmit(msg, 'out');
                 });
                 self.client.connect(self.serverPort, self.serverAddress, function () {
                     connected = true;
@@ -482,7 +484,8 @@ class UnitConnection extends events_1.EventEmitter {
                 reject(new Error('Login Failed'));
             });
             var password = new Encoder(self.password.toString()).getEncryptedPassword(challengeString);
-            exports.screenlogic.controller.connection.sendLoginMessage(password);
+            let msg = exports.screenlogic.controller.connection.sendLoginMessage(password);
+            this.toLogEmit(msg, 'out');
         });
     }
     bytesRead() {
@@ -521,7 +524,8 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('received version event');
                 resolve(version);
             });
-            exports.screenlogic.controller.connection.sendVersionMessage();
+            let msg = exports.screenlogic.controller.connection.sendVersionMessage();
+            this.toLogEmit(msg, 'out');
         });
     }
     async addClientAsync(clientId) {
@@ -538,7 +542,8 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('received addClient event');
                 resolve(true);
             });
-            self.controller.connection.sendAddClientMessage();
+            let msg = self.controller.connection.sendAddClientMessage();
+            this.toLogEmit(msg, 'out');
         });
     }
     async removeClientAsync() {
@@ -554,7 +559,8 @@ class UnitConnection extends events_1.EventEmitter {
                     debugUnit('received removeClient event');
                     resolve(true);
                 });
-                exports.screenlogic.controller.connection.sendRemoveClientMessage();
+                let msg = exports.screenlogic.controller.connection.sendRemoveClientMessage();
+                this.toLogEmit(msg, 'out');
             }
             catch (error) {
                 debugUnit(`caught remove client error ${error.message}, rethrowing...`);
@@ -574,7 +580,8 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('received pong event');
                 resolve(true);
             });
-            exports.screenlogic.controller.connection.sendPingMessage();
+            let msg = exports.screenlogic.controller.connection.sendPingMessage();
+            this.toLogEmit(msg, 'out');
         });
     }
     onClientMessage(msg) {
@@ -779,7 +786,8 @@ class Equipment {
                 debugUnit('received setSystemTime event');
                 resolve(data);
             });
-            exports.screenlogic.controller.equipment.sendSetSystemTimeMessage(date, shouldAdjustForDST);
+            let msg = exports.screenlogic.controller.equipment.sendSetSystemTimeMessage(date, shouldAdjustForDST);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getWeatherForecastAsync() {
@@ -793,7 +801,8 @@ class Equipment {
                 debugUnit('received weatherForecast event');
                 resolve(equipment);
             });
-            exports.screenlogic.controller.equipment.sendGetWeatherMessage();
+            let msg = exports.screenlogic.controller.equipment.sendGetWeatherMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getHistoryDataAsync(fromTime, toTime) {
@@ -810,7 +819,8 @@ class Equipment {
             let yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             debugUnit('[%d] requesting history data from `%s` to `%s`', exports.screenlogic.senderId, fromTime || yesterday, toTime || now);
-            exports.screenlogic.controller.equipment.sendGetHistoryMessage(fromTime || yesterday, toTime || now);
+            let msg = exports.screenlogic.controller.equipment.sendGetHistoryMessage(fromTime || yesterday, toTime || now);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getEquipmentConfigurationAsync() {
@@ -824,7 +834,8 @@ class Equipment {
                 debugUnit('received equipmentConfiguration event');
                 resolve(data);
             });
-            exports.screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage();
+            let msg = exports.screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async cancelDelayAsync() {
@@ -838,7 +849,8 @@ class Equipment {
                 debugUnit('received cancelDelay event');
                 resolve(true);
             });
-            exports.screenlogic.controller.equipment.sendCancelDelayMessage();
+            let msg = exports.screenlogic.controller.equipment.sendCancelDelayMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getSystemTimeAsync() {
@@ -852,7 +864,8 @@ class Equipment {
                 debugUnit('received getSystemTime event');
                 resolve(systemTime);
             });
-            exports.screenlogic.controller.equipment.sendGetSystemTimeMessage();
+            let msg = exports.screenlogic.controller.equipment.sendGetSystemTimeMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getControllerConfigAsync() {
@@ -866,7 +879,8 @@ class Equipment {
                 debugUnit('received equipmentConfig event');
                 resolve(controller);
             });
-            exports.screenlogic.controller.equipment.sendGetControllerConfigMessage();
+            let msg = exports.screenlogic.controller.equipment.sendGetControllerConfigMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getEquipmentStateAsync() {
@@ -880,7 +894,8 @@ class Equipment {
                 debugUnit('received equipmentState event');
                 resolve(equipmentState);
             });
-            exports.screenlogic.controller.equipment.sendGetEquipmentStateMessage();
+            let msg = exports.screenlogic.controller.equipment.sendGetEquipmentStateMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getCustomNamesAsync() {
@@ -894,7 +909,8 @@ class Equipment {
                 debugUnit('received getCustomNames event');
                 resolve(customNames);
             });
-            exports.screenlogic.controller.equipment.sendGetCustomNamesMessage();
+            let msg = exports.screenlogic.controller.equipment.sendGetCustomNamesMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
 }
@@ -911,7 +927,8 @@ class Circuit extends UnitConnection {
                 debugUnit('received sentLightCommand event');
                 resolve(data);
             });
-            exports.screenlogic.controller.circuits.sendIntellibriteMessage(command);
+            let msg = exports.screenlogic.controller.circuits.sendIntellibriteMessage(command);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async setCircuitRuntimebyIdAsync(circuitId, runTime) {
@@ -925,7 +942,8 @@ class Circuit extends UnitConnection {
                 debugUnit('received setCircuitRuntimebyId event');
                 resolve(data);
             });
-            exports.screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime);
+            let msg = exports.screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos) {
@@ -939,7 +957,8 @@ class Circuit extends UnitConnection {
                 debugUnit('received circuit event');
                 resolve(data);
             });
-            exports.screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos);
+            let msg = exports.screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async setCircuitStateAsync(circuitId, circuitState) {
@@ -953,7 +972,8 @@ class Circuit extends UnitConnection {
                 debugUnit('received circuitStateChanged event');
                 resolve(data);
             });
-            exports.screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState);
+            let msg = exports.screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
 }
@@ -970,7 +990,8 @@ class Body extends UnitConnection {
                 debugUnit('received setPointChanged event');
                 resolve(data);
             });
-            exports.screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature);
+            let msg = exports.screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async setHeatModeAsync(bodyIndex, heatMode) {
@@ -984,7 +1005,8 @@ class Body extends UnitConnection {
                 debugUnit('received heatModeChanged event');
                 resolve(data);
             });
-            exports.screenlogic.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode);
+            let msg = exports.screenlogic.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
 }
@@ -1002,7 +1024,8 @@ class Pump extends UnitConnection {
                 debugUnit('received setPumpSpeed event');
                 resolve(data);
             });
-            exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
+            let msg = exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getPumpStatusAsync(pumpId) {
@@ -1018,7 +1041,8 @@ class Pump extends UnitConnection {
                     debugUnit('received getPumpStatus event');
                     resolve(data);
                 });
-                exports.screenlogic.controller.pumps.sendGetPumpStatusMessage(pumpId);
+                let msg = exports.screenlogic.controller.pumps.sendGetPumpStatusMessage(pumpId);
+                exports.screenlogic.toLogEmit(msg, 'out');
             }
             catch (err) {
                 debugUnit(`Error getting pump status: ${err.message}`);
@@ -1040,7 +1064,8 @@ class Schedule extends UnitConnection {
                 debugUnit('received setScheduleEventById event');
                 resolve(data);
             });
-            exports.screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
+            let msg = exports.screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async addNewScheduleEventAsync(scheduleType) {
@@ -1054,7 +1079,8 @@ class Schedule extends UnitConnection {
                 debugUnit('received addNewScheduleEvent event');
                 resolve(data);
             });
-            exports.screenlogic.controller.schedules.sendAddScheduleEventMessage(scheduleType);
+            let msg = exports.screenlogic.controller.schedules.sendAddScheduleEventMessage(scheduleType);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async deleteScheduleEventByIdAsync(scheduleId) {
@@ -1068,7 +1094,8 @@ class Schedule extends UnitConnection {
                 debugUnit('received deleteScheduleEventById event');
                 resolve(data);
             });
-            exports.screenlogic.controller.schedules.sendDeleteScheduleEventMessage(scheduleId);
+            let msg = exports.screenlogic.controller.schedules.sendDeleteScheduleEventMessage(scheduleId);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getScheduleDataAsync(scheduleType) {
@@ -1082,7 +1109,8 @@ class Schedule extends UnitConnection {
                 debugUnit('received getScheduleData event');
                 resolve(schedule);
             });
-            exports.screenlogic.controller.schedules.sendGetSchedulesMessage(scheduleType);
+            let msg = exports.screenlogic.controller.schedules.sendGetSchedulesMessage(scheduleType);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
 }
@@ -1102,7 +1130,8 @@ class Chem extends UnitConnection {
             let yesterday = new Date();
             debugUnit('[%d] requesting chem history data from `%s` to `%s`', exports.screenlogic.senderId, fromTime || yesterday, toTime || now);
             yesterday.setHours(now.getHours() - 24);
-            exports.screenlogic.controller.chem.sendGetChemHistoryMessage(fromTime || yesterday, toTime || now);
+            let msg = exports.screenlogic.controller.chem.sendGetChemHistoryMessage(fromTime || yesterday, toTime || now);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getChemicalDataAsync() {
@@ -1116,7 +1145,8 @@ class Chem extends UnitConnection {
                 debugUnit('received chemicalData event');
                 resolve(chemical);
             });
-            exports.screenlogic.controller.chem.sendGetChemStatusMessage();
+            let msg = exports.screenlogic.controller.chem.sendGetChemStatusMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
 }
@@ -1133,7 +1163,8 @@ class Chlor extends UnitConnection {
                 debugUnit('received setIntellichlorConfig event');
                 resolve(equipment);
             });
-            exports.screenlogic.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput);
+            let msg = exports.screenlogic.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput);
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
     async getIntellichlorConfigAsync() {
@@ -1147,7 +1178,8 @@ class Chlor extends UnitConnection {
                 debugUnit('received intellichlorConfig event');
                 resolve(intellichlor);
             });
-            exports.screenlogic.controller.chlor.sendGetSaltCellConfigMessage();
+            let msg = exports.screenlogic.controller.chlor.sendGetSaltCellConfigMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
 }
