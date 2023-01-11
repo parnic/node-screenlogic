@@ -960,6 +960,11 @@ class Equipment {
         });
     }
     async setEquipmentConfigurationAsync(data) {
+        function updateBit(number, bitPosition, bitValue) {
+            const bitValueNormalized = bitValue ? 1 : 0;
+            const clearMask = ~(1 << bitPosition);
+            return (number & clearMask) | (bitValueNormalized << bitPosition);
+        }
         return new Promise(async (resolve, reject) => {
             debugUnit('[%d] sending set equipment configuration query...', exports.screenlogic.senderId);
             let _timeout = (0, timers_1.setTimeout)(() => {
@@ -1108,23 +1113,23 @@ class Equipment {
             // DELAYS
             if (typeof data.misc !== 'undefined') {
                 if (typeof data.misc.poolPumpOnDuringHeaterCooldown !== 'undefined')
-                    resData.delayData[0] = resData.delayData[0] |= ((data.misc.poolPumpOnDuringHeaterCooldown ? 1 : 0) << 0);
+                    resData.delayData[0] = updateBit(resData.delayData[0], 0, data.misc.poolPumpOnDuringHeaterCooldown ? 1 : 0);
                 if (typeof data.misc.spaPumpOnDuringHeaterCooldown !== 'undefined')
-                    resData.delayData[0] = resData.delayData[0] |= ((data.misc.spaPumpOnDuringHeaterCooldown ? 1 : 0) << 1);
+                    resData.delayData[0] = updateBit(resData.delayData[0], 1, data.misc.spaPumpOnDuringHeaterCooldown ? 1 : 0);
                 if (typeof data.misc.pumpDelay !== 'undefined')
-                    resData.delayData[0] = resData.delayData[0] |= ((data.misc.pumpDelay ? 1 : 0) << 7);
+                    resData.delayData[0] = updateBit(resData.delayData[0], 7, data.misc.pumpDelay ? 1 : 0);
             }
             // INTELLICHEM
             if (typeof data.chem !== 'undefined') {
                 let active = typeof data.chem.isActive !== 'undefined' ? (data.chem.isActive ? 1 : 0) : resData.miscData[3] & 0x01;
-                resData.miscData[3] = resData.miscData[3] |= (active << 0);
+                resData.miscData[3] = updateBit(resData.miscData[3], 0, active);
             }
             // MISC
             if (typeof data.misc !== 'undefined') {
                 if (typeof data.misc.units !== 'undefined')
-                    resData.heaterConfigData[2] |= ((data.misc.units ? 1 : 0) << 0);
+                    resData.heaterConfigData[2] = updateBit(resData.heaterConfigData[2], 0, data.misc.units ? 1 : 0);
                 if (typeof data.misc.manualHeat !== 'undefined')
-                    resData.miscData[4] |= ((data.misc.manualHeat ? 1 : 0) << 0);
+                    resData.miscData[4] = data.misc.manualHeat ? 1 : 0;
             }
             // VALVES
             if (typeof data.valves !== 'undefined') {
