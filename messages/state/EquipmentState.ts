@@ -1,7 +1,7 @@
 
 import { PumpTypes } from "../../index";
 import { Inbound } from "../SLMessage";
-import { Delays, Misc, SLHistoryData, SLSystemTimeData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from "./EquipmentConfig";
+import { Delays, Misc, SLHistoryData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from "../config/EquipmentConfig";
 
 
 export class EquipmentStateMessage {
@@ -375,7 +375,7 @@ export class EquipmentStateMessage {
     ///// End Delays
     let misc = {
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
-      spaManualHeat: miscDataArray[4] !== 0
+      manualHeat: miscDataArray[4] !== 0
     } as Misc;
     let speed : any[] = [];
     speed = loadSpeedCircuits(speedDataArray, true);
@@ -549,4 +549,17 @@ export interface SLEquipmentCircuitArrayState {
   colorPos: number,
   colorStagger: number,
   delay: number
+}
+
+export interface SLSystemTimeData {
+  date: Date;
+  year: any;
+  month: any;
+  dayOfWeek: any;
+  day: any;
+  hour: any;
+  minute: any;
+  second: any;
+  millisecond: any;
+  adjustForDST: boolean;
 }

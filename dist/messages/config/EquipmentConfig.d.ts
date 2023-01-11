@@ -1,16 +1,62 @@
 import { Inbound } from "../SLMessage";
 export declare class EquipmentConfigurationMessage {
+    static decodeCircuitDefinitions(msg: Inbound): any[];
+    static decodeNCircuitNames(msg: Inbound): number;
+    static decodeCircuitNames(msg: Inbound): any[];
     static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
-    isEasyTouch(controllerType: any): boolean;
-    isIntelliTouch(controllerType: any): boolean;
-    isEasyTouchLite(controllerType: any, hwType: any): boolean;
-    isDualBody(controllerType: any): boolean;
-    isChem2(controllerType: any, hwType: any): boolean;
-    static decodeEquipmentConfiguration(msg: Inbound): SLEquipmentConfigurationData;
+    static isEasyTouch(controllerType: any): boolean;
+    static isIntelliTouch(controllerType: any): boolean;
+    static isEasyTouchLite(controllerType: any, hwType: any): boolean;
+    static isDualBody(controllerType: any): boolean;
+    static isChem2(controllerType: any, hwType: any): boolean;
+    static decodeSetEquipmentConfigurationAck(msg: Inbound): boolean;
+    static decodeSetEquipmentConfiguration(msg: Inbound): {
+        pumps: any[];
+        heaterConfig: HeaterConfig;
+        valves: Valves[];
+        delays: Delays;
+        misc: Misc;
+        lights: {
+            allOnAllOff: any[];
+        };
+        highSpeedCircuits: number[];
+        remotes: {
+            fourButton: any[];
+            tenButton: any[][];
+            quickTouch: any[];
+        };
+        numPumps: number;
+        rawData: {
+            highSpeedCircuitData: any[];
+            valveData: any[];
+            remoteData: any[];
+            heaterConfigData: any[];
+            delayData: any[];
+            macroData: any[];
+            miscData: any[];
+            lightData: any[];
+            pumpData: any[];
+            spaFlowData: any[];
+            alarm: number;
+        };
+    };
+    private static _getNumPumps;
+    private static _getPumpData;
+    private static _isValvePresent;
+    private static _loadHeaterData;
+    private static _loadValveData;
+    private static _loadDelayData;
+    private static _loadMiscData;
+    private static _loadSpeedData;
+    private static _loadLightData;
+    private static _loadRemoteData;
+    private static _loadSpaFlowData;
+    static decodeGetEquipmentConfiguration(msg: Inbound): SLEquipmentConfigurationData;
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
     getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string;
     static decodeCustomNames(msg: Inbound): string[];
+    static decodeSetCustomNameAck(msg: Inbound): boolean;
 }
 export interface SLControllerConfigData {
     controllerId: number;
@@ -62,18 +108,6 @@ export interface Circuit {
     eggTimer: number;
     deviceId: number;
 }
-export interface SLSystemTimeData {
-    date: Date;
-    year: any;
-    month: any;
-    dayOfWeek: any;
-    day: any;
-    hour: any;
-    minute: any;
-    second: any;
-    millisecond: any;
-    adjustForDST: boolean;
-}
 export interface SLEquipmentConfigurationData {
     controllerType: number;
     hardwareType: number;
@@ -84,8 +118,37 @@ export interface SLEquipmentConfigurationData {
     valves: Valves[];
     delays: Delays;
     misc: Misc;
-    speed: any[];
+    remotes: SLRemoteData;
+    highSpeedCircuits: any[];
+    lights: {
+        allOnAllOff: number[];
+    };
+    spaFlow: {
+        isActive: boolean;
+        pumpId: number;
+        stepSize: number;
+    };
     numPumps: number;
+    rawData: rawData;
+}
+export interface SLRemoteData {
+    fourButton: number[];
+    tenButton: number[][];
+    quickTouch: number[];
+}
+export interface rawData {
+    versionData: number[];
+    highSpeedCircuitData: number[];
+    valveData: number[];
+    remoteData: number[];
+    heaterConfigData: number[];
+    delayData: number[];
+    macroData: number[];
+    miscData: number[];
+    lightData: number[];
+    pumpData: number[];
+    sgData: number[];
+    spaFlowData: number[];
 }
 export interface HeaterConfig {
     body1SolarPresent: boolean;
@@ -93,6 +156,7 @@ export interface HeaterConfig {
     thermaFloCoolPresent: boolean;
     solarHeatPumpPresent: boolean;
     thermaFloPresent: boolean;
+    units: number;
 }
 export interface Delays {
     poolPumpOnDuringHeaterCooldown: boolean;
@@ -101,7 +165,7 @@ export interface Delays {
 }
 export interface Misc {
     intelliChem: boolean;
-    spaManualHeat: boolean;
+    manualHeat: boolean;
 }
 export interface Valves {
     loadCenterIndex: number;

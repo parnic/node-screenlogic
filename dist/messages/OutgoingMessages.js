@@ -81,8 +81,41 @@ class EquipmentCommands extends Commands {
         this.unit.write(this.toBuffer());
         return this;
     }
+    sendGetNumCircuitNamesMessage() {
+        this.action = 12558;
+        this.createBaseMessage();
+        this.writeInt32LE(0);
+        this.writeInt32LE(0);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
+    sendGetCircuitNamesMessage(idx, cnt) {
+        this.action = 12561;
+        this.createBaseMessage();
+        this.writeInt32LE(0);
+        this.writeInt32LE(idx);
+        this.writeInt32LE(cnt);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
+    sendGetCircuitDefinitionsMessage() {
+        this.action = 12510;
+        this.createBaseMessage();
+        this.writeInt32LE(0);
+        this.writeInt32LE(0);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
     sendGetEquipmentConfigurationMessage() {
         this.action = 12566; //equipconfg
+        this.createBaseMessage();
+        this.writeInt32LE(0);
+        this.writeInt32LE(0);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
+    async sendSetEquipmentConfigurationMessageAsync(data) {
+        this.action = 12568; //setequipconfg
         this.createBaseMessage();
         this.writeInt32LE(0);
         this.writeInt32LE(0);
@@ -106,6 +139,15 @@ class EquipmentCommands extends Commands {
         this.action = 12562;
         this.createBaseMessage();
         this.writeInt32LE(0);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
+    sendSetCustomNameMessage(idx, name) {
+        this.action = 12564;
+        this.createBaseMessage();
+        this.writeInt32LE(this.controllerId);
+        this.writeInt32LE(idx);
+        this.writeSLString(name);
         this.unit.write(this.toBuffer());
         return this;
     }
@@ -204,6 +246,14 @@ class ChlorCommands extends Commands {
         this.unit.write(this.toBuffer());
         return this;
     }
+    sendSetSaltCellEnableMessage(isActive) {
+        this.action = 12574;
+        this.createBaseMessage();
+        this.writeInt32LE(this.unit.controllerId);
+        this.writeInt32LE(isActive ? 1 : 0);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
 }
 exports.ChlorCommands = ChlorCommands;
 class ChemCommands extends Commands {
@@ -229,6 +279,15 @@ exports.ChemCommands = ChemCommands;
 class BodyCommands extends Commands {
     sendSetPointMessage(bodyType, temperature) {
         this.action = 12528;
+        this.createBaseMessage();
+        this.writeInt32LE(this.unit.controllerId);
+        this.writeInt32LE(bodyType || 0);
+        this.writeInt32LE(temperature || 0);
+        this.unit.write(this.toBuffer());
+        return this;
+    }
+    sendCoolSetPointMessage(bodyType, temperature) {
+        this.action = 12590;
         this.createBaseMessage();
         this.writeInt32LE(this.unit.controllerId);
         this.writeInt32LE(bodyType || 0);

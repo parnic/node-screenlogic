@@ -1,4 +1,4 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from "./SLMessage";
 export declare class ConnectionMessage {
     static decodeChallengeResponse(msg: Inbound): string;
     static decodeVersionResponse(msg: Inbound): string;

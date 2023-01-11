@@ -1,5 +1,5 @@
 import { Inbound } from "../SLMessage";
-import { SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from "./EquipmentConfig";
+import { SLHistoryData, SLWeatherForecastData } from "../config/EquipmentConfig";
 export declare class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg: Inbound): SLEquipmentStateData;
     static decodeSystemTime(msg: Inbound): SLSystemTimeData;
@@ -43,4 +43,16 @@ export interface SLEquipmentCircuitArrayState {
     colorPos: number;
     colorStagger: number;
     delay: number;
+}
+export interface SLSystemTimeData {
+    date: Date;
+    year: any;
+    month: any;
+    dayOfWeek: any;
+    day: any;
+    hour: any;
+    minute: any;
+    second: any;
+    millisecond: any;
+    adjustForDST: boolean;
 }

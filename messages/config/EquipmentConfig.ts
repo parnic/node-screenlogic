@@ -1,0 +1,1093 @@
+
+import exp = require("constants");
+import { PumpTypes, screenlogic, UnitConnection } from "../../index";
+import { Inbound } from "../SLMessage";
+
+
+export class EquipmentConfigurationMessage {
+  public static decodeCircuitDefinitions(msg: Inbound){
+    let cnt = msg.readUInt32LE();
+    let res = [];
+    for (let i = 0; i < cnt; i++){
+      let id = msg.readUInt32LE();
+      let circuitName = msg.readSLString();
+      res.push({id, circuitName});
+    }
+    return res;
+  }
+  public static decodeNCircuitNames(msg: Inbound){
+    let cnt = msg.readUInt8();
+    return cnt;
+  }
+  public static decodeCircuitNames(msg: Inbound){
+    let size = msg.readUInt32LE();
+    let res = [];
+    for (let id = 1; id <= size; id++){
+      let circuitName = msg.readSLString();
+      res.push({id, circuitName});
+    }
+    return res;
+  }
+
+  public static decodeControllerConfig(msg: Inbound) {
+    let controllerId = msg.readInt32LE() - 99;
+
+    let minSetPoint = new Array(2);
+    let maxSetPoint = new Array(2);
+    for (let i = 0; i < 2; i++) {
+      minSetPoint[i] = msg.readUInt8();
+      maxSetPoint[i] = msg.readUInt8();
+    }
+
+    let degC = msg.readUInt8() !== 0;
+    let controllerType = msg.readUInt8();
+    let hwType = msg.readUInt8();
+    let controllerData = msg.readUInt8();
+    let equipFlags = msg.readInt32LE();
+    let genCircuitName = msg.readSLString();
+
+    let circuitCount = msg.readInt32LE();
+    let circuitArray: Circuit[] = new Array(circuitCount);
+    for (let i = 0; i < circuitCount; i++) {
+      circuitArray[i] = {
+        circuitId: msg.readInt32LE() - 499,
+        name: msg.readSLString(),
+        nameIndex: msg.readUInt8(),
+        function: msg.readUInt8(),
+        interface: msg.readUInt8(), // where does this show in the interface?  0 = pool; 1 = spa; 2 = features; 5 = hide
+        freeze: msg.readUInt8(), // 1 = on with freeze active; 0 = not on with freeze active
+        colorSet: msg.readUInt8(),
+        colorPos: msg.readUInt8(),
+        colorStagger: msg.readUInt8(),
+        deviceId: msg.readUInt8(), // always the same as circuitId - 499;
+        eggTimer: msg.readUInt16LE(),
+      };
+      msg.incrementReadOffset(2);
+    }
+    for (let i = 0; i < circuitArray.length; i++) {
+      // normalize to 1 based ids for default names; 100 based for custom names
+      circuitArray[i].nameIndex = circuitArray[i].nameIndex < 101 ? circuitArray[i].nameIndex + 1 : circuitArray[i].nameIndex + 99;
+    }
+
+    let colorCount = msg.readInt32LE();
+    let colorArray = new Array(colorCount);
+    for (let i = 0; i < colorCount; i++) {
+      colorArray[i] = {
+        name: msg.readSLString(),
+        color: {
+          r: msg.readInt32LE() & 0xff,
+          g: msg.readInt32LE() & 0xff,
+          b: msg.readInt32LE() & 0xff,
+        },
+      };
+    }
+
+    // RSG - This data doesn't look right.  Rely on pump config.
+    let pumpCircCount = 8;
+    let pumpCircArray = new Array(pumpCircCount);
+    for (let i = 0; i < pumpCircCount; i++) {
+      pumpCircArray[i] = msg.readUInt8();
+    }
+
+    let interfaceTabFlags = msg.readInt32LE();
+    let showAlarms = msg.readInt32LE();
+
+
+    let equipment = {
+      POOL_SOLARPRESENT: (equipFlags & 1) === 1,
+      POOL_SOLARHEATPUMP: (equipFlags & 2) === 2,
+      POOL_CHLORPRESENT: (equipFlags & 4) === 4,
+      POOL_IBRITEPRESENT: (equipFlags & 8) === 8,
+      POOL_IFLOWPRESENT0: (equipFlags & 16) === 16,
+      POOL_IFLOWPRESENT1: (equipFlags & 32) === 32,
+      POOL_IFLOWPRESENT2: (equipFlags & 64) === 64,
+      POOL_IFLOWPRESENT3: (equipFlags & 128) === 128,
+      POOL_IFLOWPRESENT4: (equipFlags & 256) === 256,
+      POOL_IFLOWPRESENT5: (equipFlags & 512) === 512,
+      POOL_IFLOWPRESENT6: (equipFlags & 1024) === 1024,
+      POOL_IFLOWPRESENT7: (equipFlags & 2048) === 2048,
+      POOL_NO_SPECIAL_LIGHTS: (equipFlags & 4096) === 4096,
+      POOL_HEATPUMPHASCOOL: (equipFlags & 8192) === 8192,
+      POOL_MAGICSTREAMPRESENT: (equipFlags & 16384) === 16384,
+      POOL_ICHEMPRESENT: (equipFlags & 32768) === 32768
+    }
+    let data: SLControllerConfigData = {
+      controllerId,
+      minSetPoint,
+      maxSetPoint,
+      degC,
+      controllerType,
+      hwType,
+      controllerData,
+      equipment,
+      genCircuitName,
+      circuitCount,
+      circuitArray,
+      colorCount,
+      colorArray,
+      pumpCircCount,
+      pumpCircArray,
+      interfaceTabFlags,
+      showAlarms
+    }
+    return data;
+  }
+
+  public static isEasyTouch(controllerType) {
+    return controllerType === 14 || controllerType === 13;
+  }
+
+  public static isIntelliTouch(controllerType) {
+    return controllerType !== 14 && controllerType !== 13 && controllerType !== 10;
+  }
+
+  public static isEasyTouchLite(controllerType, hwType) {
+    return controllerType === 13 && (hwType & 4) !== 0;
+  }
+
+  public static isDualBody(controllerType) {
+    return controllerType === 5;
+  }
+
+  public static isChem2(controllerType, hwType) {
+    return controllerType === 252 && hwType === 2;
+  }
+  public static decodeSetEquipmentConfigurationAck(msg: Inbound) {
+    // ack
+    return true;
+  }
+
+  public static decodeSetEquipmentConfiguration(msg: Inbound) {
+
+    msg.readSLArray();
+    let speedDataArray = msg.readSLArray(); // 0 byte
+    let valveDataArray = msg.readSLArray(); // decodeValveData()
+    let remoteDataArray = msg.readSLArray();
+    let heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
+    let delayDataArray = msg.readSLArray(); // decodeDelayData()
+    let macroDataArray = msg.readSLArray();
+    let miscDataArray = msg.readSLArray(); // decodeMiscData()
+    let lightDataArray = msg.readSLArray();
+    let pumpDataArray = msg.readSLArray();
+    let spaFlowDataArray = msg.readSLArray();
+    let alarm = msg.readUInt8();
+    let rawData = {
+      highSpeedCircuitData: speedDataArray,
+      valveData: valveDataArray,
+      remoteData: remoteDataArray,
+      heaterConfigData: heaterConfigDataArray,
+      delayData: delayDataArray,
+      macroData: macroDataArray,
+      miscData: miscDataArray,
+      lightData: lightDataArray,
+      pumpData: pumpDataArray,
+      spaFlowData: spaFlowDataArray,
+      alarm
+    };
+    let numPumps = this._getNumPumps(pumpDataArray);
+
+    let pumps = [];
+    for (let i = 0; i < numPumps; i++) {
+      let pump: any = { id: i + 1 };
+      pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
+      pumps.push(pump);
+    }
+
+    let heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
+    let valves = this._loadValveData(valveDataArray, heaterConfig, UnitConnection.controllerType, UnitConnection.expansionsCount, msg);
+    let highSpeedCircuits = this._loadSpeedData(speedDataArray, UnitConnection.controllerType)
+    let delays = this._loadDelayData(delayDataArray, msg);
+    let lights = this._loadLightData(lightDataArray);
+    let misc = this._loadMiscData(miscDataArray, msg);
+    let remotes = this._loadRemoteData(remoteDataArray, UnitConnection.controllerType);
+    let data = {
+      pumps,
+      heaterConfig,
+      valves,
+      delays,
+      misc,
+      lights,
+      highSpeedCircuits,
+      remotes,
+      numPumps,
+      rawData
+    };
+    return data;
+
+  }
+
+  private static _getNumPumps(pumpDataArray: number[]) {
+    if (pumpDataArray === null) {
+      return 0;
+    }
+
+    let numPumps = 0;
+    for (var i = 0; i < pumpDataArray.length; i += 45) {
+      if (pumpDataArray[i] !== 0) {
+        numPumps++;
+      }
+    }
+
+    return numPumps;
+  }
+
+  private static _getPumpData(pumpIndex: number, pumpDataArray: number[]) {
+    if (typeof (pumpIndex) !== 'number') {
+      return {};
+    }
+    let pumpIndexByte = 45 * pumpIndex;
+    let pump: any = {};
+
+    if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
+      return {};
+    }
+    let type = pumpDataArray[pumpIndexByte];
+    pump.type = type;
+    if ((type & 128) === 128) {
+      pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVS;
+      pump.name = 'Intelliflo VS'
+    }
+    else if ((type & 134) === 134) {
+      pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVS;
+      pump.name = 'Intelliflo VS Ultra Efficiency'
+    }
+    else if ((type & 169) === 169) {
+      pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVS;
+      pump.name = 'Intelliflo VS+SVRS'
+    }
+    else if ((type & 64) === 64) {
+      pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVSF;
+      pump.name = 'Intelliflo VSF'
+
+    }
+    else {
+      pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVF;
+      pump.name = 'Intelliflo VF'
+    }
+
+    pump.address = pumpIndex + 95;
+    pump.circuits = [];
+    if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVS) {
+      for (let circuitId = 1; circuitId <= 8; circuitId++) {
+        let _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
+        if (_circuit !== 0) {
+          let circuit: any = {};
+          circuit.id = circuitId;
+          circuit.circuit = _circuit;
+          circuit.speed =
+            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 +
+            pumpDataArray[pumpIndexByte + (circuitId + 20)];
+          circuit.units = 0;
+          pump.circuits.push(circuit);
+        }
+      }
+      pump.primingSpeed = pumpDataArray[pumpIndexByte + 20] * 256 + pumpDataArray[pumpIndexByte + 29];
+      pump.primingTime = pumpDataArray[pumpIndexByte + 1];
+      pump.minSpeed = 450;
+      pump.maxSpeed = 3450;
+      pump.speedStepSize = 10;
+    }
+    else if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVF) {
+      for (let circuitId = 1; circuitId <= 8; circuitId++) {
+        let _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
+        if (_circuit !== 0) {
+          let circuit: any = {};
+          circuit.circuit = _circuit;
+          circuit.flow =
+            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
+          circuit.units = 1;
+          pump.circuits.push(circuit);
+        }
+      }
+      pump.backgroundCircuit = pumpDataArray[pumpIndexByte];
+      pump.filterSize = pumpDataArray[pumpIndexByte + 1] * 1000;
+      pump.turnovers = pumpDataArray[pumpIndexByte + 2];
+      pump.manualFilterGPM = pumpDataArray[pumpIndexByte + 20];
+      pump.primingSpeed = pumpDataArray[pumpIndexByte + 21];
+      pump.primingTime = (pumpDataArray[pumpIndexByte + 22] & 0xf);
+      pump.minFlow = 15;
+      pump.maxFlow = 130;
+      pump.flowStepSize = 1;
+      pump.maxSystemTime = pumpDataArray[pumpIndexByte + 22] >> 4;
+      pump.maxPressureIncrease = pumpDataArray[pumpIndexByte + 23];
+      pump.backwashFlow = pumpDataArray[pumpIndexByte + 24];
+      pump.backwashTime = pumpDataArray[pumpIndexByte + 25];
+      pump.rinseTime = pumpDataArray[pumpIndexByte + 26];
+      pump.vacuumFlow = pumpDataArray[pumpIndexByte + 27];
+      pump.vacuumTime = pumpDataArray[pumpIndexByte + 29];
+    }
+    else if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVSF) {
+      for (let circuitId = 1; circuitId <= 8; circuitId++) {
+        let _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
+        if (_circuit !== 0) {
+          let circuit: any = {};
+          circuit.circuit = _circuit;
+          circuit.units = (pumpDataArray[pumpIndexByte + 3] >> circuitId - 1 & 1) === 0 ? 1 : 0;
+          if (circuit.units) circuit.flow = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
+          else circuit.speed =
+            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 +
+            pumpDataArray[pumpIndexByte + (circuitId + 20)];
+          pump.circuits.push(circuit);
+        }
+      }
+      pump.speedStepSize = 10;
+      pump.flowStepSize = 1;
+      pump.minFlow = 15;
+      pump.maxFlow = 130;
+      pump.minSpeed = 450;
+      pump.maxSpeed = 3450;
+    }
+    return pump;
+  }
+
+  private static _isValvePresent(valveIndex, loadCenterValveData, msg) {
+    if (valveIndex < 2) {
+      return true;
+    } else {
+      return msg.isBitSet(loadCenterValveData, valveIndex);
+    }
+  }
+
+  private static _loadHeaterData(heaterConfigDataArray: number[], msg) {
+    ///// Heater config
+    let heaterConfig: any = {
+      body1SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 1), // bSolar1
+      // body1HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4), // bHPump1
+      solarHeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),  // ?? bHPump1
+      body2SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 4),  // bSolar2
+      thermaFloPresent: msg.isBitSet(heaterConfigDataArray[2], 5), // bHPump2
+      // body2HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 5),  // bHPump2
+      thermaFloCoolPresent: msg.isBitSet(heaterConfigDataArray[1], 1),  // ?? Source?
+      units: msg.isBitSet(heaterConfigDataArray[2], 0) ? 1 : 0 // 1 == celsius, 0 = fahrenheit
+
+    };
+    return heaterConfig as HeaterConfig;
+    ///// End heater config
+  }
+
+  private static _loadValveData(valveDataArray, heaterConfig, controllerType, expansionsCount, msg) {
+    var bEnable1 = true;
+    var bEnable2 = true;
+    // var isSolarValve0 = false;
+    // var isSolarValve1 = false;
+    if (heaterConfig.body1SolarPresent && !heaterConfig.body1HeatPumpPresent) {
+      bEnable1 = false;
+    }
+    if (heaterConfig.body2SolarPresent && !heaterConfig.thermaFloPresent && controllerType === 5) {
+      bEnable2 = false;
+    }
+
+    var valves: Valves[] = [];
+
+    for (let loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
+      let loadCenterValveData = valveDataArray[loadCenterIndex];
+
+      for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
+        let valveName: string;
+        let loadCenterName: string;
+        let deviceId: number;
+
+        var bEnable = true;
+        // var isSolarValve = true;
+        if (loadCenterIndex === 0) {
+          if (valveIndex === 0 && !bEnable1) {
+            bEnable = false;
+          }
+          if (valveIndex === 1 && !bEnable2) {
+            bEnable = false;
+          }
+        }
+        let bPresent = false;
+        if (valveIndex < 2) {
+          bPresent = true;
+        }
+        else {
+          bPresent = this._isValvePresent(valveIndex, loadCenterValveData, msg)
+        }
+        if (bPresent) {
+          var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
+          deviceId = valveDataArray[valveDataIndex];
+
+          valveName = String.fromCharCode(65 + valveIndex);
+          if (deviceId !== 0) {
+
+            console.log('unused valve, loadCenterIndex = ' + loadCenterIndex + ' valveIndex = ' + valveIndex);
+            // } else if (isSolarValve === true) {
+            //   // console.log('used by solar');
+          } else {
+            loadCenterName = (loadCenterIndex + 1).toString();
+          }
+          let v: any = {
+            loadCenterIndex,
+            valveIndex: valveIndex + 1,
+            valveName,
+            loadCenterName,
+            deviceId
+          }
+          valves.push(v);
+        }
+        // }
+
+      }
+
+    }
+    return valves as Valves[];
+  }
+
+  private static _loadDelayData(delayDataArray, msg) {
+    let delays = {
+      poolPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 0),
+      spaPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 1),
+      pumpOffDuringValveAction: msg.isBitSet(delayDataArray[0], 7)
+    } as Delays;
+    return delays;
+  }
+
+  private static _loadMiscData(miscDataArray, msg) {
+    let misc = {
+      intelliChem: msg.isBitSet(miscDataArray[3], 0),
+      manualHeat: msg.isBitSet(miscDataArray[4], 0)
+    } as Misc;
+    return misc;
+  }
+
+  /*   private static _loadSpeedCircuits(speedDataArray, isPool) {
+      // let  loadSpeedCircuits(poolConfig,isPool) {
+      // ArrayList<Pair<String, Integer>> result = new ArrayList<>();
+      let result = new Array();
+      // Pair<Integer, Integer> minMax = getRange(poolConfig, isPool);
+      let minMax = [0, 255];
+      // int iMin = ((Integer) minMax.first).intValue();
+      // int iMax = ((Integer) minMax.second).intValue();
+      let iMin = minMax[0];
+      let iMax = minMax[1];
+      // let iCount = 0;
+      for (let i = iMin; i < iMax; i++) {
+        // let byCircuit = poolConfig.getEquipconfig().getSpeedDataArray().get(i);
+        let byCircuit = speedDataArray[i];
+        if (byCircuit > 0) {
+          if (byCircuit >= 128 && byCircuit <= 132) {
+            // let name = get().deviceIDToString(poolConfig, byCircuit);
+            let name = `string ${byCircuit}`
+            let id = byCircuit;
+            result.push([name, id]);
+            // iCount++;
+          } else {
+            let circuit = byCircuit;
+            if (circuit != null) {
+              let name2 = 'get name from body array' //circuit.getM_Name();
+              let id2 = byCircuit;
+              result.push([name2, id2]);
+              // iCount++;
+            }
+          }
+        }
+      }
+      // if (iCount < iMax - iMin) {
+      // }
+      return result;
+    } */
+
+  private static _loadSpeedData(speedDataArray, controllerType) {
+
+    let getRange = function () {
+      let ret = { min: 0, max: 0 };
+      ret.max = speedDataArray.length;
+      
+      if (EquipmentConfigurationMessage.isEasyTouch(controllerType)) {
+        ret.max = 4;
+      }
+      if (EquipmentConfigurationMessage.isDualBody(controllerType)) {
+        ret.max = 8; // 4;
+        // what is 'isPoolData'?  Define both bodies as pool instead of
+        // sep pool/spa types?  Or is spa 0-3 and pool 4-8?
+        // if (isPoolData){
+        //  ret.min = 0 + 4;
+        //  ret.max = 4 + 4;
+        // }
+      }
+      return ret;
+    }
+    let speed: number[] = [];
+    let range = getRange();
+    for (let i = range.min; i < range.max; i++) {
+      if (speedDataArray[i] !== 0) speed.push(speedDataArray[i])
+    }
+    return speed;
+  }
+
+  private static _loadLightData(lightDataArray) {
+    let lights = { allOnAllOff: [] };
+    for (let i = 0; i < 8; i++) {
+      lights.allOnAllOff.push(lightDataArray[i]);
+    };
+    return lights;
+  }
+
+  private static _loadRemoteData(remoteDataArray, controllerType) {
+    let data = {
+      fourButton: [],
+      tenButton: [[]],
+      quickTouch: []
+    }
+    if (EquipmentConfigurationMessage.isEasyTouch(controllerType)) {
+      for (let i = 0; i < 4; i++) {
+        data.fourButton.push(remoteDataArray[i]);
+      }
+      for (let i = 10; i < 20; i++) {
+        data.tenButton[0].push(remoteDataArray[i]);
+      }
+    }
+    else {
+      // Intellitouch
+      // RSG 1.6.23 - Per Screenlogic Config, the IS10#4 shares the bytes with IS4#1/IS4#2.
+      //  Byte 1 - IS10#1-1  IS4#1-1
+      //  Byte 2 - IS10#1-2  IS4#1-2
+      //  Byte 3 - IS10#1-3  IS4#1-3
+      //  Byte 4 - IS10#1-4  IS4#1-4
+      //  Byte 5 - IS10#1-5  
+      //  Byte 6 - IS10#1-6  IS4#2-1
+      //  Byte 7 - IS10#1-7  IS4#2-2
+      //  Byte 8 - IS10#1-8  IS4#2-3
+      //  Byte 9 - IS10#1-9  IS4#2-4
+      //  Byte 10 - IS10#1-10  
+
+      data.tenButton.push([], [], []);
+      for (let i = 0; i < 10; i++) {
+        data.tenButton[0].push(remoteDataArray[i]);
+      }
+      for (let i = 10; i < 20; i++) {
+        data.tenButton[1].push(remoteDataArray[i]);
+      }
+      for (let i = 20; i < 30; i++) {
+        data.tenButton[2].push(remoteDataArray[i]);
+      }
+      for (let i = 30; i < 40; i++) {
+        data.tenButton[3].push(remoteDataArray[i]);
+      }
+    }
+    for (let i = 40; i < 44; i++) {
+      data.quickTouch.push(remoteDataArray[i]);
+    }
+    return data;
+  }
+
+  private static _loadSpaFlowData(spaFlowDataArray) {
+    let spaFlow = {
+      isActive: spaFlowDataArray[1] === 1,
+      pumpId: spaFlowDataArray[5],
+      stepSize: spaFlowDataArray[6]
+     };
+    return spaFlow;
+  }
+
+  public static decodeGetEquipmentConfiguration(msg: Inbound) {
+
+
+    let deviceIDToString = (poolConfig) => {
+      switch (poolConfig) {
+        case 128:
+          return 'Solar_Active';
+        case 129:
+          return 'Pool_or_Spa_Heater_Active';
+        case 130:
+          return 'Pool_Heater_Active';
+        case 131:
+          return 'Spa_Heater_Active';
+        case 132:
+          return 'Freeze_Mode_Active';
+        case 133:
+          return 'Heat_Boost';
+        case 134:
+          return 'Heat_Enable';
+        case 135:
+          return 'Increment_Pump_Speed';
+        case 136:
+          return 'Decrement_Pump_Speed';
+        case 137:
+        case 138:
+        case 139:
+        case 140:
+        case 141:
+        case 142:
+        case 143:
+        case 144:
+        case 145:
+        case 146:
+        case 147:
+        case 148:
+        case 149:
+        case 150:
+        case 151:
+        case 152:
+        case 153:
+        case 154:
+        default:
+          // PoolCircuit pC = poolConfig.getCircuitByDeviceID(byID);
+          // if (pC != null) {
+          //     return pC.getM_Name();
+          // }
+          // return 'None';
+          return `fix: poolConfig ${poolConfig}`;
+        case 155:
+          return 'Pool_Heater';
+        case 156:
+          return 'Spa_Heater';
+        case 157:
+          return 'Either_Heater';
+        case 158:
+          return 'Solar';
+        case 159:
+          return 'Freeze';
+      }
+    };
+
+
+
+    let controllerType = msg.readUInt8();
+    let hardwareType = msg.readUInt8();
+    msg.readUInt8();
+    msg.readUInt8();
+
+    let controllerData = msg.readInt32LE();
+    let versionDataArray = msg.readSLArray();
+    let version = 0;
+    let speedDataArray = msg.readSLArray();
+    let valveDataArray = msg.readSLArray(); // decodeValveData()
+    let remoteDataArray = msg.readSLArray();
+    let heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
+    let delayDataArray = msg.readSLArray(); // decodeDelayData()
+    let macroDataArray = msg.readSLArray();
+    let miscDataArray = msg.readSLArray(); // decodeMiscData()
+    let lightDataArray = msg.readSLArray();
+    let pumpDataArray = msg.readSLArray();
+    let sgDataArray = msg.readSLArray();
+    let spaFlowDataArray = msg.readSLArray();
+    let rawData: rawData = {
+      versionData: versionDataArray,
+      highSpeedCircuitData: speedDataArray,
+      valveData: valveDataArray,
+      remoteData: remoteDataArray,
+      heaterConfigData: heaterConfigDataArray,
+      delayData: delayDataArray,
+      macroData: macroDataArray,
+      miscData: miscDataArray,
+      lightData: lightDataArray,
+      pumpData: pumpDataArray,
+      sgData: sgDataArray,
+      spaFlowData: spaFlowDataArray
+    };
+    let expansionsCount = (controllerData & 192) >> 6 || 0;
+    UnitConnection.controllerType = controllerData;
+    UnitConnection.expansionsCount = expansionsCount;
+    if (versionDataArray === null || versionDataArray.length < 2) {
+      version = 0;
+    }
+
+    else version = (versionDataArray[0] * 1000) + (versionDataArray[1]);
+    let numPumps = this._getNumPumps(pumpDataArray);
+
+    let pumps = [];
+    for (let i = 0; i < numPumps; i++) {
+      let pump: any = { id: i + 1 };
+      pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
+      pumps.push(pump);
+    }
+    let heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
+    let valves = this._loadValveData(valveDataArray, heaterConfig, controllerType, expansionsCount, msg);
+    let highSpeedCircuits = this._loadSpeedData(speedDataArray, controllerType);
+    let delays = this._loadDelayData(delayDataArray, msg);
+    let lights = this._loadLightData(lightDataArray);
+    let misc = this._loadMiscData(miscDataArray, msg);
+    let remotes = this._loadRemoteData(remoteDataArray, controllerType);
+    let spaFlow = this._loadSpaFlowData(spaFlowDataArray);
+    let data: SLEquipmentConfigurationData = {
+      controllerType,
+      hardwareType,
+      expansionsCount,
+      version,
+      pumps,
+      heaterConfig,
+      valves,
+      delays,
+      lights,
+      misc,
+      highSpeedCircuits,
+      remotes,
+      spaFlow,
+      numPumps,
+      rawData
+    };
+    return data;
+
+  }
+
+  public static decodeWeatherMessage(msg: Inbound) {
+    let version = msg.readInt32LE();
+    let zip = msg.readSLString();
+    let lastUpdate = msg.readSLDateTime();
+    let lastRequest = msg.readSLDateTime();
+    let dateText = msg.readSLString();
+    let text = msg.readSLString();
+    let currentTemperature = msg.readInt32LE();
+    let humidity = msg.readInt32LE();
+    let wind = msg.readSLString();
+    let pressure = msg.readInt32LE();
+    let dewPoint = msg.readInt32LE();
+    let windChill = msg.readInt32LE();
+    let visibility = msg.readInt32LE();
+    let numDays = msg.readInt32LE();
+    let dayData: SLWeatherForecastDayData[] = new Array(numDays);
+    for (let i = 0; i < numDays; i++) {
+      dayData[i] = {
+        dayTime: msg.readSLDateTime(),
+        highTemp: msg.readInt32LE(),
+        lowTemp: msg.readInt32LE(),
+        text: msg.readSLString(),
+      };
+    }
+
+    let sunrise = msg.readInt32LE();
+    let sunset = msg.readInt32LE();
+    let data: SLWeatherForecastData = {
+      version,
+      zip,
+      lastUpdate,
+      lastRequest,
+      dateText,
+      text,
+      currentTemperature,
+      humidity,
+      wind,
+      pressure,
+      dewPoint,
+      windChill,
+      visibility,
+      dayData,
+      sunrise,
+      sunset
+    };
+    return data;
+  }
+  public static decodeGetHistory(msg: Inbound) {
+    let readTimeTempPointsPairs = function () {
+      let retval: TimeTempPointPairs[] = [];
+      // 4 bytes for the length
+      if (msg.length >= msg.readOffset + 4) {
+        let points = msg.readInt32LE();
+        // 16 bytes per time, 4 bytes per temperature
+        if (msg.length >= msg.readOffset + (points * (16 + 4))) {
+          for (let i = 0; i < points; i++) {
+            let time = msg.readSLDateTime();
+            let temp = msg.readInt32LE();
+            retval.push({
+              time: time,
+              temp: temp,
+            });
+          }
+        }
+      }
+
+      return retval;
+    }
+    let readTimeTimePointsPairs = function () {
+      let retval: TimeTimePointPairs[] = [];
+      // 4 bytes for the length
+      if (msg.length >= msg.readOffset + 4) {
+        let points = msg.readInt32LE();
+        // 16 bytes per on time, 16 bytes per off time
+        if (msg.length >= msg.readOffset + (points * (16 + 16))) {
+          for (let i = 0; i < points; i++) {
+            let onTime = msg.readSLDateTime();
+            let offTime = msg.readSLDateTime();
+            retval.push({
+              on: onTime,
+              off: offTime,
+            });
+          }
+        }
+      }
+
+      return retval;
+    }
+    let airTemps = readTimeTempPointsPairs();
+    let poolTemps = readTimeTempPointsPairs();
+    let poolSetPointTemps = readTimeTempPointsPairs();
+    let spaTemps = readTimeTempPointsPairs();
+    let spaSetPointTemps = readTimeTempPointsPairs();
+    let poolRuns = readTimeTimePointsPairs();
+    let spaRuns = readTimeTimePointsPairs();
+    let solarRuns = readTimeTimePointsPairs();
+    let heaterRuns = readTimeTimePointsPairs();
+    let lightRuns = readTimeTimePointsPairs();
+    let data: SLHistoryData = {
+      airTemps,
+      poolTemps,
+      poolSetPointTemps,
+      spaTemps,
+      spaSetPointTemps,
+      poolRuns,
+      spaRuns,
+      solarRuns,
+      heaterRuns,
+      lightRuns
+    };
+    return data;
+
+  }
+  public getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number) {
+    if (poolConfig.controllerType === 3 || poolConfig.controllerType === 4) {
+      if (circuitIndex == 0) {
+        return "Hight";
+      }
+      if (circuitIndex == 5) {
+        return "Low";
+      }
+    } else if (circuitIndex == 0) {
+      return "Spa";
+    } else {
+      if (circuitIndex == 5) {
+        return "Pool";
+      }
+    }
+    return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
+  }
+  public static decodeCustomNames(msg: Inbound) {
+    let nameCount = msg.readInt32LE();
+    // msg.incrementReadOffset(0);
+    let customNames: string[] = [];
+    let ro = msg.readOffset;
+    for (let i = 0; i < nameCount; i++) {
+      let n = msg.readSLString();
+      customNames.push(n);
+    }
+    return customNames;
+
+  }
+  public static decodeSetCustomNameAck(msg: Inbound){
+    // ack
+    return true;
+  }
+  /* public  getTypeList(poolConfig: SLEquipmentConfigurationData, circuit: number) {
+    let resultList = [];
+    if (circuit.getM_Function() == 2) {
+        CircuitType type = new CircuitType();
+        type.setName(StringLib.string(R.string.Pool));
+        type.setTypeID(2);
+        resultList.add(type);
+    }
+    if (circuit.getM_Function() == 1) {
+        CircuitType type2 = new CircuitType();
+        type2.setName(StringLib.string(R.string.Spa));
+        type2.setTypeID(1);
+        resultList.add(type2);
+    }
+    ArrayList<CircuitType> tempList = poolConfig.getCircuitTypes();
+    Iterator<CircuitType> it = tempList.iterator();
+    while (it.hasNext()) {
+        CircuitType type3 = it.next();
+        boolean hasType = true;
+        switch (type3.getTypeID()) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 6:
+                hasType = false;
+                break;
+        }
+        if (poolConfig.isEasyTouch()) {
+            switch (type3.getTypeID()) {
+                case 6:
+                case 8:
+                case 13:
+                    hasType = false;
+                    break;
+                case 16:
+                    if (poolConfig.getFWVersionNumeric() < 2010.0f && !poolConfig.iseasyTouchLite()) {
+                        hasType = false;
+                        break;
+                    }
+                    break;
+                case 17:
+                    if (poolConfig.getFWVersionNumeric() < 2060.0f && !poolConfig.iseasyTouchLite()) {
+                        hasType = false;
+                        break;
+                    }
+                    break;
+            }
+        }
+        if (hasType) {
+            resultList.add(type3);
+        }
+    }
+    return resultList;
+}*/
+}
+
+
+export interface SLControllerConfigData {
+  controllerId: number;
+  minSetPoint: number[];
+  maxSetPoint: number[];
+  degC: boolean;
+  controllerType;
+  circuitCount: number,
+  hwType;
+  controllerData;
+  equipment: Equipment;
+  genCircuitName;
+  interfaceTabFlags: number;
+  circuitArray: Circuit[];
+  colorCount: number;
+  colorArray: any[];
+  pumpCircCount: number;
+  pumpCircArray: any[];
+  showAlarms: number;
+}
+export interface Equipment {
+  POOL_SOLARPRESENT: boolean,
+  POOL_SOLARHEATPUMP: boolean,
+  POOL_CHLORPRESENT: boolean,
+  POOL_IBRITEPRESENT: boolean,
+  POOL_IFLOWPRESENT0: boolean,
+  POOL_IFLOWPRESENT1: boolean,
+  POOL_IFLOWPRESENT2: boolean,
+  POOL_IFLOWPRESENT3: boolean,
+  POOL_IFLOWPRESENT4: boolean,
+  POOL_IFLOWPRESENT5: boolean,
+  POOL_IFLOWPRESENT6: boolean,
+  POOL_IFLOWPRESENT7: boolean,
+  POOL_NO_SPECIAL_LIGHTS: boolean,
+  POOL_HEATPUMPHASCOOL: boolean,
+  POOL_MAGICSTREAMPRESENT: boolean,
+  POOL_ICHEMPRESENT: boolean
+
+}
+export interface Circuit {
+  circuitId: number,
+  name: string,
+  nameIndex: number,
+  function: number,
+  interface: number,
+  freeze: number,
+  colorSet?: number,
+  colorPos?: number,
+  colorStagger?: number,
+  eggTimer: number,
+  deviceId: number
+}
+
+export interface SLEquipmentConfigurationData {
+  controllerType: number;
+  hardwareType: number;
+  expansionsCount: number;
+  version: number;
+  pumps: any;
+  heaterConfig: HeaterConfig;
+  valves: Valves[];
+  delays: Delays;
+  misc: Misc;
+  remotes: SLRemoteData;
+  highSpeedCircuits: any[],
+  lights: { allOnAllOff: number[] },
+  spaFlow: {isActive: boolean, pumpId: number, stepSize: number}
+  numPumps: number;
+  rawData: rawData;
+}
+
+export interface SLRemoteData {
+  fourButton: number[],
+  tenButton: number[][],
+  quickTouch: number[]
+}
+
+export interface rawData {
+  versionData: number[],
+  highSpeedCircuitData: number[],
+  valveData: number[],
+  remoteData: number[],
+  heaterConfigData: number[],
+  delayData: number[],
+  macroData: number[],
+  miscData: number[],
+  lightData: number[],
+  pumpData: number[],
+  sgData: number[],
+  spaFlowData: number[]
+}
+
+export interface HeaterConfig {
+  body1SolarPresent: boolean,
+  body2SolarPresent: boolean,
+  thermaFloCoolPresent: boolean,
+  solarHeatPumpPresent: boolean,
+  thermaFloPresent: boolean,
+  units: number
+}
+
+export interface Delays {
+  poolPumpOnDuringHeaterCooldown: boolean,
+  spaPumpOnDuringHeaterCooldown: boolean,
+  pumpOffDuringValveAction
+}
+
+export interface Misc {
+  intelliChem: boolean,
+  manualHeat: boolean
+}
+
+export interface Valves {
+  loadCenterIndex: number,
+  valveIndex: number,
+  valveName: string,
+  loadCenterName: string,
+  deviceId: any
+}
+
+export interface SLWeatherForecastData {
+  version: number;
+  zip: string;
+  lastUpdate: Date;
+  lastRequest: Date;
+  dateText: string;
+  text: string;
+  currentTemperature: number;
+  humidity: number;
+  wind: string;
+  pressure: number;
+  dewPoint: number;
+  windChill: number;
+  visibility: number;
+  dayData: SLWeatherForecastDayData[];
+  sunrise: number;
+  sunset: number;
+}
+export interface SLWeatherForecastDayData {
+  dayTime: Date;
+  highTemp: number;
+  lowTemp: number;
+  text: string;
+}
+
+export interface TimeTimePointPairs {
+  on: Date;
+  off: Date;
+}
+export interface TimeTempPointPairs {
+  time: Date;
+  temp: number;
+}
+
+export interface SLHistoryData {
+  airTemps: TimeTempPointPairs[];
+  poolTemps: TimeTempPointPairs[];
+  poolSetPointTemps: TimeTempPointPairs[];
+  spaTemps: TimeTempPointPairs[];
+  spaSetPointTemps: TimeTempPointPairs[];
+  poolRuns: TimeTimePointPairs[];
+  spaRuns: TimeTimePointPairs[];
+  solarRuns: TimeTimePointPairs[];
+  heaterRuns: TimeTimePointPairs[];
+  lightRuns: TimeTimePointPairs[];
+}

@@ -4,7 +4,13 @@ import { Inbound } from "../SLMessage";
 
 export class PumpMessage {
   public static decodePumpStatus(msg: Inbound){
-    let pumpType = msg.readUInt32LE();
+    // This pump type seems to be different:
+    // 1 = VF
+    // 2 = VS
+    // 3 = VSF
+    // The equipmentConfig message gives more specifics on the pump type
+    let _pumpType = msg.readUInt32LE();
+    let pumpType = _pumpType === 1 ? PumpTypes.PUMP_TYPE_INTELLIFLOVF : _pumpType === 2 ? PumpTypes.PUMP_TYPE_INTELLIFLOVS : _pumpType === 3 ? PumpTypes.PUMP_TYPE_INTELLIFLOVSF : _pumpType;
     let isRunning = msg.readUInt32LE() !== 0; // 0, 1, or 4294967295 (FF FF FF FF)
     let pumpWatts = msg.readUInt32LE();
     let pumpRPMs = msg.readUInt32LE();

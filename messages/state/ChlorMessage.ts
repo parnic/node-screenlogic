@@ -18,6 +18,10 @@ export class ChlorMessage {
     // ack
     return true;
   }
+  public static decodeSetEnableIntellichlorConfig(msg: Inbound){
+    // ack
+    return true;
+  }
 }
 export interface SLIntellichlorData {
   installed: boolean;

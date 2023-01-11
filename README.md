@@ -26,6 +26,8 @@ Table of Contents:
     * [SLChemDataMessageAsync](#slchemdata)
     * [SLControllerConfigAsync](#SLControllerConfig)
     * [SLDeleteScheduleEventByIdAsync](#sldeletescheduleeventbyid)
+    * [SLGetCircuitNamesAsync](#slgetcircuitnames)
+    * [SLGetCircuitDefinitionsAsync](#slgetcircuitdefinitions)
     * [SLGetChemHistoryDataAsync](#slgetchemhistorydata)
     * [SLGetGatewayDataMessageAsync](#slgetgatewaydatamessage)
     * [SLGetHistoryDataAsync](#slgethistorydata)
@@ -245,6 +247,14 @@ Adds a new event to the specified schedule type. See [`SLAddNewScheduleEvent`](#
 
 Cancels any delays on the system. ~~See [`SLCancelDelay`](#slcanceldelay) documentation.~~ Resolves/emits the `cancelDelay` event (with a boolean as the returned object) when response is acknowledged.
 
+#### equipment.getAllCircuitDefinitions()
+
+Returns an array of objects with circuit names and IDs.  Internally, this calls equipment.getNCircuitNames() for the count of circuits and equipment.getCircuitNames(index, count) to retrieve the array from the server.
+
+#### equipment.getCircuitDefinitions()
+
+Returns an array of objects that represent the different circuit functions that a circuit can be assigned.
+
 #### schedule.deleteScheduleEventByIdAsync(scheduleId)
 
 Deletes a scheduled event with specified id. See [`SLDeleteScheduleEventById`](#sldeletescheduleeventbyid) documentation for argument values. Resolves/emits the `deleteScheduleById` or `scheduleChanged` event when response is acknowledged (listen for both).
@@ -269,6 +279,7 @@ Requests all custom names from the OCP.  An array of 20 names will be returned, 
 
 Resolves/emits the `equipmentConfiguration` event when the response comes back.  This is the basic configuration of what equipment is installed on the controller.  
 
+```
 export interface SLEquipmentConfigurationData {
   controllerType: number;
   hardwareType: number;
@@ -279,9 +290,14 @@ export interface SLEquipmentConfigurationData {
   valves: Valves[];
   delays: Delays;
   misc: Misc;
-  speed: any[],
+  remotes: SLRemoteData;
+  highSpeedCircuits: any[],
+  lights: { allOnAllOff: number[] },
+  spaFlow: {isActive: boolean, pumpId: number, stepSize: number}
   numPumps: number;
+  rawData: rawData;
 }
+```
 
 #### equipment.getEquipmentStateAsync(): SLEquipmentStateData
 
@@ -527,9 +543,9 @@ export interface SLControllerConfigData {
 }
 ```
 
-#### SLEquipmentStateData
+#### SLControllerStateData
 
-Passed as an argument to the `equipmentConfig` event handler.
+Passed as an argument to the `controllerConfig` event handler.
 
 ```
 export interface SLControllerConfigData {

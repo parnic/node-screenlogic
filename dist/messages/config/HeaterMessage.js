@@ -6,6 +6,10 @@ class HeaterMessage {
         // ack
         return true;
     }
+    static decodeCoolSetHeatSetPoint(msg) {
+        // ack
+        return true;
+    }
     static decodeSetHeatModePoint(msg) {
         // ack
         return true;

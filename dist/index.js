@@ -7,15 +7,15 @@ const net = require("net");
 const events_1 = require("events");
 const SLGateway = require("./messages/SLGatewayDataMessage");
 const OutgoingMessages_1 = require("./messages/OutgoingMessages");
-const ConnectionMessage_1 = require("./messages/state/ConnectionMessage");
+const ConnectionMessage_1 = require("./messages/ConnectionMessage");
 // import { Inbound } from './messages/SLMessage';
-const EquipmentConfig_1 = require("./messages/state/EquipmentConfig");
+const EquipmentConfig_1 = require("./messages/config/EquipmentConfig");
 const ChlorMessage_1 = require("./messages/state/ChlorMessage");
 const ChemMessage_1 = require("./messages/state/ChemMessage");
-const ScheduleMessage_1 = require("./messages/state/ScheduleMessage");
+const ScheduleMessage_1 = require("./messages/config/ScheduleMessage");
 const PumpMessage_1 = require("./messages/state/PumpMessage");
-const CircuitMessage_1 = require("./messages/state/CircuitMessage");
-const HeaterMessage_1 = require("./messages/state/HeaterMessage");
+const CircuitMessage_1 = require("./messages/config/CircuitMessage");
+const HeaterMessage_1 = require("./messages/config/HeaterMessage");
 const SLMessage_1 = require("./messages/SLMessage");
 const EquipmentState_1 = require("./messages/state/EquipmentState");
 const Encoder = require('./utils/PasswordEncoder').HLEncoder;
@@ -280,6 +280,15 @@ class UnitConnection extends events_1.EventEmitter {
             debugUnit(`Error writing to net: ${err.message}`);
         }
     }
+    readMockBytesAsString(hexStr) {
+        let bytes = [];
+        for (let i = 0; i < hexStr.length; i += 2) {
+            console.log(hexStr.length);
+            bytes.push(parseInt(hexStr.substring(i, i + 2), 16));
+        }
+        let buf = Buffer.from(bytes);
+        this.processData(buf);
+    }
     keepAliveAsync() {
         let self = this;
         try {
@@ -387,6 +396,8 @@ class UnitConnection extends events_1.EventEmitter {
         });
     }
     async connectAsync() {
+        if (this._isMock)
+            return Promise.resolve(true);
         var self = this;
         return new Promise(async (resolve, reject) => {
             try {
@@ -529,6 +540,8 @@ class UnitConnection extends events_1.EventEmitter {
         });
     }
     async addClientAsync(clientId) {
+        if (this._isMock)
+            return Promise.resolve(true);
         let self = this;
         if (clientId)
             this.clientId = clientId;
@@ -547,6 +560,8 @@ class UnitConnection extends events_1.EventEmitter {
         });
     }
     async removeClientAsync() {
+        if (this._isMock)
+            return Promise.resolve(true);
         let self = this;
         return new Promise(async (resolve, reject) => {
             try {
@@ -585,17 +600,14 @@ class UnitConnection extends events_1.EventEmitter {
         });
     }
     onClientMessage(msg) {
-        debugUnit('received message of length %d', msg.length);
-        // var msgType = buf.readInt16LE(2);
-        // console.log(`got a message ${msg.messageId}`)
+        debugUnit(`received ${msg.action} message of length ${msg.length}`);
         switch (msg.action) {
-            case 15: //SLChallengeMessage.getResponseId():
+            case 15:
                 debugUnit("  it's a challenge response");
                 let challengeString = ConnectionMessage_1.ConnectionMessage.decodeChallengeResponse(msg);
                 this.emit('challengeString', challengeString);
-                // this.login(challengeString);
                 break;
-            case 28: //SLLoginMessage.getResponseId():
+            case 28:
                 debugUnit("  it's a login response");
                 this.emit('loggedIn');
                 break;
@@ -603,84 +615,109 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit("  it's a login failure.");
                 this.emit('loginFailed');
                 break;
-            case 12500: //SLPoolStatusMessage.getAsyncResponseId():
-            case 12527: //SLPoolStatusMessage.getResponseId():
+            case 12500:
+            case 12527:
                 debugUnit("  it's pool status");
                 let equipmentState = EquipmentState_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg);
                 this.emit('equipmentState', equipmentState);
                 break;
-            case 12521: // SLVersionMessage.getResponseId():
+            case 12521:
                 debugUnit("  it's set circuit info");
                 let circuit = CircuitMessage_1.CircuitMessage.decodeSetCircuit(msg);
                 this.emit('circuit', circuit);
                 break;
-            case 8121: // SLVersionMessage.getResponseId():
+            case 8121:
                 debugUnit("  it's version");
                 let ver = ConnectionMessage_1.ConnectionMessage.decodeVersionResponse(msg);
                 this.emit('version', ver);
                 break;
-            case 12573: // SLIntellichlorConfigMessage.getResponseId():
+            case 12573:
                 debugUnit("  it's salt cell config");
                 this.emit('intellichlorConfig', ChlorMessage_1.ChlorMessage.decodeIntellichlorConfig(msg));
                 break;
-            case 12533: // SLEquipmentConfigMessage.getResponseId():
+            case 12511:
+                debugUnit("  it's a get circuit definitions answer");
+                this.emit('circuitDefinitions', EquipmentConfig_1.EquipmentConfigurationMessage.decodeCircuitDefinitions(msg));
+                break;
+            case 12559:
+                debugUnit("  it's get circuit names answer");
+                this.emit('nCircuitNames', EquipmentConfig_1.EquipmentConfigurationMessage.decodeNCircuitNames(msg));
+                break;
+            case 12560:
+            case 12562:
+                debugUnit("  it's get circuit names answer");
+                this.emit('circuitNames', EquipmentConfig_1.EquipmentConfigurationMessage.decodeCircuitNames(msg));
+                break;
+            case 12533:
                 debugUnit("  it's controller configuration");
                 this.emit('equipmentConfig', EquipmentConfig_1.EquipmentConfigurationMessage.decodeControllerConfig(msg));
                 break;
-            case 12505: // SLChemDataMessage.getAsyncResponseId():
-            case 12593: // SLChemDataMessage.getResponseId():
+            case 12505:
+            case 12593:
                 debugUnit("  it's chem data");
                 this.emit('chemicalData', ChemMessage_1.ChemMessage.decodeChemDataMessage(msg));
                 break;
-            case 8111: // SLGetSystemTime.getResponseId():
+            case 8111:
                 debugUnit("  it's system time");
                 this.emit('getSystemTime', EquipmentState_1.EquipmentStateMessage.decodeSystemTime(msg));
                 break;
-            case 12543: // SLGetScheduleData.getResponseId():
+            case 12543:
                 debugUnit("  it's schedule data");
                 this.emit('getScheduleData', ScheduleMessage_1.ScheduleMessage.decodeGetScheduleMessage(msg));
                 break;
-            case 12581: // SLCancelDelay.getResponseId():
+            case 12581:
                 debugUnit("  it's a cancel delay ack");
                 this.emit('cancelDelay', EquipmentState_1.EquipmentStateMessage.decodeCancelDelay(msg));
                 break;
-            case 12523: // SLAddClient.getResponseId():
+            case 12523:
                 debugUnit("  it's an add client ack");
                 this.emit('addClient', ConnectionMessage_1.ConnectionMessage.decodeAddClient(msg));
                 break;
-            case 12525: // SLRemoveClient.getResponseId():
+            case 12525:
                 debugUnit("  it's a remove client ack");
                 this.emit('removeClient', ConnectionMessage_1.ConnectionMessage.decodeRemoveClient(msg));
                 break;
-            case 17: // SLPingServerMessage.getResponseId():
+            case 17:
                 debugUnit("  it's a pong");
                 this.emit('pong', ConnectionMessage_1.ConnectionMessage.decodePingClient(msg));
                 break;
-            case 12567: // SLEquipmentConfigurationMessage.getResponseId():
-                debugUnit("  it's equipment configuration");
-                this.emit('equipmentConfiguration', EquipmentConfig_1.EquipmentConfigurationMessage.decodeEquipmentConfiguration(msg));
+            case 12567:
+                debugUnit("  it's a get equipment configuration");
+                this.emit('equipmentConfiguration', EquipmentConfig_1.EquipmentConfigurationMessage.decodeGetEquipmentConfiguration(msg));
                 break;
-            case 12585: // SLGetPumpStatus.getResponseId():
+            case 12568:
+                debugUnit("  it's a SET equipment configuration");
+                this.emit('setEquipmentConfiguration', EquipmentConfig_1.EquipmentConfigurationMessage.decodeSetEquipmentConfiguration(msg));
+                break;
+            case 12569:
+                debugUnit("  it's a SET equipment configuration ack");
+                this.emit('setEquipmentConfigurationAck', EquipmentConfig_1.EquipmentConfigurationMessage.decodeSetEquipmentConfigurationAck(msg));
+                break;
+            case 12585:
                 debugUnit("  it's pump status");
                 this.emit('getPumpStatus', PumpMessage_1.PumpMessage.decodePumpStatus(msg));
                 break;
-            case 9808: // SLGetWeatherForecast.getResponseId():
+            case 9808:
                 debugUnit("  it's a weather forecast ack");
                 this.emit('weatherForecast', EquipmentConfig_1.EquipmentConfigurationMessage.decodeWeatherMessage(msg));
                 break;
-            case 12531: // SLSetCircuitStateMessage.getResponseId():
+            case 12531:
                 debugUnit("  it's circuit toggle ack");
                 this.emit('circuitStateChanged', CircuitMessage_1.CircuitMessage.decodeSetCircuitState(msg));
                 break;
-            case 12529: // SLSetHeatSetPointMessage.getResponseId():
+            case 12529:
                 debugUnit("  it's a setpoint ack");
                 this.emit('setPointChanged', HeaterMessage_1.HeaterMessage.decodeSetHeatSetPoint(msg));
                 break;
-            case 12539: // SLSetHeatModeMessage.getResponseId():
+            case 12591:
+                debugUnit("  it's a cool setpoint ack");
+                this.emit('coolSetPointChanged', HeaterMessage_1.HeaterMessage.decodeCoolSetHeatSetPoint(msg));
+                break;
+            case 12539:
                 debugUnit("  it's a heater mode ack");
                 this.emit('heatModeChanged', HeaterMessage_1.HeaterMessage.decodeSetHeatModePoint(msg));
                 break;
-            case 12557: // SLLightControlMessage.getResponseId():
+            case 12557:
                 debugUnit("  it's a light control ack");
                 this.emit('sentLightCommand', CircuitMessage_1.CircuitMessage.decodeSetLight(msg));
                 break;
@@ -688,23 +725,27 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit("  it's a light sequence delay packet");
                 this.emit('intellibriteDelay', 1);
                 break;
-            case 12577: // SLSetIntellichlorConfigMessage.getResponseId():
+            case 12575:
+                debugUnit("  it's a set salt cell isActive ack");
+                this.emit('intellichlorIsActive', ChlorMessage_1.ChlorMessage.decodeSetEnableIntellichlorConfig(msg));
+                break;
+            case 12577:
                 debugUnit("  it's a set salt cell config ack");
                 this.emit('setIntellichlorConfig', ChlorMessage_1.ChlorMessage.decodeSetIntellichlorConfig(msg));
                 break;
-            case 12545: // SLAddNewScheduleEvent.getResponseId():
+            case 12545:
                 debugUnit("  it's a new schedule event ack");
                 this.emit('addNewScheduleEvent', ScheduleMessage_1.ScheduleMessage.decodeAddSchedule(msg));
                 break;
-            case 12547: // SLDeleteScheduleEventById.getResponseId():
+            case 12547:
                 debugUnit("  it's a delete schedule event ack");
                 this.emit('deleteScheduleEventById', ScheduleMessage_1.ScheduleMessage.decodeDeleteSchedule(msg));
                 break;
-            case 12549: // SLSetScheduleEventById.getResponseId():
+            case 12549:
                 debugUnit("  it's a set schedule event ack");
                 this.emit('setScheduleEventById', ScheduleMessage_1.ScheduleMessage.decodeSetSchedule(msg));
                 break;
-            case 12551: // SLSetCircuitRuntimeById.getResponseId():
+            case 12551:
                 debugUnit("  it's a set circuit runtime ack");
                 this.emit('setCircuitRuntimebyId', CircuitMessage_1.CircuitMessage.decodeSetCircuitRunTime(msg));
                 break;
@@ -712,28 +753,32 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit("  it's a get custom names packet");
                 this.emit('getCustomNames', EquipmentConfig_1.EquipmentConfigurationMessage.decodeCustomNames(msg));
                 break;
-            case 12587: // SLSetPumpSpeed.getResponseId():
+            case 12565:
+                debugUnit("  it's a set custom names packet");
+                this.emit('setCustomName', EquipmentConfig_1.EquipmentConfigurationMessage.decodeSetCustomNameAck(msg));
+                break;
+            case 12587:
                 debugUnit("  it's a set pump flow ack");
                 this.emit('setPumpSpeed', PumpMessage_1.PumpMessage.decodeSetPumpSpeed(msg));
                 break;
             // ------------  ASYNC MESSAGES --------------- //
-            case 8113: // SLSetSystemTime.getResponseId():
+            case 8113:
                 debugUnit("  it's a set system time ack");
                 this.emit('setSystemTime', EquipmentState_1.EquipmentStateMessage.decodeSetSystemTime(msg));
                 break;
-            case 12535: // SLGetHistoryData.getResponseId():
+            case 12535:
                 debugUnit("  it's a history data query ack");
                 this.emit('getHistoryDataPending');
                 break;
-            case 12502: // SLGetHistoryData.getPayloadId():
+            case 12502:
                 debugUnit("  it's a history data payload");
                 this.emit('getHistoryData', EquipmentConfig_1.EquipmentConfigurationMessage.decodeGetHistory(msg));
                 break;
-            case 12597: // SLGetChemHistoryData.getResponseId():
+            case 12597:
                 debugUnit("  it's a chem history data query ack");
                 this.emit('getChemHistoryDataPending');
                 break;
-            case 12506: // SLGetChemHistoryData.getPayloadId():
+            case 12506:
                 debugUnit("  it's a chem history data payload");
                 this.emit('getChemHistoryData', ChemMessage_1.ChemMessage.decodecChemHistoryMessage(msg));
                 break;
@@ -761,6 +806,8 @@ class UnitConnection extends events_1.EventEmitter {
     }
 }
 exports.UnitConnection = UnitConnection;
+UnitConnection.controllerType = 0; // for set equip message decode
+UnitConnection.expansionsCount = 0; // for set equip message decode
 exports.screenlogic = new UnitConnection();
 class Equipment {
     async setSystemTimeAsync(date, shouldAdjustForDST) {
@@ -823,6 +870,80 @@ class Equipment {
             exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
+    async getAllCircuitNamesAsync() {
+        let size = await this.getNCircuitNamesAsync();
+        let circNames = await this.getCircuitNamesAsync(size);
+        return circNames;
+    }
+    async getNCircuitNamesAsync() {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending get n circuit names query...', exports.screenlogic.senderId);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for get n circuit names response'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('nCircuitNames', (data) => {
+                clearTimeout(_timeout);
+                debugUnit('received n circuit names event');
+                resolve(data);
+            });
+            let msg = exports.screenlogic.controller.equipment.sendGetNumCircuitNamesMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
+        });
+    }
+    async getCircuitNamesAsync(size) {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending get circuit names query...', exports.screenlogic.senderId);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for get circuit names response'));
+            }, exports.screenlogic.netTimeout * 3);
+            exports.screenlogic.once('circuitNames', (data) => {
+                clearTimeout(_timeout);
+                debugUnit('received n circuit names event');
+                resolve(data);
+            });
+            let msg = exports.screenlogic.controller.equipment.sendGetCircuitNamesMessage(0, 101);
+            exports.screenlogic.toLogEmit(msg, 'out');
+            /*
+            // This method works and is how SL does it; but it is also possible to get all the names in one pass, so why not?
+            let idx = 0;
+            let cnt = 25;
+            let names = [];
+            let adj = size - names.length < 25 ? size - names.length : cnt;
+            screenlogic.on('circuitNames', (data) => {
+              debugUnit('receivedcircuit names event');
+              data.forEach(el => { el.id = el.id + idx;})
+              names = [...names, ...data];
+              idx > names.length ? names.length - 1 : idx += 25;
+              adj = size - names.length < 25 ? size - names.length : cnt;
+              let msg = screenlogic.controller.equipment.sendGetCircuitNamesMessage(idx, adj);
+              screenlogic.toLogEmit(msg, 'out');
+              
+              if (names.length >= size){
+                clearTimeout(_timeout);
+                screenlogic.removeListener('circuitNames', ()=>{});
+                resolve(names);
+              }
+            })
+            let msg = screenlogic.controller.equipment.sendGetCircuitNamesMessage(idx, adj);
+            screenlogic.toLogEmit(msg, 'out');
+            */
+        });
+    }
+    async getCircuitDefinitionsAsync() {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending get circuit definitions query...', exports.screenlogic.senderId);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for get circuit definitions response'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('circuitDefinitions', (data) => {
+                clearTimeout(_timeout);
+                debugUnit('received circuit definitions event');
+                resolve(data);
+            });
+            let msg = exports.screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
+        });
+    }
     async getEquipmentConfigurationAsync() {
         return new Promise(async (resolve, reject) => {
             debugUnit('[%d] sending equipment configuration query...', exports.screenlogic.senderId);
@@ -836,6 +957,217 @@ class Equipment {
             });
             let msg = exports.screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage();
             exports.screenlogic.toLogEmit(msg, 'out');
+        });
+    }
+    async setEquipmentConfigurationAsync(data) {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending set equipment configuration query...', exports.screenlogic.senderId);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for set equipment configuration response'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('setEquipmentConfiguration', (data) => {
+                clearTimeout(_timeout);
+                debugUnit('received setEquipmentConfiguration event');
+                resolve(false);
+            });
+            // theory here is that we may not know all of the exact bytes yet in the equipment config. 
+            // Eventually we should be able to recreate it, but for now we should check to make sure
+            // we don't screw anything up.  We can do that by comparing the existing array to the
+            // constructed array and look for differences that shouldn't be there.
+            let equipConfig = await exports.screenlogic.equipment.getEquipmentConfigurationAsync();
+            let resData = {
+                ...equipConfig.rawData,
+                alarm: data.alarm
+            };
+            // High Speed
+            if (typeof data.highSpeedCircuits !== 'undefined') {
+                let max = 0;
+                if (EquipmentConfig_1.EquipmentConfigurationMessage.isEasyTouch(UnitConnection.controllerType)) {
+                    // easytouch = 4; it = 8
+                    max = 4;
+                }
+                else if (EquipmentConfig_1.EquipmentConfigurationMessage.isDualBody(UnitConnection.controllerType)) {
+                    max = 8;
+                }
+                for (let i = 0; i < max; i++) {
+                    if (typeof data.highSpeedCircuits[i] !== 'undefined') {
+                        resData.highSpeedCircuitData = data.highSpeedCircuits[i];
+                    }
+                }
+            }
+            // PUMPS
+            if (typeof data.pumps !== 'undefined') {
+                for (let i = 0; i < data.pumps.length; i++) {
+                    let pump = data.pumps[i];
+                    if (pump.id === 0)
+                        continue;
+                    let pumpIndex = pump.id || i + 1;
+                    let pumpIndexByte = 45 * pumpIndex;
+                    resData.pumpData[pumpIndexByte] = pump.type;
+                    if (pump.type === 128 || pump.type === 169 || pump.type === 169 || pump.type === 255) {
+                        for (let pc = 0; pc < pump.circuits.length; pc++) {
+                            let circuit = pump.circuits[pc];
+                            if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = 0;
+                            }
+                            else {
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = Math.floor(circuit.speed / 256) || 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = circuit.speed % 256 || 0;
+                            }
+                        }
+                        resData.pumpData[pumpIndexByte + 20] = Math.floor(pump.primingSpeed / 256) || 0;
+                        resData.pumpData[pumpIndexByte + 29] = pump.primingSpeed % 256 || 0;
+                        resData.pumpData[pumpIndexByte + 1] = pump.primingTime || 0;
+                    }
+                    else if (pump.type < 64) {
+                        for (let pc = 0; pc < 8; pc++) {
+                            let circuit = pump.circuits[pc];
+                            if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
+                            }
+                            else {
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = circuit.flow || 0;
+                            }
+                        }
+                        resData.pumpData[pumpIndexByte] = pump.backgroundCircuit || 6;
+                        resData.pumpData[pumpIndexByte + 1] = pump.filterSize / 1000 || 15000;
+                        resData.pumpData[pumpIndexByte + 2] = pump.turnovers || 2;
+                        resData.pumpData[pumpIndexByte + 20] = pump.manualFilterGPM || 30;
+                        resData.pumpData[pumpIndexByte + 21] = pump.primingSpeed || 55;
+                        resData.pumpData[pumpIndexByte + 22] = (pump.primingTime | pump.maxSystemTime << 4) || 0;
+                        resData.pumpData[pumpIndexByte + 23] = pump.maxPressureIncrease || 0;
+                        resData.pumpData[pumpIndexByte + 24] = pump.backwashFlow || 60;
+                        resData.pumpData[pumpIndexByte + 25] = pump.backwashTime || 5;
+                        resData.pumpData[pumpIndexByte + 26] = pump.rinseTime || 1;
+                        resData.pumpData[pumpIndexByte + 27] = pump.vacuumFlow || 50;
+                        resData.pumpData[pumpIndexByte + 29] = pump.vacuumTime || 10;
+                    }
+                    else if (pump.type === 64) {
+                        let ubyte = 0;
+                        for (let pc = 0; pc < 8; pc++) {
+                            let circuit = pump.circuits[pc];
+                            if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = 0;
+                            }
+                            else {
+                                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
+                                if (circuit.units) {
+                                    // gpm
+                                    resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = circuit.flow || 0;
+                                    ubyte |= (1 << (i - 1));
+                                }
+                                else {
+                                    resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = Math.floor(circuit.speed / 256) || 0;
+                                    resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = circuit.speed % 256 || 0;
+                                }
+                            }
+                        }
+                        resData.pumpData[pumpIndexByte + 3] = ubyte || 0;
+                    }
+                }
+            }
+            // HEATERS
+            if (typeof data.heaters !== 'undefined') {
+                let thermaFloPresent = false;
+                let thermaFloCoolPresent = false;
+                let body1SolarPresent = false;
+                let solarHeatPumpPresent = false;
+                let body2SolarPresent = false; // dual body?
+                for (let i = 0; i < data.heaters.length; i++) {
+                    let heater = data.heaters[i];
+                    if (heater.type === 3) {
+                        thermaFloPresent = true;
+                        thermaFloCoolPresent = heater.thermaFloCoolPresent;
+                    }
+                    else if (heater.type === 2) {
+                        body1SolarPresent = true;
+                    }
+                    else if (heater.type === 3) {
+                        solarHeatPumpPresent = true;
+                    }
+                }
+                if (body2SolarPresent)
+                    resData.heaterConfigData[0] = resData.heaterConfigData[0] |= (1 << 4);
+                if (body1SolarPresent)
+                    resData.heaterConfigData[0] = resData.heaterConfigData[0] |= (1 << 1);
+                if (thermaFloCoolPresent)
+                    resData.heaterConfigData[1] = resData.heaterConfigData[1] |= (1 << 1);
+                if (thermaFloPresent)
+                    resData.heaterConfigData[2] = resData.heaterConfigData[2] |= (1 << 5);
+                if (solarHeatPumpPresent)
+                    resData.heaterConfigData[2] = resData.heaterConfigData[2] |= (1 << 4);
+                // manual heat is in misc section
+            }
+            // DELAYS
+            if (typeof data.misc !== 'undefined') {
+                if (typeof data.misc.poolPumpOnDuringHeaterCooldown !== 'undefined')
+                    resData.delayData[0] = resData.delayData[0] |= ((data.misc.poolPumpOnDuringHeaterCooldown ? 1 : 0) << 0);
+                if (typeof data.misc.spaPumpOnDuringHeaterCooldown !== 'undefined')
+                    resData.delayData[0] = resData.delayData[0] |= ((data.misc.spaPumpOnDuringHeaterCooldown ? 1 : 0) << 1);
+                if (typeof data.misc.pumpDelay !== 'undefined')
+                    resData.delayData[0] = resData.delayData[0] |= ((data.misc.pumpDelay ? 1 : 0) << 7);
+            }
+            // INTELLICHEM
+            if (typeof data.chem !== 'undefined') {
+                let active = typeof data.chem.isActive !== 'undefined' ? (data.chem.isActive ? 1 : 0) : resData.miscData[3] & 0x01;
+                resData.miscData[3] = resData.miscData[3] |= (active << 0);
+            }
+            // MISC
+            if (typeof data.misc !== 'undefined') {
+                if (typeof data.misc.units !== 'undefined')
+                    resData.heaterConfigData[2] |= ((data.misc.units ? 1 : 0) << 0);
+                if (typeof data.misc.manualHeat !== 'undefined')
+                    resData.miscData[4] |= ((data.misc.manualHeat ? 1 : 0) << 0);
+            }
+            // VALVES
+            if (typeof data.valves !== 'undefined') {
+                // ignore for now
+            }
+            // REMOTES
+            if (typeof data.remotes !== 'undefined') {
+                // ignore for now
+            }
+            // LIGHTS
+            if (typeof data.lightGroup !== 'undefined') {
+                // ignore for now
+            }
+            // MACRO
+            if (typeof data.circuitGroup !== 'undefined') {
+                // ignore for now
+            }
+            // SPA COMMAND
+            if (typeof data.spaCommand !== 'undefined') {
+            }
+            let ready = false;
+            if (ready) {
+                let msg = exports.screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData);
+                exports.screenlogic.toLogEmit(msg, 'out');
+            }
+            else {
+                function dec2bin(dec) {
+                    return (dec >>> 0).toString(2).padStart(8, '0');
+                }
+                // debugUnit(`SET CONFIGURATION DATA:`);
+                // debugUnit(`data:`);
+                // debugUnit(data);
+                // debugUnit(`resData:`);
+                // debugUnit(resData);
+                for (const [key, value] of Object.entries(resData)) {
+                    debugUnit(key);
+                    for (let i = 0; i < resData[key].length; i++) {
+                        if (resData[key][i] !== equipConfig.rawData[key][i]) {
+                            debugUnit(`Difference at ${key}[${i}].  prev: ${resData[key][i]} (${dec2bin(resData[key][i])})-> new: ${equipConfig.rawData[key][i]} (${dec2bin(equipConfig.rawData[key][i])})`);
+                        }
+                    }
+                }
+            }
         });
     }
     async cancelDelayAsync() {
@@ -910,6 +1242,23 @@ class Equipment {
                 resolve(customNames);
             });
             let msg = exports.screenlogic.controller.equipment.sendGetCustomNamesMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
+        });
+    }
+    async setCustomNameAsync(idx, name) {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending set custom names: %d...', exports.screenlogic.senderId);
+            if (name.length > 11)
+                reject(`Name (${name}) must be less than 12 characters`);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for set custom name'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('setCustomName', (customNames) => {
+                clearTimeout(_timeout);
+                debugUnit('received setCustomName event');
+                resolve(customNames);
+            });
+            let msg = exports.screenlogic.controller.equipment.sendSetCustomNameMessage(idx, name);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
@@ -991,6 +1340,21 @@ class Body extends UnitConnection {
                 resolve(data);
             });
             let msg = exports.screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature);
+            exports.screenlogic.toLogEmit(msg, 'out');
+        });
+    }
+    async setCoolSetPointAsync(bodyIndex, temperature) {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending set cool setpoint command: controllerId: %d, bodyIndex: %d, temperature: %d...', exports.screenlogic.senderId, this.controllerId, bodyIndex, temperature);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for body coolSetpoint response'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('coolSetPointChanged', (data) => {
+                clearTimeout(_timeout);
+                debugUnit('received coolSetPointChanged event');
+                resolve(data);
+            });
+            let msg = exports.screenlogic.controller.bodies.sendCoolSetPointMessage(bodyIndex, temperature);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
     }
@@ -1179,6 +1543,21 @@ class Chlor extends UnitConnection {
                 resolve(intellichlor);
             });
             let msg = exports.screenlogic.controller.chlor.sendGetSaltCellConfigMessage();
+            exports.screenlogic.toLogEmit(msg, 'out');
+        });
+    }
+    async setIntellichlorIsActiveAsync(isActive) {
+        return new Promise(async (resolve, reject) => {
+            debugUnit('[%d] sending salt cell enable query...', exports.screenlogic.senderId);
+            let _timeout = (0, timers_1.setTimeout)(() => {
+                reject(new Error('time out waiting for intellichlor enable'));
+            }, exports.screenlogic.netTimeout);
+            exports.screenlogic.once('intellichlorIsActive', (intellichlor) => {
+                clearTimeout(_timeout);
+                debugUnit('received intellichlorIsActive event');
+                resolve(intellichlor);
+            });
+            let msg = exports.screenlogic.controller.chlor.sendSetSaltCellEnableMessage(isActive);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
     }

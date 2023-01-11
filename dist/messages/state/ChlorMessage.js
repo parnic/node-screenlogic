@@ -18,6 +18,10 @@ class ChlorMessage {
         // ack
         return true;
     }
+    static decodeSetEnableIntellichlorConfig(msg) {
+        // ack
+        return true;
+    }
 }
 exports.ChlorMessage = ChlorMessage;
 //# sourceMappingURL=ChlorMessage.js.map

@@ -32,6 +32,7 @@ export declare class Inbound extends SLMessage {
     readUInt32LE(): number;
     incrementReadOffset(val: number): void;
     toString(): string;
+    toHexStream(): string;
 }
 export declare class Outbound extends SLMessage {
     createBaseMessage(): void;

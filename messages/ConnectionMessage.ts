@@ -1,5 +1,5 @@
 
-import { Inbound } from "../SLMessage";
+import { Inbound } from "./SLMessage";
 
 
 export class ConnectionMessage{

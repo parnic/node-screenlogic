@@ -121,6 +121,9 @@ class Inbound extends SLMessage {
     toString() {
         return this._smartBuffer.toString();
     }
+    toHexStream() {
+        return this._smartBuffer.toString("hex");
+    }
 }
 exports.Inbound = Inbound;
 class Outbound extends SLMessage {

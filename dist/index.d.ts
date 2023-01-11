@@ -6,13 +6,13 @@ import * as net from 'net';
 import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
-import { SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLSystemTimeData, SLWeatherForecastData } from './messages/state/EquipmentConfig';
+import { SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { SLIntellichlorData } from './messages/state/ChlorMessage';
 import { SLChemData, SLChemHistory } from './messages/state/ChemMessage';
-import { SLScheduleData } from './messages/state/ScheduleMessage';
+import { SLScheduleData } from './messages/config/ScheduleMessage';
 import { SLPumpStatusData } from './messages/state/PumpMessage';
 import { Inbound } from './messages/SLMessage';
-import { SLEquipmentStateData } from './messages/state/EquipmentState';
+import { SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
 export declare class FindUnits extends EventEmitter {
     constructor();
     private finder;
@@ -46,6 +46,8 @@ export declare class UnitConnection extends EventEmitter {
     private _controllerId;
     get controllerId(): number;
     set controllerId(val: number);
+    static controllerType: number;
+    static expansionsCount: number;
     protected _isMock: boolean;
     private _buffer;
     private _bufferIdx;
@@ -69,6 +71,7 @@ export declare class UnitConnection extends EventEmitter {
     init(systemName: string, address: string, port: number, password: string, senderId?: number): void;
     private _initCommands;
     write(bytes: Buffer | string): void;
+    readMockBytesAsString(hexStr: string): void;
     keepAliveAsync(): void;
     processData(msg: Buffer): void;
     toLogEmit(message: any, direction: any): void;
@@ -99,12 +102,18 @@ export declare class Equipment {
     setSystemTimeAsync(date: Date, shouldAdjustForDST: boolean): Promise<SLSystemTimeData>;
     getWeatherForecastAsync(): Promise<SLWeatherForecastData>;
     getHistoryDataAsync(fromTime?: Date, toTime?: Date): Promise<SLHistoryData>;
+    getAllCircuitNamesAsync(): Promise<any>;
+    getNCircuitNamesAsync(): Promise<any>;
+    getCircuitNamesAsync(size: number): Promise<any>;
+    getCircuitDefinitionsAsync(): Promise<any>;
     getEquipmentConfigurationAsync(): Promise<SLEquipmentConfigurationData>;
+    setEquipmentConfigurationAsync(data: any): Promise<boolean>;
     cancelDelayAsync(): Promise<boolean>;
     getSystemTimeAsync(): Promise<SLSystemTimeData>;
     getControllerConfigAsync(): Promise<SLControllerConfigData>;
     getEquipmentStateAsync(): Promise<SLEquipmentStateData>;
     getCustomNamesAsync(): Promise<string[]>;
+    setCustomNameAsync(idx: number, name: string): Promise<string[]>;
 }
 export declare class Circuit extends UnitConnection {
     sendLightCommandAsync(command: LightCommands): Promise<boolean>;
@@ -114,6 +123,7 @@ export declare class Circuit extends UnitConnection {
 }
 export declare class Body extends UnitConnection {
     setSetPointAsync(bodyIndex: BodyIndex, temperature: any): Promise<boolean>;
+    setCoolSetPointAsync(bodyIndex: BodyIndex, temperature: any): Promise<boolean>;
     setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes): Promise<boolean>;
 }
 export declare class Pump extends UnitConnection {
@@ -133,6 +143,7 @@ export declare class Chem extends UnitConnection {
 export declare class Chlor extends UnitConnection {
     setIntellichlorOutputAsync(poolOutput: number, spaOutput: number): Promise<boolean>;
     getIntellichlorConfigAsync(): Promise<SLIntellichlorData>;
+    setIntellichlorIsActiveAsync(isActive: boolean): Promise<boolean>;
 }
 export declare enum LightCommands {
     LIGHT_CMD_LIGHTS_OFF = 0,

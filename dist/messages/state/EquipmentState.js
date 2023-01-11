@@ -350,7 +350,7 @@ class EquipmentStateMessage {
         ///// End Delays
         let misc = {
             intelliChem: msg.isBitSet(miscDataArray[3], 0),
-            spaManualHeat: miscDataArray[4] !== 0
+            manualHeat: miscDataArray[4] !== 0
         };
         let speed = [];
         speed = loadSpeedCircuits(speedDataArray, true);

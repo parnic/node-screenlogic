@@ -5,6 +5,10 @@ export class HeaterMessage {
     // ack
     return true;
   }
+  public static decodeCoolSetHeatSetPoint(msg:Inbound){
+    // ack
+    return true;
+  }
   public static decodeSetHeatModePoint(msg:Inbound){
     // ack
     return true;

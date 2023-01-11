@@ -2,6 +2,7 @@ import { Inbound } from "../SLMessage";
 export declare class ChlorMessage {
     static decodeIntellichlorConfig(msg: Inbound): SLIntellichlorData;
     static decodeSetIntellichlorConfig(msg: Inbound): boolean;
+    static decodeSetEnableIntellichlorConfig(msg: Inbound): boolean;
 }
 export interface SLIntellichlorData {
     installed: boolean;
