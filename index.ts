@@ -1204,11 +1204,6 @@ export class Equipment {
         function dec2bin(dec) {
           return (dec >>> 0).toString(2).padStart(8, '0');
         }
-        // debugUnit(`SET CONFIGURATION DATA:`);
-        // debugUnit(`data:`);
-        // debugUnit(data);
-        // debugUnit(`resData:`);
-        // debugUnit(resData);
         for (const [key, value] of Object.entries(resData)) {
           debugUnit(key);
           for (let i = 0; i < resData[key].length; i++) {
