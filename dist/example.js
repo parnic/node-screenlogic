@@ -14,44 +14,62 @@ async function app() {
     // use this if you want to use a direct connection to a known unit
     // connect(new ScreenLogic.UnitConnection('10.0.0.85', 80));
     // use this to remote connect to a system by name (going through the Pentair servers)
-    const systemName = 'Pentair: XX-XX-XX';
+    let gatewayName = 'Pentair: XX-XX-XX';
     const password = '1111';
-    let gateway = new index_1.RemoteLogin(systemName);
-    var unit = await gateway.connectAsync();
-    if (!unit || !unit.gatewayFound || unit.ipAddr === '') {
-        console.log('no unit found by that name');
-        return;
+    let unit;
+    try {
+        let finder = new index_1.FindUnits();
+        let localUnits = await finder.searchAsync();
+        finder.close();
+        if (localUnits.length) {
+            console.log(`Found units: ${JSON.stringify(localUnits)}`);
+            if (gatewayName.includes('XX-XX-XX')) {
+                gatewayName = localUnits[0].gatewayName;
+                unit.ipAddr = localUnits[0].address;
+                unit.port = localUnits[0].port;
+            }
+        }
+        else
+            console.log(`No local units found`);
     }
-    console.log('unit ' + gateway.systemName + ' found at ' + unit.ipAddr + ':' + unit.port);
+    catch (err) {
+        console.error(`Error looking for local units: ${err.message}`);
+    }
+    if (!gatewayName.includes('XX-XX-XX')) {
+        let gateway = new index_1.RemoteLogin(gatewayName);
+        unit = await gateway.connectAsync();
+        if (!unit || !unit.gatewayFound || unit.ipAddr === '') {
+            console.log('no unit found by that name');
+            return;
+        }
+        console.log('unit ' + gateway.systemName + ' found at ' + unit.ipAddr + ':' + unit.port);
+    }
     let client = index_1.screenlogic;
     let delayCount = 0;
     // events still work, too!
-    client.on('loggedIn', function () {
+    // Uncomment to log to the console.
+    /*
+      client.on('loggedIn', function () {
         console.log(`logged in event`);
-    }).on('version', function (version) {
+      }).on('version', function (version) {
         console.log(' version (event)=' + version);
-    }).on('equipmentState', function (status) {
+      }).on('equipmentState', function (data) {
         delayCount = 0; // reset intellibrite delay
-        console.log(`equipmentState (event) update!`);
-        console.log(' pool ok=' + status.ok);
-        console.log(' pool temp=' + status.currentTemp[0]);
-        console.log(' air temp=' + status.airTemp);
-        console.log(' salt ppm=' + status.saltPPM);
-        console.log(' pH=' + status.pH);
-        console.log(' saturation=' + status.saturation);
-    }).on('chemicalData', function (chemData) {
-        console.log(`chemical data (event):`);
-        console.log(' calcium=' + chemData.calcium);
-        console.log(' cyanuric acid=' + chemData.cyanuricAcid);
-        console.log(' alkalinity=' + chemData.alkalinity);
-    }).on('intellichlorConfig', function (intellichlorConfig) {
-        console.log(`intellchlor (event):`);
-        console.log(' salt cell installed=' + intellichlorConfig.installed);
-    }).on('controllerConfig', function (config) {
-        console.log(`controllerConfig (event):`);
-        console.log('    controller is in celsius=' + config.degC);
-    })
-        .on('intellibriteDelay', function (sec) {
+        console.log(`equipmentState (event) update!`)
+        console.log('Equipment State:');
+        console.log(JSON.stringify(data));
+      }).on('chemicalData', function (data) {
+        console.log(`chemical data (event):`)
+        console.log(JSON.stringify(data));
+      }).on('intellichlorConfig', function (data) {
+        console.log(`intellchlor (event):`)
+        console.log(JSON.stringify(data));
+      }).on('controllerConfig', function (data) {
+        console.log(`controllerConfig (event):`)
+        console.log(JSON.stringify(data));
+      })
+    */
+    client.on('intellibriteDelay', function (sec) {
         delayCount = delayCount + sec;
         console.log(`Intellibrite light sequence delay ${delayCount}s`);
     })
@@ -60,7 +78,7 @@ async function app() {
         client.closeAsync();
     });
     try {
-        client.init(systemName, unit.ipAddr, unit.port, password, 12345);
+        client.init(gatewayName, unit.ipAddr, unit.port, password);
         await client.connectAsync();
         let addClient = await client.addClientAsync();
         console.log(`Add client result: ${addClient}`);
@@ -102,31 +120,39 @@ async function app() {
         console.log(`reccuring schedules: ${JSON.stringify(recurringSched)}`);
         let runOnceSched = await client.schedule.getScheduleDataAsync(1);
         console.log(`Run once schedules: ${JSON.stringify(runOnceSched)}`);
-        let addSched = await client.schedule.addNewScheduleEventAsync(index_1.SchedTypes.RECURRING);
+        // The following will change your settings.  Proceed with Caution
+        /*
+        let addSched = await client.schedule.addNewScheduleEventAsync(SchedTypes.RECURRING);
         console.log(`Add sched response: ${addSched}`);
-        let setSched = await client.schedule.setScheduleEventByIdAsync(10, 2, 500, 1200, 127, 0, 1, 99);
+         let setSched = await client.schedule.setScheduleEventByIdAsync(10, 2, 500, 1200, 127, 0, 1, 99);
         console.log(`Set sched result: ${setSched}`);
         let delSched = await client.schedule.deleteScheduleEventByIdAsync(10);
         console.log(`Deleted sched result: ${delSched}`);
+        */
         // PUMPS
         let pumpStatus = await client.pump.getPumpStatusAsync(1);
         console.log(`Pump 1: ${JSON.stringify(pumpStatus)}`);
-        let pumpCircuits = [{ "circuitId": 1, "speed": 2500, "isRPMs": true }, { "circuitId": 6, "speed": 2000, "isRPMs": true }, { "circuitId": 7, "speed": 2500, "isRPMs": true }, { "circuitId": 8, "speed": 3250, "isRPMs": true }, { "circuitId": 18, "speed": 1040, "isRPMs": true }, { "circuitId": 0, "speed": 1000, "isRPMs": true }, { "circuitId": 0, "speed": 1000, "isRPMs": true }, { "circuitId": 0, "speed": 1000, "isRPMs": true }];
-        let pumpRes = await client.pump.setPumpSpeedAsync(0, 4, 1030, true);
+        // The following will change your settings.  Proceed with Caution
+        let pumpRes = await client.pump.setPumpSpeedAsync(1, 6, 2000, true);
         console.log(`Pump speed response: ${pumpRes}`);
         // BODIES
-        let setPointChanged = await client.bodies.setSetPointAsync(1, 101);
+        // The following will change your settings.  Proceed with Caution
+        /*
+        let setPointChanged = await client.bodies.setSetPointAsync(1, 101)
         console.log(`set point changed: ${setPointChanged}`);
-        let heatModeRes = await client.bodies.setHeatModeAsync(1, index_1.HeatModes.HEAT_MODE_HEATPUMP);
+        let heatModeRes = await client.bodies.setHeatModeAsync(1, HeatModes.HEAT_MODE_HEATPUMP);
         console.log(`heat mode result: ${heatModeRes}`);
+        */
         // CIRCUITS
-        let lightRes = await client.circuits.sendLightCommandAsync(index_1.LightCommands.LIGHT_CMD_COLOR_MODE_PARTY);
+        // The following will change your settings.  Proceed with Caution
+        /*
+        let lightRes = await client.circuits.sendLightCommandAsync(LightCommands.LIGHT_CMD_COLOR_MODE_PARTY);
         console.log(`Light result: ${lightRes}`);
-        // NOT WORKING...    
         let cstate = await client.circuits.setCircuitStateAsync(3, true);
         console.log(`Circuit state: ${JSON.stringify(cstate)}`);
         let circRun = await client.circuits.setCircuitRuntimebyIdAsync(4, 5);
         console.log(`circ run res: ${circRun}`);
+    */
         setTimeout(async () => {
             console.log(`closing connection after 60s`);
             await client.closeAsync();

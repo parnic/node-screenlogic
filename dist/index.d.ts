@@ -19,7 +19,7 @@ export declare class FindUnits extends EventEmitter {
     private bound;
     private message;
     search(): void;
-    searchAsync(): Promise<unknown>;
+    searchAsync(): Promise<LocalUnit[]>;
     foundServer(msg: any, remote: any): void;
     sendServerBroadcast(): void;
     close(): void;
@@ -195,4 +195,12 @@ export interface Controller {
 export declare enum SchedTypes {
     RECURRING = 0,
     RUNONCE = 1
+}
+export interface LocalUnit {
+    address: string;
+    type: number;
+    port: number;
+    gatewayType: number;
+    gatewaySubtype: number;
+    gatewayName: string;
 }

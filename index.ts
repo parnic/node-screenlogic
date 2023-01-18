@@ -63,11 +63,11 @@ export class FindUnits extends EventEmitter {
     }
   }
 
-  public async searchAsync() {
+  public async searchAsync():Promise<LocalUnit[]> {
     let self = this;
     return new Promise(async (resolve, reject) => {
       try {
-        let units = [];
+        let units: LocalUnit[] = [];
         debugFind(`Screenlogic finder searching for local units...`,);
         setTimeoutSync(() => {
           if (units.length === 0) debugFind(`No units found searching locally.`)
@@ -89,7 +89,7 @@ export class FindUnits extends EventEmitter {
   foundServer(msg, remote) {
     debugFind('found something');
     if (msg.length >= 40) {
-      var server = {
+      var server: LocalUnit = {
         address: remote.address,
         type: msg.readInt32LE(0),
         port: msg.readInt16LE(8),
@@ -1028,7 +1028,7 @@ export class Equipment {
       let equipConfig: SLEquipmentConfigurationData = await screenlogic.equipment.getEquipmentConfigurationAsync();
 
       let resData: rawData & { alarm: number } = {
-        ...equipConfig.rawData,
+        ...JSON.parse(JSON.stringify(equipConfig.rawData)),
         alarm: data.alarm
       }
 
@@ -1670,4 +1670,13 @@ export interface Controller {
 export enum SchedTypes {
   RECURRING = 0,
   RUNONCE = 1
+}
+
+export interface LocalUnit {
+  address: string,
+  type: number,
+  port: number,
+  gatewayType: number,
+  gatewaySubtype: number,
+  gatewayName:string,
 }
