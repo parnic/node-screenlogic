@@ -33,5 +33,9 @@
         "test-passwordencoder": "mocha test/password.spec.js",
         "build": "tsc",
         "lint": "eslint --fix --ext .js,.jsx,.ts ."
+    },
+    "engines": {
+        "npm": ">=6.0.0",
+        "node": ">=14.0.0"
     }
 }
