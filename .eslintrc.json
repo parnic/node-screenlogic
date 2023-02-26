@@ -1,50 +1,55 @@
 {
-  "ignorePatterns": ["**/test", "**/dist"],
-  //"extends": "strongloop",
-  /* "rules": {
+    "ignorePatterns": [
+        "**/test/*.js",
+        "**/dist/*.js"
+    ],
+    //"extends": "strongloop",
+    /* "rules": {
     "max-len": "off"
   }, */
-/*   "parserOptions": {
+    /*   "parserOptions": {
     "ecmaVersion": 6
   }, */
-/*   "env": {
+    /*   "env": {
     "mocha": true
   }, */
-  "env": {
-    "es2021": true,
-    "node": true,
-    "mocha": true
-},
-"extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-],
-"parser": "@typescript-eslint/parser",
-"parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-},
-"plugins": [
-    "@typescript-eslint"
-],
-"rules": {
-    "indent": [
-        "error",
-        2,
-        { "SwitchCase": 1 }
+    "env": {
+        "es2021": true,
+        "node": true,
+        "mocha": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
     ],
-    "linebreak-style": [
-        "warn",
-        "windows"
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint"
     ],
-    "quotes": [
-        "warn",
-        "single"
-    ],
-    "semi": [
-        "error",
-        "always"
-    ],
-    "@typescript-eslint/no-var-requires": "warn"
-}
+    "rules": {
+        "indent": [
+            "error",
+            2,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "linebreak-style": [
+            "warn",
+            "windows"
+        ],
+        "quotes": [
+            "warn",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "@typescript-eslint/no-var-requires": "warn"
+    }
 }
