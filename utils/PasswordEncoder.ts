@@ -117,7 +117,7 @@ export class HLEncoder {
       }
 
       let roundKey = 0;
-      for (i = 0; i < numBlockChunks && roundKey < ROUND_KEY_COUNT; i++, roundKey++) {
+      for (let i = 0; i < numBlockChunks && roundKey < ROUND_KEY_COUNT; i++, roundKey++) {
         this.ke[Math.floor(roundKey / 4)][roundKey % 4] = this.tk[i];
         this.kd[this.iROUNDS - Math.floor(roundKey / 4)][roundKey % 4] = this.tk[i];
       }
@@ -132,25 +132,25 @@ export class HLEncoder {
           }
         } else {
           const blockChunkMidpoint = Math.floor(numBlockChunks / 2);
-          for (prevIdx = 0, tkIdx = 1; tkIdx < blockChunkMidpoint; prevIdx++, tkIdx++) {
+          for (let prevIdx = 0, tkIdx = 1; tkIdx < blockChunkMidpoint; prevIdx++, tkIdx++) {
             this.tk[tkIdx] ^= this.tk[prevIdx];
           }
 
           tkVal = this.tk[blockChunkMidpoint - 1];
           this.tk[blockChunkMidpoint] ^= (((sm_S[tkVal & 0xFF] ^ (sm_S[(tkVal >> 8) & 0xFF] << 8)) ^ (sm_S[(tkVal >> 16) & 0xFF] << 16)) ^ (sm_S[(tkVal >> 24) & 0xFF] << 24));
-          for (prevIdx = blockChunkMidpoint, tkIdx = blockChunkMidpoint + 1; tkIdx < numBlockChunks; prevIdx++, tkIdx++) {
+          for (let prevIdx = blockChunkMidpoint, tkIdx = blockChunkMidpoint + 1; tkIdx < numBlockChunks; prevIdx++, tkIdx++) {
             this.tk[tkIdx] ^= this.tk[prevIdx];
           }
         }
 
-        for (tkIdx = 0; tkIdx < numBlockChunks && roundKey < ROUND_KEY_COUNT; tkIdx++, roundKey++) {
+        for (let tkIdx = 0; tkIdx < numBlockChunks && roundKey < ROUND_KEY_COUNT; tkIdx++, roundKey++) {
           this.ke[Math.floor(roundKey / 4)][roundKey % 4] = this.tk[tkIdx];
           this.kd[this.iROUNDS - Math.floor(roundKey / 4)][roundKey % 4] = this.tk[tkIdx];
         }
       }
 
-      for (round = 1; round < this.iROUNDS; round++) {
-        for (i = 0; i < 4; i++) {
+      for (let round = 1; round < this.iROUNDS; round++) {
+        for (let i = 0; i < 4; i++) {
           const tt = this.kd[round][i];
           this.kd[round][i] = ((sm_U1[(tt >> 24) & 0xFF] ^ sm_U2[(tt >> 16) & 0xFF]) ^ sm_U3[(tt >> 8) & 0xFF]) ^ sm_U4[tt & 0xFF];
         }
