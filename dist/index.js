@@ -170,7 +170,7 @@ class RemoteLogin extends events_1.EventEmitter {
             });
         });
     }
-    ;
+    
     async closeAsync() {
         let self = this;
         return new Promise(async (resolve, reject) => {
@@ -211,13 +211,13 @@ class UnitConnection extends events_1.EventEmitter {
         this._bufferIdx = 0;
     }
     get clientId() { return this._clientId; }
-    ;
+    
     set clientId(val) { this._clientId = val; }
     get controllerId() { return this._controllerId; }
-    ;
+    
     set controllerId(val) { this._controllerId = val; }
     get senderId() { return this._senderId; }
-    ;
+    
     set senderId(val) { this._senderId = val; }
     initMock(systemName, address, port, password, senderId) {
         this.systemName = systemName;
@@ -266,7 +266,7 @@ class UnitConnection extends events_1.EventEmitter {
         if (this._isMock) {
             debugUnit(`Skipping write because of mock port`);
         }
-        ;
+        
         try {
             if (!this.client.writable) {
                 debugUnit('Socket not writeable.');
@@ -1604,7 +1604,7 @@ var PumpTypes;
     PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVS"] = 3] = "PUMP_TYPE_INTELLIFLOVS";
     PumpTypes[PumpTypes["PUMP_TYPE_INTELLIFLOVSF"] = 4] = "PUMP_TYPE_INTELLIFLOVSF";
 })(PumpTypes = exports.PumpTypes || (exports.PumpTypes = {}));
-;
+
 var BodyIndex;
 (function (BodyIndex) {
     BodyIndex[BodyIndex["POOL"] = 0] = "POOL";

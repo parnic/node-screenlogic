@@ -479,7 +479,7 @@ class EquipmentConfigurationMessage {
         for (let i = 0; i < 8; i++) {
             lights.allOnAllOff.push(lightDataArray[i]);
         }
-        ;
+        
         return lights;
     }
     static _loadRemoteData(remoteDataArray, controllerType) {

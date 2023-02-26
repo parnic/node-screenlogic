@@ -64,7 +64,7 @@ class ConnectionCommands extends Commands {
     }
 }
 exports.ConnectionCommands = ConnectionCommands;
-;
+
 class EquipmentCommands extends Commands {
     sendGetEquipmentStateMessage() {
         this.action = 12526;
@@ -388,5 +388,5 @@ class OutboundGateway extends SLMessage_1.Outbound {
     }
 }
 exports.OutboundGateway = OutboundGateway;
-;
+
 //# sourceMappingURL=OutgoingMessages.js.map

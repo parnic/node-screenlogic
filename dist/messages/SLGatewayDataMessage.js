@@ -31,5 +31,5 @@ class SLReceiveGatewayDataMessage extends SLMessage_1.Inbound {
     }
 }
 exports.SLReceiveGatewayDataMessage = SLReceiveGatewayDataMessage;
-;
+
 //# sourceMappingURL=SLGatewayDataMessage.js.map

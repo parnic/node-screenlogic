@@ -1,12 +1,50 @@
 {
-  "extends": "strongloop",
-  "rules": {
+  "ignorePatterns": ["**/test", "**/dist"],
+  //"extends": "strongloop",
+  /* "rules": {
     "max-len": "off"
-  },
-  "parserOptions": {
+  }, */
+/*   "parserOptions": {
     "ecmaVersion": 6
-  },
-  "env": {
+  }, */
+/*   "env": {
     "mocha": true
-  }
+  }, */
+  "env": {
+    "es2021": true,
+    "node": true,
+    "mocha": true
+},
+"extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+],
+"parser": "@typescript-eslint/parser",
+"parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+},
+"plugins": [
+    "@typescript-eslint"
+],
+"rules": {
+    "indent": [
+        "error",
+        2,
+        { "SwitchCase": 1 }
+    ],
+    "linebreak-style": [
+        "error",
+        "windows"
+    ],
+    "quotes": [
+        "error",
+        "single"
+    ],
+    "semi": [
+        "error",
+        "always"
+    ],
+    "@typescript-eslint/no-var-requires": "warn"
+}
 }

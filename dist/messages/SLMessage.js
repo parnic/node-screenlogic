@@ -37,7 +37,7 @@ class SLMessage {
     }
 }
 exports.SLMessage = SLMessage;
-;
+
 class Inbound extends SLMessage {
     readFromBuffer(buf) {
         this._smartBuffer = smart_buffer_1.SmartBuffer.fromBuffer(buf);

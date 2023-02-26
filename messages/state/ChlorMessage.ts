@@ -1,9 +1,9 @@
-import { Inbound } from "../SLMessage"
+import { Inbound } from '../SLMessage';
 
 
 export class ChlorMessage {
   public static decodeIntellichlorConfig(msg: Inbound){
-    let data: SLIntellichlorData = {
+    const data: SLIntellichlorData = {
       installed: msg.readInt32LE() === 1,
       status: msg.readInt32LE(),
       poolSetPoint: msg.readInt32LE(),
@@ -11,7 +11,7 @@ export class ChlorMessage {
       salt: msg.readInt32LE() * 50,
       flags: msg.readInt32LE(),
       superChlorTimer: msg.readInt32LE()
-    }
+    };
     return data;
   }
   public static decodeSetIntellichlorConfig(msg: Inbound){

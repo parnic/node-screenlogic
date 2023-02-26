@@ -1,14 +1,14 @@
 
-import { Inbound } from "./SLMessage";
+import { Inbound } from './SLMessage';
 
 
 export class ConnectionMessage{
   public static decodeChallengeResponse(msg: Inbound){
-    let challengeString = msg.readSLString();
+    const challengeString = msg.readSLString();
     return challengeString;
   }
   public static decodeVersionResponse(msg: Inbound){
-    let version = msg.readSLString();
+    const version = msg.readSLString();
     return version;
   }
   public static decodeAddClient(msg: Inbound){

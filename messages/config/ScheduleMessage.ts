@@ -1,21 +1,21 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from '../SLMessage';
 
 
 export class ScheduleMessage {
   public static decodeGetScheduleMessage(msg: Inbound) {
-    let eventCount = msg.readUInt32LE();
-    let data: SLScheduleData[] = [];
-    for (var i = 0; i < eventCount; i++) {
-      let scheduleId = msg.readUInt32LE() - 699;
-      let circuitId = msg.readUInt32LE() - 499;
-      let startTime = msg.decodeTime(msg.readUInt32LE());
-      let stopTime = msg.decodeTime(msg.readUInt32LE());
-      let dayMask = msg.readUInt32LE();
-      let flags = msg.readUInt32LE();
-      let heatCmd = msg.readUInt32LE();
-      let heatSetPoint = msg.readUInt32LE();
-      let days = msg.decodeDayMask(dayMask);
-      let event: SLScheduleData = {
+    const eventCount = msg.readUInt32LE();
+    const data: SLScheduleData[] = [];
+    for (let i = 0; i < eventCount; i++) {
+      const scheduleId = msg.readUInt32LE() - 699;
+      const circuitId = msg.readUInt32LE() - 499;
+      const startTime = msg.decodeTime(msg.readUInt32LE());
+      const stopTime = msg.decodeTime(msg.readUInt32LE());
+      const dayMask = msg.readUInt32LE();
+      const flags = msg.readUInt32LE();
+      const heatCmd = msg.readUInt32LE();
+      const heatSetPoint = msg.readUInt32LE();
+      const days = msg.decodeDayMask(dayMask);
+      const event: SLScheduleData = {
         scheduleId,
         circuitId,
         startTime,
@@ -25,7 +25,7 @@ export class ScheduleMessage {
         heatCmd,
         heatSetPoint,
         days
-      }
+      };
       data.push(event);
     }
     return data;

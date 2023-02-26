@@ -1,4 +1,4 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from '../SLMessage';
 
 export class HeaterMessage {
   public static decodeSetHeatSetPoint(msg:Inbound){

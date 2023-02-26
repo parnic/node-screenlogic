@@ -200,7 +200,7 @@ class EquipmentStateMessage {
         let loadSpeedCircuits = (speedDataArray, isPool) => {
             // let  loadSpeedCircuits(poolConfig,isPool) {
             // ArrayList<Pair<String, Integer>> result = new ArrayList<>();
-            let result = new Array();
+            let result = [];
             // Pair<Integer, Integer> minMax = getRange(poolConfig, isPool);
             let minMax = [0, 255];
             // int iMin = ((Integer) minMax.first).intValue();

@@ -1,6 +1,6 @@
-import { Outbound } from "./SLMessage";
-import { LightCommands, UnitConnection } from "../index";
-import { rawData } from "./config/EquipmentConfig";
+import { Outbound } from './SLMessage';
+import { LightCommands, UnitConnection } from '../index';
+import { rawData } from './config/EquipmentConfig';
 
 export class Commands extends Outbound {
   protected unit: UnitConnection;
@@ -66,7 +66,7 @@ export class ConnectionCommands extends Commands {
     this.unit.write(this.toBuffer());
     return this;
   }
-};
+}
 
 
 export class EquipmentCommands extends Commands {
@@ -360,10 +360,10 @@ export class PumpCommands extends Commands {
   public sendSetPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean) {
     this.action = 12586;
     if (typeof isRPMs === 'undefined') {
-      if (speed < 400) { isRPMs = false }
+      if (speed < 400) { isRPMs = false; }
       else isRPMs = true;
     }
-    let _isRPMs = isRPMs ? 1 : 0;
+    const _isRPMs = isRPMs ? 1 : 0;
     this.createBaseMessage();
     this.writeInt32LE(this.controllerId);
     this.writeInt32LE(pumpId - 1);
@@ -382,4 +382,4 @@ export class OutboundGateway extends Outbound {
     this.writeSLString(systemName);
     return this.toBuffer();
   }
-};
+}

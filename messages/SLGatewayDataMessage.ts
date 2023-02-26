@@ -17,12 +17,12 @@ export class SLReceiveGatewayDataMessage extends Inbound {
   decode() {
     super.decode();
 
-    let gatewayFound = this._smartBuffer.readUInt8() !== 0;
-    let licenseOK = this._smartBuffer.readUInt8() !== 0;
-    let ipAddr = this.readSLString();
-    let port = this._smartBuffer.readUInt16LE();
-    let portOpen = this._smartBuffer.readUInt8() !== 0;
-    let relayOn = this._smartBuffer.readUInt8() !== 0;
+    const gatewayFound = this._smartBuffer.readUInt8() !== 0;
+    const licenseOK = this._smartBuffer.readUInt8() !== 0;
+    const ipAddr = this.readSLString();
+    const port = this._smartBuffer.readUInt16LE();
+    const portOpen = this._smartBuffer.readUInt8() !== 0;
+    const relayOn = this._smartBuffer.readUInt8() !== 0;
     this.data = {
       gatewayFound,
       licenseOK,
@@ -30,13 +30,13 @@ export class SLReceiveGatewayDataMessage extends Inbound {
       port,
       portOpen,
       relayOn
-    }
+    };
 
   }
   get() {
     return this.data;
   }
-};
+}
 
 
 // export class SLSendGatewayDataMessage extends Outbound {

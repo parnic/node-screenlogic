@@ -1,5 +1,5 @@
-import { PumpTypes } from "../../index";
-import { Inbound } from "../SLMessage";
+import { PumpTypes } from '../../index';
+import { Inbound } from '../SLMessage';
 
 
 export class PumpMessage {
@@ -9,25 +9,25 @@ export class PumpMessage {
     // 2 = VS
     // 3 = VSF
     // The equipmentConfig message gives more specifics on the pump type
-    let _pumpType = msg.readUInt32LE();
-    let pumpType = _pumpType === 1 ? PumpTypes.PUMP_TYPE_INTELLIFLOVF : _pumpType === 2 ? PumpTypes.PUMP_TYPE_INTELLIFLOVS : _pumpType === 3 ? PumpTypes.PUMP_TYPE_INTELLIFLOVSF : _pumpType;
-    let isRunning = msg.readUInt32LE() !== 0; // 0, 1, or 4294967295 (FF FF FF FF)
-    let pumpWatts = msg.readUInt32LE();
-    let pumpRPMs = msg.readUInt32LE();
-    let pumpUnknown1 = msg.readUInt32LE(); // Always 0
-    let pumpGPMs = msg.readUInt32LE();
-    let pumpUnknown2 = msg.readUInt32LE(); // Always 255
+    const _pumpType = msg.readUInt32LE();
+    const pumpType = _pumpType === 1 ? PumpTypes.PUMP_TYPE_INTELLIFLOVF : _pumpType === 2 ? PumpTypes.PUMP_TYPE_INTELLIFLOVS : _pumpType === 3 ? PumpTypes.PUMP_TYPE_INTELLIFLOVSF : _pumpType;
+    const isRunning = msg.readUInt32LE() !== 0; // 0, 1, or 4294967295 (FF FF FF FF)
+    const pumpWatts = msg.readUInt32LE();
+    const pumpRPMs = msg.readUInt32LE();
+    const pumpUnknown1 = msg.readUInt32LE(); // Always 0
+    const pumpGPMs = msg.readUInt32LE();
+    const pumpUnknown2 = msg.readUInt32LE(); // Always 255
 
-    let pumpCircuits = [];
-    for (var i = 0; i < 8; i++) {
-      let _pumpCirc: SLPumpCircuitData = {
+    const pumpCircuits = [];
+    for (let i = 0; i < 8; i++) {
+      const _pumpCirc: SLPumpCircuitData = {
         circuitId: msg.readUInt32LE(),
         speed: msg.readUInt32LE(),
         isRPMs: msg.readUInt32LE() !== 0 // 1 for RPMs; 0 for GPMs
       };
       pumpCircuits.push(_pumpCirc);
     }
-    let data: SLPumpStatusData = {
+    const data: SLPumpStatusData = {
       pumpCircuits,
       pumpType,
       isRunning,
@@ -41,6 +41,7 @@ export class PumpMessage {
   }
   public static decodeSetPumpSpeed(msg:Inbound){
     // ack
+    msg;
     return true;
   }
 }
