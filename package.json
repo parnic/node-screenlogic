@@ -28,7 +28,7 @@
     },
     "scripts": {
         "test": "mocha test/*.spec.js",
-        "pretest": "eslint --ignore-path .gitignore .",
+        "pretest": "eslint . ",
         "test-slmessage": "mocha test/slmessage.spec.js",
         "test-passwordencoder": "mocha test/password.spec.js",
         "build": "tsc",

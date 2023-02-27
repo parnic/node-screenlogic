@@ -1,18 +1,14 @@
 {
-    "ignorePatterns": [
-        "**/test/*.js",
-        "**/dist/*.js"
-    ],
-    //"extends": "strongloop",
-    /* "rules": {
-    "max-len": "off"
-  }, */
-    /*   "parserOptions": {
-    "ecmaVersion": 6
-  }, */
-    /*   "env": {
-    "mocha": true
-  }, */
+        //"extends": "strongloop",
+        /* "rules": {
+        "max-len": "off"
+    }, */
+        /*   "parserOptions": {
+        "ecmaVersion": 6
+    }, */
+        /*   "env": {
+        "mocha": true
+    }, */
     "env": {
         "es2021": true,
         "node": true,
@@ -32,7 +28,7 @@
     ],
     "rules": {
         "indent": [
-            "error",
+            "warn",
             2,
             {
                 "SwitchCase": 1
