@@ -57,16 +57,4 @@ typings/
 # dotenv environment variables file
 .env
 
-
-
-messages/.DS_Store
-.vscode/launch.json
-
-
-output.json
-dist/example *.*
-example *.*
-output*.*
-clean.*
-example - find units.ts
-.vscode/launch.json
+.DS_Store
