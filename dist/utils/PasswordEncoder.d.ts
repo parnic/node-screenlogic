@@ -7,7 +7,7 @@ export declare class HLEncoder {
     private bKeyInit;
     private iROUNDS;
     createArray(length: any, max_length: any): any[];
-    getEncryptedPassword(cls: any): Buffer;
+    getEncryptedPassword(cls: string): Buffer;
     makeKey(sChallengeStr: any): void;
     makeBlock(str: any, byFill: any): any[];
     makeKeyFromBlock(block: any): void;

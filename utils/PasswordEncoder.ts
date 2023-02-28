@@ -53,7 +53,7 @@ export class HLEncoder {
 
     return arr;
   }
-  getEncryptedPassword(cls) {
+  getEncryptedPassword(cls: string): Buffer {
     if (cls) {
       const charCodes = new Array(cls.length);
       for (let i = 0; i < cls.length; i++) {

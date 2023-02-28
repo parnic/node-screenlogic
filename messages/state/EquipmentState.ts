@@ -1,6 +1,6 @@
 
 import { PumpTypes } from '../../index';
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 import { Delays, Misc, SLHistoryData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from '../config/EquipmentConfig';
 
 
@@ -62,6 +62,7 @@ export class EquipmentStateMessage {
     const alarms = msg.readInt32LE();
 
     const data: SLEquipmentStateData = {
+      senderId: msg.senderId,
       panelMode,
       freezeMode,
       remotes,
@@ -108,15 +109,21 @@ export class EquipmentStateMessage {
     };
     return data;
   }
-  public static decodeCancelDelay(msg: Inbound) {
+  public static decodeCancelDelay(msg: Inbound): SLSimpleBoolData {
     // ack
-    msg;
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeSetSystemTime(msg: Inbound) {
+  public static decodeSetSystemTime(msg: Inbound): SLSimpleBoolData {
     // ack
-    msg;
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
   public static decodeEquipmentConfiguration(msg: Inbound) {
     const getNumPumps = function () {
@@ -427,6 +434,7 @@ export class EquipmentStateMessage {
     const sunrise = msg.readInt32LE();
     const sunset = msg.readInt32LE();
     const data: SLWeatherForecastData = {
+      senderId: msg.senderId,
       version,
       zip,
       lastUpdate,
@@ -498,6 +506,7 @@ export class EquipmentStateMessage {
     const heaterRuns = readTimeTimePointsPairs();
     const lightRuns = readTimeTimePointsPairs();
     const data: SLHistoryData = {
+      senderId: msg.senderId,
       airTemps,
       poolTemps,
       poolSetPointTemps,
@@ -517,7 +526,7 @@ export class EquipmentStateMessage {
   }
 }
 
-export interface SLEquipmentStateData {
+export interface SLEquipmentStateData extends SLData {
   panelMode: number;
   freezeMode: number;
   remotes: number;

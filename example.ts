@@ -15,7 +15,7 @@ async function app() {
   finder.close();
 
   // use this if you want to use a direct connection to a known unit
-  // connect(new ScreenLogic.UnitConnection(`10.0.0.85', 80));
+  // connect(new ScreenLogic.UnitConnection('10.0.0.85', 80));
 
   // use this to remote connect to a system by name (going through the Pentair servers)
 
@@ -59,7 +59,7 @@ async function app() {
     client.on('loggedIn', function () {
       console.log(`logged in event`);
     }).on('version', function (version) {
-      console.log(` version (event)=' + version);
+      console.log(` version (event)=' + version.version);
     }).on('equipmentState', function (data) {
       delayCount = 0; // reset intellibrite delay
       console.log(`equipmentState (event) update!`)
@@ -95,7 +95,7 @@ async function app() {
     const equipmentState = await client.equipment.getEquipmentStateAsync();
     console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
     const result = await client.getVersionAsync();
-    console.log(`Pool Version: ${result}`);
+    console.log(`Pool Version: ${result.version}`);
     const customNames = await client.equipment.getCustomNamesAsync();
     console.log(`customNames: ${customNames}`);
     const controller = await client.equipment.getEquipmentConfigurationAsync();

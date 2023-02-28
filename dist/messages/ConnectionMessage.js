@@ -3,24 +3,40 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConnectionMessage = void 0;
 class ConnectionMessage {
     static decodeChallengeResponse(msg) {
-        let challengeString = msg.readSLString();
+        const challengeString = msg.readSLString();
         return challengeString;
     }
     static decodeVersionResponse(msg) {
-        let version = msg.readSLString();
-        return version;
+        const version = msg.readSLString();
+        const versionData = {
+            senderId: msg.senderId,
+            version
+        };
+        return versionData;
     }
     static decodeAddClient(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeRemoveClient(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodePingClient(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
 }
 exports.ConnectionMessage = ConnectionMessage;

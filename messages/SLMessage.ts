@@ -14,12 +14,26 @@ const DAY_VALUES = [
 ];
 
 
+export interface SLData {
+  senderId: number;
+}
+
+
+export interface SLSimpleBoolData extends SLData {
+  val: boolean
+}
+
+
+export interface SLSimpleNumberData extends SLData {
+  val: number
+}
+
 
 export class SLMessage {
   static MSG_ID: number;
-  constructor(controllerId: number, senderId: number) {
-    this.controllerId = controllerId;
-    this.senderId = senderId;
+  constructor(controllerId?: number, senderId?: number) {
+    this.controllerId = controllerId ?? 0;
+    this.senderId = senderId ?? 0;
   }
   protected _wroteSize: boolean;
   public action: number;
@@ -29,10 +43,10 @@ export class SLMessage {
   protected _smartBuffer: SmartBuffer;
   public get readOffset() { return this._smartBuffer.readOffset; }
   public get length() { return this._smartBuffer.length; }
-  static slackForAlignment(val) {
+  public static slackForAlignment(val: number) {
     return (4 - val % 4) % 4;
   }
-  public getDayValue(dayName) {
+  public getDayValue(dayName: string) {
     for (let i = 0; i < DAY_VALUES.length; i++) {
       if (DAY_VALUES[i][0] === dayName) {
         return DAY_VALUES[i][1] as number;
@@ -78,13 +92,12 @@ export class Inbound extends SLMessage {
     this._smartBuffer.readOffset = 0;
     this.senderId = this._smartBuffer.readUInt16LE();
     this.action = this._smartBuffer.readUInt16LE();
-    // this.messageId = this._smartBuffer.readInt16LE(2);
     this.dataLength = this._smartBuffer.readInt32LE();
   }
-  isBitSet(value, bit) {
+  isBitSet(value: number, bit: number): boolean {
     return ((value >> bit) & 0x1) === 1;
   }
-  decodeTime(rawTime) { // Takes 'rawTime' in mins past midnight and returns military time as a string
+  decodeTime(rawTime: number) { // Takes 'rawTime' in mins past midnight and returns military time as a string
     let retVal;
 
     retVal = Math.floor(rawTime / 60) * 100 + rawTime % 60;
@@ -145,19 +158,24 @@ export class Inbound extends SLMessage {
 
 
 export class Outbound extends SLMessage {
-  public createBaseMessage() {
-    this._smartBuffer = new SmartBuffer();
-    this.addHeader();
-  }
-  public addHeader() {
+  constructor(controllerId?: number, senderId?: number, messageId?: number) {
+    super(controllerId, senderId);
 
-    this._smartBuffer.writeUInt16LE(this.senderId);
+    this.action = messageId;
+  }
+  public createBaseMessage(senderId?: number) {
+    this._smartBuffer = new SmartBuffer();
+    this.addHeader(senderId);
+  }
+  public addHeader(senderId?: number) {
+
+    this._smartBuffer.writeUInt16LE(senderId ?? this.senderId);
     this._smartBuffer.writeUInt16LE(this.action);
 
     this._wroteSize = false;
   }
 
-  encodeDayMask(daysArray) {
+  encodeDayMask(daysArray: string[]) {
     let dayMask = 0;
 
     for (let i = 0; i < daysArray.length; i++) {
@@ -165,7 +183,7 @@ export class Outbound extends SLMessage {
     }
     return dayMask;
   }
-  writeSLDateTime(date) {
+  writeSLDateTime(date: Date) {
     this._smartBuffer.writeInt16LE(date.getFullYear());
     this._smartBuffer.writeInt16LE(date.getMonth() + 1);
     this._smartBuffer.writeInt16LE(date.getDay() + 1);
@@ -175,7 +193,7 @@ export class Outbound extends SLMessage {
     this._smartBuffer.writeInt16LE(date.getSeconds());
     this._smartBuffer.writeInt16LE(date.getMilliseconds());
   }
-  writeInt32LE(val) {
+  writeInt32LE(val: number) {
     this._smartBuffer.writeInt32LE(val);
   }
   encode() { null; } 
@@ -194,16 +212,16 @@ export class Outbound extends SLMessage {
 
     return this._smartBuffer.toBuffer();
   }
-  writeSLString(str) {
+  writeSLString(str: string) {
     this._smartBuffer.writeInt32LE(str.length);
     this._smartBuffer.writeString(str);
     this.skipWrite(SLMessage.slackForAlignment(str.length));
   }
-  writeSLBuffer(buf) {
+  writeSLBuffer(buf: Buffer) {
     this._smartBuffer.writeInt32LE(buf.length);
     this._smartBuffer.writeBuffer(buf);
   }
-  writeSLArray(arr) {
+  writeSLArray(arr: Buffer) {
     this._smartBuffer.writeInt32LE(arr.length);
 
     for (let i = 0; i < arr.length; i++) {
@@ -212,12 +230,12 @@ export class Outbound extends SLMessage {
 
     this.skipWrite(SLMessage.slackForAlignment(arr.length));
   }
-  skipWrite(num) {
+  skipWrite(num: number) {
     if (num > 0) {
       this._smartBuffer.writeBuffer(Buffer.alloc(num));
     }
   }
-  encodeTime(stringTime) { // Takes 'stringTime' as military time and returns mins past midnight
-    return Number(stringTime.substr(0, 2) * 60) + Number(stringTime.substr(2, 2));
+  encodeTime(stringTime: string) { // Takes 'stringTime' as military time and returns mins past midnight
+    return (Number(stringTime.substring(0, 2)) * 60) + Number(stringTime.substring(2, 4));
   }
 }

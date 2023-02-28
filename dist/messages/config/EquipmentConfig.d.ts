@@ -1,16 +1,17 @@
-import { Inbound } from "../SLMessage";
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 export declare class EquipmentConfigurationMessage {
     static decodeCircuitDefinitions(msg: Inbound): any[];
     static decodeNCircuitNames(msg: Inbound): number;
     static decodeCircuitNames(msg: Inbound): any[];
     static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
-    static isEasyTouch(controllerType: any): boolean;
-    static isIntelliTouch(controllerType: any): boolean;
-    static isEasyTouchLite(controllerType: any, hwType: any): boolean;
-    static isDualBody(controllerType: any): boolean;
-    static isChem2(controllerType: any, hwType: any): boolean;
-    static decodeSetEquipmentConfigurationAck(msg: Inbound): boolean;
+    static isEasyTouch(controllerType: number): boolean;
+    static isIntelliTouch(controllerType: number): boolean;
+    static isEasyTouchLite(controllerType: number, hwType: number): boolean;
+    static isDualBody(controllerType: number): boolean;
+    static isChem2(controllerType: number, hwType: number): boolean;
+    static decodeSetEquipmentConfigurationAck(msg: Inbound): SLSimpleBoolData;
     static decodeSetEquipmentConfiguration(msg: Inbound): {
+        senderId: number;
         pumps: any[];
         heaterConfig: HeaterConfig;
         valves: Valves[];
@@ -56,9 +57,9 @@ export declare class EquipmentConfigurationMessage {
     static decodeGetHistory(msg: Inbound): SLHistoryData;
     getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string;
     static decodeCustomNames(msg: Inbound): string[];
-    static decodeSetCustomNameAck(msg: Inbound): boolean;
+    static decodeSetCustomNameAck(msg: Inbound): SLSimpleBoolData;
 }
-export interface SLControllerConfigData {
+export interface SLControllerConfigData extends SLData {
     controllerId: number;
     minSetPoint: number[];
     maxSetPoint: number[];
@@ -108,7 +109,7 @@ export interface Circuit {
     eggTimer: number;
     deviceId: number;
 }
-export interface SLEquipmentConfigurationData {
+export interface SLEquipmentConfigurationData extends SLData {
     controllerType: number;
     hardwareType: number;
     expansionsCount: number;
@@ -174,7 +175,7 @@ export interface Valves {
     loadCenterName: string;
     deviceId: any;
 }
-export interface SLWeatherForecastData {
+export interface SLWeatherForecastData extends SLData {
     version: number;
     zip: string;
     lastUpdate: Date;
@@ -206,7 +207,7 @@ export interface TimeTempPointPairs {
     time: Date;
     temp: number;
 }
-export interface SLHistoryData {
+export interface SLHistoryData extends SLData {
     airTemps: TimeTempPointPairs[];
     poolTemps: TimeTempPointPairs[];
     poolSetPointTemps: TimeTempPointPairs[];

@@ -1,26 +1,46 @@
 
-import { Inbound } from './SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from './SLMessage';
 
 
 export class ConnectionMessage{
-  public static decodeChallengeResponse(msg: Inbound){
+  public static decodeChallengeResponse(msg: Inbound): string {
     const challengeString = msg.readSLString();
     return challengeString;
   }
-  public static decodeVersionResponse(msg: Inbound){
+  public static decodeVersionResponse(msg: Inbound): SLVersionData {
     const version = msg.readSLString();
-    return version;
+    const versionData: SLVersionData = {
+      senderId: msg.senderId,
+      version
+    };
+    return versionData;
   }
-  public static decodeAddClient(msg: Inbound){
+  public static decodeAddClient(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeRemoveClient(msg: Inbound){
+  public static decodeRemoveClient(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodePingClient(msg: Inbound){
+  public static decodePingClient(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
+}
+
+export interface SLVersionData extends SLData {
+  version: string
 }

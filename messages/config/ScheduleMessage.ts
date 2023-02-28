@@ -1,8 +1,8 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData, SLSimpleNumberData } from '../SLMessage';
 
 
 export class ScheduleMessage {
-  public static decodeGetScheduleMessage(msg: Inbound) {
+  public static decodeGetScheduleMessage(msg: Inbound): SLScheduleData[] {
     const eventCount = msg.readUInt32LE();
     const data: SLScheduleData[] = [];
     for (let i = 0; i < eventCount; i++) {
@@ -16,6 +16,7 @@ export class ScheduleMessage {
       const heatSetPoint = msg.readUInt32LE();
       const days = msg.decodeDayMask(dayMask);
       const event: SLScheduleData = {
+        senderId: msg.senderId,
         scheduleId,
         circuitId,
         startTime,
@@ -30,21 +31,33 @@ export class ScheduleMessage {
     }
     return data;
   }
-  public static decodeAddSchedule(msg: Inbound):number{
-    return msg.readUInt32LE() - 699;
+  public static decodeAddSchedule(msg: Inbound): SLSimpleNumberData {
+    const response: SLSimpleNumberData = {
+      senderId: msg.senderId,
+      val: msg.readUInt32LE() - 699
+    };
+    return response;
   }
-  public static decodeDeleteSchedule(msg: Inbound){
+  public static decodeDeleteSchedule(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeSetSchedule(msg: Inbound){
+  public static decodeSetSchedule(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 }
 
 
-export interface SLScheduleData {
+export interface SLScheduleData extends SLData {
   scheduleId: number;
   circuitId: number;
   startTime: number;

@@ -3,19 +3,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CircuitMessage = void 0;
 class CircuitMessage {
     static decodeSetCircuit(msg) {
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeSetCircuitState(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeSetLight(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeSetCircuitRunTime(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
 }
 exports.CircuitMessage = CircuitMessage;

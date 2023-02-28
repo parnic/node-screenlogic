@@ -7,7 +7,7 @@ import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
-import { ConnectionMessage } from './messages/ConnectionMessage';
+import { ConnectionMessage, SLVersionData } from './messages/ConnectionMessage';
 // import { Inbound } from './messages/SLMessage';
 import { EquipmentConfigurationMessage, rawData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
@@ -16,9 +16,9 @@ import { ScheduleMessage, SLScheduleData } from './messages/config/ScheduleMessa
 import { PumpMessage, SLPumpStatusData } from './messages/state/PumpMessage';
 import { CircuitMessage } from './messages/config/CircuitMessage';
 import { HeaterMessage } from './messages/config/HeaterMessage';
-import { Inbound } from './messages/SLMessage';
+import { Inbound, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { EquipmentStateMessage, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
-const Encoder = require('./utils/PasswordEncoder').HLEncoder;
+import { HLEncoder } from './utils/PasswordEncoder';
 const debugFind = require('debug')('sl:find');
 const debugRemote = require('debug')('sl:remote');
 const debugUnit = require('debug')('sl:unit');
@@ -220,6 +220,7 @@ export class UnitConnection extends EventEmitter {
   public static controllerType = 0; // for set equip message decode
   public static expansionsCount = 0; // for set equip message decode
   protected _isMock = false;
+  protected _hasAddedClient = false;
 
   private _buffer: Buffer;
   private _bufferIdx: number;
@@ -268,7 +269,7 @@ export class UnitConnection extends EventEmitter {
     this.serverPort = port;
     this.serverAddress = address;
     this.password = password;
-    this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
+    this.senderId = typeof senderId !== 'undefined' ? senderId : 0;
     this.clientId = Math.round(Math.random() * 100000);
     this._initCommands();
     this._isMock = false;
@@ -276,6 +277,9 @@ export class UnitConnection extends EventEmitter {
       this.keepAliveAsync();
     }, this._keepAliveDuration || 30000
     );
+  }
+  public initUnit(server: LocalUnit) {
+    this.init(server.gatewayName, server.address, server.port, '');
   }
   private _initCommands() {
     this.controller = {
@@ -401,7 +405,7 @@ export class UnitConnection extends EventEmitter {
           resolve(true);
         }
         else {
-          if (this.isConnected) {
+          if (this.isConnected && this._hasAddedClient) {
             const removeClient = this.removeClientAsync().catch(e => { throw e; });
             debugUnit(`Removed client: ${removeClient}`);
           }
@@ -506,7 +510,7 @@ export class UnitConnection extends EventEmitter {
     return Promise.resolve(p) as Promise<boolean>;
   }
 
-  async loginAsync(challengeString: string) {
+  async loginAsync(challengeString: string, senderId?: number) {
     const p = new Promise((resolve, reject) => {
       debugUnit('sending login message...');
       const _timeout = setTimeoutSync(() => {
@@ -524,8 +528,8 @@ export class UnitConnection extends EventEmitter {
         debugUnit('loginFailed');
         reject(new Error('Login Failed'));
       });
-      const password = new Encoder(this.password.toString()).getEncryptedPassword(challengeString);
-      const msg = screenlogic.controller.connection.sendLoginMessage(password);
+      const password = new HLEncoder(this.password.toString()).getEncryptedPassword(challengeString);
+      const msg = screenlogic.controller.connection.sendLoginMessage(password, senderId);
       this.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p);
@@ -554,7 +558,7 @@ export class UnitConnection extends EventEmitter {
       readyState: this.client.readyState,
     };
   }
-  async getVersionAsync(): Promise<string> {
+  async getVersionAsync(senderId?: number): Promise<SLVersionData> {
     const p = new Promise((resolve, reject) => {
 
       debugUnit('[%d] sending version query...', this.senderId);
@@ -566,14 +570,14 @@ export class UnitConnection extends EventEmitter {
         debugUnit('received version event');
         resolve(version);
       });
-      const msg = screenlogic.controller.connection.sendVersionMessage();
+      const msg = screenlogic.controller.connection.sendVersionMessage(senderId);
       this.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<string>;
+    return Promise.resolve(p) as Promise<SLVersionData>;
   }
 
-  async addClientAsync(clientId?: number): Promise<boolean> {
-    if (this._isMock) return Promise.resolve(true);
+  async addClientAsync(clientId?: number, senderId?: number): Promise<SLSimpleBoolData> {
+    if (this._isMock) return Promise.resolve({senderId: senderId ?? 0, val: true});
     if (clientId) this.clientId = clientId;
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending add client command, clientId %d...', this.senderId, this.clientId);
@@ -583,16 +587,17 @@ export class UnitConnection extends EventEmitter {
       this.once('addClient', (clientAck) => {
         clearTimeout(_timeout);
         debugUnit('received addClient event');
-        resolve(true);
+        this._hasAddedClient = true;
+        resolve(clientAck);
       });
-      const msg = this.controller.connection.sendAddClientMessage();
+      const msg = screenlogic.controller.connection.sendAddClientMessage(senderId);
       this.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
-  async removeClientAsync(): Promise<boolean> {
-    if (this._isMock) return Promise.resolve(true);
+  async removeClientAsync(senderId?: number): Promise<SLSimpleBoolData> {
+    if (this._isMock) return Promise.resolve({senderId: senderId ?? 0, val: true});
     const p = new Promise((resolve, reject) => {
       try {
         debugUnit(`[${this.senderId}] sending remove client command, clientId ${this.clientId}...`,);
@@ -602,19 +607,20 @@ export class UnitConnection extends EventEmitter {
         this.once('removeClient', (clientAck) => {
           clearTimeout(_timeout);
           debugUnit('received removeClient event');
-          resolve(true);
+          this._hasAddedClient = false;
+          resolve(clientAck);
         });
-        const msg = screenlogic.controller.connection.sendRemoveClientMessage();
+        const msg = screenlogic.controller.connection.sendRemoveClientMessage(senderId);
         this.toLogEmit(msg, 'out');
       } catch (error) {
         debugUnit(`caught remove client error ${error.message}, rethrowing...`);
         throw error;
       }
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
-  async pingServerAsync(): Promise<boolean> {
+  async pingServerAsync(senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] pinging server', this.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -623,12 +629,12 @@ export class UnitConnection extends EventEmitter {
       this.once('pong', (pong) => {
         clearTimeout(_timeout);
         debugUnit('received pong event');
-        resolve(true);
+        resolve(pong);
       });
-      const msg = screenlogic.controller.connection.sendPingMessage();
+      const msg = screenlogic.controller.connection.sendPingMessage(senderId);
       this.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
   onClientMessage(msg: Inbound) {
@@ -848,7 +854,7 @@ export class UnitConnection extends EventEmitter {
 }
 export const screenlogic = new UnitConnection();
 export class Equipment {
-  async setSystemTimeAsync(date: Date, shouldAdjustForDST: boolean): Promise<SLSystemTimeData> {
+  async setSystemTimeAsync(date: Date, shouldAdjustForDST: boolean, senderId?: number): Promise<SLSystemTimeData> {
     const p = new Promise((resolve, reject) => {
       if (!(date instanceof Date)) {
         debugUnit('setSystemTime() must receive valid Date object for the date argument');
@@ -872,12 +878,12 @@ export class Equipment {
         debugUnit('received setSystemTime event');
         resolve(data);
       });
-      const msg = screenlogic.controller.equipment.sendSetSystemTimeMessage(date, shouldAdjustForDST);
+      const msg = screenlogic.controller.equipment.sendSetSystemTimeMessage(date, shouldAdjustForDST, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLSystemTimeData>;
   }
-  async getWeatherForecastAsync(): Promise<SLWeatherForecastData> {
+  async getWeatherForecastAsync(senderId?: number): Promise<SLWeatherForecastData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] requesting weather forecast', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -888,13 +894,13 @@ export class Equipment {
         debugUnit('received weatherForecast event');
         resolve(equipment);
       });
-      const msg = screenlogic.controller.equipment.sendGetWeatherMessage();
+      const msg = screenlogic.controller.equipment.sendGetWeatherMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLWeatherForecastData>;
   }
 
-  async getHistoryDataAsync(fromTime?: Date, toTime?: Date): Promise<SLHistoryData> {
+  async getHistoryDataAsync(fromTime?: Date, toTime?: Date, senderId?: number): Promise<SLHistoryData> {
     const p = new Promise((resolve, reject) => {
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for get history response'));
@@ -908,17 +914,17 @@ export class Equipment {
       const yesterday: Date = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       debugUnit('[%d] requesting history data from `%s` to `%s`', screenlogic.senderId, fromTime || yesterday, toTime || now);
-      const msg = screenlogic.controller.equipment.sendGetHistoryMessage(fromTime || yesterday, toTime || now);
+      const msg = screenlogic.controller.equipment.sendGetHistoryMessage(fromTime || yesterday, toTime || now, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLHistoryData>;
   }
-  async getAllCircuitNamesAsync(): Promise<any> {
-    const size = await this.getNCircuitNamesAsync();
-    const circNames = await this.getCircuitNamesAsync(size);
+  async getAllCircuitNamesAsync(senderId?: number): Promise<any> {
+    const size = await this.getNCircuitNamesAsync(senderId);
+    const circNames = await this.getCircuitNamesAsync(size, senderId);
     return circNames;
   }
-  async getNCircuitNamesAsync(): Promise<any> {
+  async getNCircuitNamesAsync(senderId?: number): Promise<any> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get n circuit names query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -929,12 +935,12 @@ export class Equipment {
         debugUnit('received n circuit names event');
         resolve(data);
       });
-      const msg = screenlogic.controller.equipment.sendGetNumCircuitNamesMessage();
+      const msg = screenlogic.controller.equipment.sendGetNumCircuitNamesMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p);
   }
-  async getCircuitNamesAsync(size: number): Promise<any> {
+  async getCircuitNamesAsync(size: number, senderId?: number): Promise<any> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get circuit names query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -945,7 +951,7 @@ export class Equipment {
         debugUnit('received n circuit names event');
         resolve(data);
       });
-      const msg = screenlogic.controller.equipment.sendGetCircuitNamesMessage(0, 101);
+      const msg = screenlogic.controller.equipment.sendGetCircuitNamesMessage(0, 101, senderId);
       screenlogic.toLogEmit(msg, 'out');
 
       /* 
@@ -975,7 +981,7 @@ export class Equipment {
     });
     return Promise.resolve(p);
   }
-  async getCircuitDefinitionsAsync(): Promise<any> {
+  async getCircuitDefinitionsAsync(senderId?: number): Promise<any> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get circuit definitions query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -986,12 +992,12 @@ export class Equipment {
         debugUnit('received circuit definitions event');
         resolve(data);
       });
-      const msg = screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage();
+      const msg = screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p);
   }
-  async getEquipmentConfigurationAsync(): Promise<SLEquipmentConfigurationData> {
+  async getEquipmentConfigurationAsync(senderId?: number): Promise<SLEquipmentConfigurationData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending equipment configuration query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1002,13 +1008,13 @@ export class Equipment {
         debugUnit('received equipmentConfiguration event');
         resolve(data);
       });
-      const msg = screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage();
+      const msg = screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLEquipmentConfigurationData>;
   }
-  async setEquipmentConfigurationAsync(data: any): Promise<boolean> {
-    function updateBit(number, bitPosition, bitValue) {
+  async setEquipmentConfigurationAsync(data: any, senderId?: number): Promise<boolean> {
+    function updateBit(number: number, bitPosition: number, bitValue: number): number {
       const bitValueNormalized = bitValue ? 1 : 0;
       const clearMask = ~(1 << bitPosition);
       return (number & clearMask) | (bitValueNormalized << bitPosition);
@@ -1028,7 +1034,7 @@ export class Equipment {
       // we don't screw anything up.  We can do that by comparing the existing array to the
       // constructed array and look for differences that shouldn't be there.
       let equipConfig: SLEquipmentConfigurationData;
-      screenlogic.equipment.getEquipmentConfigurationAsync()
+      screenlogic.equipment.getEquipmentConfigurationAsync(senderId)
         .then(res => { equipConfig = res; })
         .catch(e => { throw e; });
 
@@ -1206,7 +1212,7 @@ export class Equipment {
         return (dec >>> 0).toString(2).padStart(8, '0');
       }
       if (ready) {
-        const msg = screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData);
+        const msg = screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData, senderId);
         screenlogic.toLogEmit(msg, 'out');
       }
       else {
@@ -1222,7 +1228,7 @@ export class Equipment {
     });
     return Promise.resolve(p) as Promise<boolean>;
   }
-  async cancelDelayAsync(): Promise<boolean> {
+  async cancelDelayAsync(senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending cancel delay command...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1231,14 +1237,14 @@ export class Equipment {
       screenlogic.once('cancelDelay', (delay) => {
         clearTimeout(_timeout);
         debugUnit('received cancelDelay event');
-        resolve(true);
+        resolve(delay);
       });
-      const msg = screenlogic.controller.equipment.sendCancelDelayMessage();
+      const msg = screenlogic.controller.equipment.sendCancelDelayMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async getSystemTimeAsync(): Promise<SLSystemTimeData> {
+  async getSystemTimeAsync(senderId?: number): Promise<SLSystemTimeData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get system time query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1249,12 +1255,12 @@ export class Equipment {
         debugUnit('received getSystemTime event');
         resolve(systemTime);
       });
-      const msg = screenlogic.controller.equipment.sendGetSystemTimeMessage();
+      const msg = screenlogic.controller.equipment.sendGetSystemTimeMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLSystemTimeData>;
   }
-  async getControllerConfigAsync(): Promise<SLControllerConfigData> {
+  async getControllerConfigAsync(senderId?: number): Promise<SLControllerConfigData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending controller config query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1265,12 +1271,12 @@ export class Equipment {
         debugUnit('received equipmentConfig event');
         resolve(controller);
       });
-      const msg = screenlogic.controller.equipment.sendGetControllerConfigMessage();
+      const msg = screenlogic.controller.equipment.sendGetControllerConfigMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLControllerConfigData>;
   }
-  async getEquipmentStateAsync(): Promise<SLEquipmentStateData> {
+  async getEquipmentStateAsync(senderId?: number): Promise<SLEquipmentStateData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending pool status query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1281,12 +1287,12 @@ export class Equipment {
         debugUnit('received equipmentState event');
         resolve(equipmentState);
       });
-      const msg = screenlogic.controller.equipment.sendGetEquipmentStateMessage();
+      const msg = screenlogic.controller.equipment.sendGetEquipmentStateMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLEquipmentStateData>;
   }
-  async getCustomNamesAsync(): Promise<string[]> {
+  async getCustomNamesAsync(senderId?: number): Promise<string[]> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get custom names: %d...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1297,12 +1303,12 @@ export class Equipment {
         debugUnit('received getCustomNames event');
         resolve(customNames);
       });
-      const msg = screenlogic.controller.equipment.sendGetCustomNamesMessage();
+      const msg = screenlogic.controller.equipment.sendGetCustomNamesMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<string[]>;
   }
-  async setCustomNameAsync(idx: number, name: string): Promise<string[]> {
+  async setCustomNameAsync(idx: number, name: string, senderId?: number): Promise<string[]> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set custom names: %d...', screenlogic.senderId);
       if (name.length > 11) reject(`Name (${name}) must be less than 12 characters`);
@@ -1314,7 +1320,7 @@ export class Equipment {
         debugUnit('received setCustomName event');
         resolve(customNames);
       });
-      const msg = screenlogic.controller.equipment.sendSetCustomNameMessage(idx, name);
+      const msg = screenlogic.controller.equipment.sendSetCustomNameMessage(idx, name, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<string[]>;
@@ -1322,7 +1328,7 @@ export class Equipment {
 }
 
 export class Circuit extends UnitConnection {
-  async sendLightCommandAsync(command: LightCommands): Promise<boolean> {
+  async sendLightCommandAsync(command: LightCommands, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending light command: controllerId: %d, command: %d...', screenlogic.senderId, this.controllerId, command);
       const _timeout = setTimeoutSync(() => {
@@ -1333,12 +1339,12 @@ export class Circuit extends UnitConnection {
         debugUnit('received sentLightCommand event');
         resolve(data);
       });
-      const msg = screenlogic.controller.circuits.sendIntellibriteMessage(command);
+      const msg = screenlogic.controller.circuits.sendIntellibriteMessage(command, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async setCircuitRuntimebyIdAsync(circuitId, runTime): Promise<boolean> {
+  async setCircuitRuntimebyIdAsync(circuitId: number, runTime?: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set circuit runtime command for circuitId: %d, runTime: %d...', screenlogic.senderId, circuitId, runTime);
       const _timeout = setTimeoutSync(() => {
@@ -1349,12 +1355,12 @@ export class Circuit extends UnitConnection {
         debugUnit('received setCircuitRuntimebyId event');
         resolve(data);
       });
-      const msg = screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime);
+      const msg = screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number): Promise<boolean> {
+  async setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit(`[${screenlogic.senderId}] sending set circuit command: controllerId: ${this.controllerId}, circuitId: ${circuitId}, nameIndex: ${nameIndex} circuitFunc: ${circuitFunction} circInterface: ${circuitInterface} freeze: ${freeze ? 'true' : 'false'} colorPos: ${colorPos}...`);
       const _timeout = setTimeoutSync(() => {
@@ -1365,12 +1371,12 @@ export class Circuit extends UnitConnection {
         debugUnit('received circuit event');
         resolve(data);
       });
-      const msg = screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos);
+      const msg = screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async setCircuitStateAsync(circuitId: number, circuitState: boolean): Promise<boolean> {
+  async setCircuitStateAsync(circuitId: number, circuitState: boolean, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', screenlogic.senderId, this.controllerId, circuitId, circuitState);
       const _timeout = setTimeoutSync(() => {
@@ -1381,14 +1387,14 @@ export class Circuit extends UnitConnection {
         debugUnit('received circuitStateChanged event');
         resolve(data);
       });
-      const msg = screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState);
+      const msg = screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 }
 export class Body extends UnitConnection {
-  async setSetPointAsync(bodyIndex: BodyIndex, temperature): Promise<boolean> {
+  async setSetPointAsync(bodyIndex: BodyIndex, temperature: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set setpoint command: controllerId: %d, bodyIndex: %d, temperature: %d...', screenlogic.senderId, this.controllerId, bodyIndex, temperature);
       const _timeout = setTimeoutSync(() => {
@@ -1399,12 +1405,12 @@ export class Body extends UnitConnection {
         debugUnit('received setPointChanged event');
         resolve(data);
       });
-      const msg = screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature);
+      const msg = screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async setCoolSetPointAsync(bodyIndex: BodyIndex, temperature): Promise<boolean> {
+  async setCoolSetPointAsync(bodyIndex: BodyIndex, temperature: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set cool setpoint command: controllerId: %d, bodyIndex: %d, temperature: %d...', screenlogic.senderId, this.controllerId, bodyIndex, temperature);
       const _timeout = setTimeoutSync(() => {
@@ -1415,13 +1421,13 @@ export class Body extends UnitConnection {
         debugUnit('received coolSetPointChanged event');
         resolve(data);
       });
-      const msg = screenlogic.controller.bodies.sendCoolSetPointMessage(bodyIndex, temperature);
+      const msg = screenlogic.controller.bodies.sendCoolSetPointMessage(bodyIndex, temperature, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
-  async setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes): Promise<boolean> {
+  async setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set heatmode command: controllerId: %d, bodyIndex: %d, heatMode: %d...', screenlogic.senderId, this.controllerId, bodyIndex, heatMode);
       const _timeout = setTimeoutSync(() => {
@@ -1432,14 +1438,14 @@ export class Body extends UnitConnection {
         debugUnit('received heatModeChanged event');
         resolve(data);
       });
-      const msg = screenlogic.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode);
+      const msg = screenlogic.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 }
 export class Pump extends UnitConnection {
-  async setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean): Promise<boolean> {
+  async setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${speed}, isRPMs: ${isRPMs}}`);
       const _timeout = setTimeoutSync(() => {
@@ -1451,12 +1457,12 @@ export class Pump extends UnitConnection {
         debugUnit('received setPumpSpeed event');
         resolve(data);
       });
-      const msg = screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
+      const msg = screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async getPumpStatusAsync(pumpId): Promise<SLPumpStatusData> {
+  async getPumpStatusAsync(pumpId: number, senderId?: number): Promise<SLPumpStatusData> {
     const p = new Promise((resolve, reject) => {
       try {
 
@@ -1470,7 +1476,7 @@ export class Pump extends UnitConnection {
           debugUnit('received getPumpStatus event');
           resolve(data);
         });
-        const msg = screenlogic.controller.pumps.sendGetPumpStatusMessage(pumpId);
+        const msg = screenlogic.controller.pumps.sendGetPumpStatusMessage(pumpId, senderId);
         screenlogic.toLogEmit(msg, 'out');
       }
       catch (err) {
@@ -1483,7 +1489,7 @@ export class Pump extends UnitConnection {
 }
 
 export class Schedule extends UnitConnection {
-  async setScheduleEventByIdAsync(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number): Promise<boolean> {
+  async setScheduleEventByIdAsync(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set schedule event command for scheduleId: %d, circuitId: %d, startTime: %d, stopTime: %d, dayMask: %d, flags: %d, heatCmd: %d, heatSetPoint: %d...', screenlogic.senderId, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
       const _timeout = setTimeoutSync(() => {
@@ -1494,12 +1500,12 @@ export class Schedule extends UnitConnection {
         debugUnit('received setScheduleEventById event');
         resolve(data);
       });
-      const msg = screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
+      const msg = screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async addNewScheduleEventAsync(scheduleType: SchedTypes): Promise<number> {
+  async addNewScheduleEventAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLSimpleNumberData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending add new schedule event command for scheduleType: %d...', screenlogic.senderId, scheduleType);
       const _timeout = setTimeoutSync(() => {
@@ -1510,13 +1516,13 @@ export class Schedule extends UnitConnection {
         debugUnit('received addNewScheduleEvent event');
         resolve(data);
       });
-      const msg = screenlogic.controller.schedules.sendAddScheduleEventMessage(scheduleType);
+      const msg = screenlogic.controller.schedules.sendAddScheduleEventMessage(scheduleType, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<number>;
+    return Promise.resolve(p) as Promise<SLSimpleNumberData>;
   }
 
-  async deleteScheduleEventByIdAsync(scheduleId: number): Promise<boolean> {
+  async deleteScheduleEventByIdAsync(scheduleId: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending delete schedule event command for scheduleId: %d...', screenlogic.senderId, scheduleId);
       const _timeout = setTimeoutSync(() => {
@@ -1527,13 +1533,13 @@ export class Schedule extends UnitConnection {
         debugUnit('received deleteScheduleEventById event');
         resolve(data);
       });
-      const msg = screenlogic.controller.schedules.sendDeleteScheduleEventMessage(scheduleId);
+      const msg = screenlogic.controller.schedules.sendDeleteScheduleEventMessage(scheduleId, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
-  async getScheduleDataAsync(scheduleType: SchedTypes): Promise<SLScheduleData[]> {
+  async getScheduleDataAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLScheduleData[]> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get schedule data query for scheduleType: %d...', screenlogic.senderId, scheduleType);
       const _timeout = setTimeoutSync(() => {
@@ -1544,7 +1550,7 @@ export class Schedule extends UnitConnection {
         debugUnit('received getScheduleData event');
         resolve(schedule);
       });
-      const msg = screenlogic.controller.schedules.sendGetSchedulesMessage(scheduleType);
+      const msg = screenlogic.controller.schedules.sendGetSchedulesMessage(scheduleType, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLScheduleData[]>;
@@ -1552,7 +1558,7 @@ export class Schedule extends UnitConnection {
 }
 
 export class Chem extends UnitConnection {
-  async getChemHistoryDataAsync(fromTime?: Date, toTime?: Date): Promise<SLChemHistory> {
+  async getChemHistoryDataAsync(fromTime?: Date, toTime?: Date, senderId?: number): Promise<SLChemHistory> {
     const p = new Promise((resolve, reject) => {
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for get chem history response'));
@@ -1566,12 +1572,12 @@ export class Chem extends UnitConnection {
       const yesterday: Date = new Date();
       debugUnit('[%d] requesting chem history data from `%s` to `%s`', screenlogic.senderId, fromTime || yesterday, toTime || now);
       yesterday.setHours(now.getHours() - 24);
-      const msg = screenlogic.controller.chem.sendGetChemHistoryMessage(fromTime || yesterday, toTime || now);
+      const msg = screenlogic.controller.chem.sendGetChemHistoryMessage(fromTime || yesterday, toTime || now, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLChemHistory>;
   }
-  async getChemicalDataAsync(): Promise<SLChemData> {
+  async getChemicalDataAsync(senderId?: number): Promise<SLChemData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending chemical data query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -1582,14 +1588,14 @@ export class Chem extends UnitConnection {
         debugUnit('received chemicalData event');
         resolve(chemical);
       });
-      const msg = screenlogic.controller.chem.sendGetChemStatusMessage();
+      const msg = screenlogic.controller.chem.sendGetChemStatusMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLChemData>;
   }
 }
 export class Chlor extends UnitConnection {
-  async setIntellichlorOutputAsync(poolOutput: number, spaOutput: number): Promise<boolean> {
+  async setIntellichlorOutputAsync(poolOutput: number, spaOutput: number, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set intellichlor output command: controllerId: %d, poolOutput: %d, spaOutput: %d...', screenlogic.senderId, this.controllerId, poolOutput, spaOutput);
       const _timeout = setTimeoutSync(() => {
@@ -1600,12 +1606,12 @@ export class Chlor extends UnitConnection {
         debugUnit('received setIntellichlorConfig event');
         resolve(equipment);
       });
-      const msg = screenlogic.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput);
+      const msg = screenlogic.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
-  async getIntellichlorConfigAsync(): Promise<SLIntellichlorData> {
+  async getIntellichlorConfigAsync(senderId?: number): Promise<SLIntellichlorData> {
     const p = new Promise((resolve, reject) => {
 
       debugUnit('[%d] sending salt cell config query...', screenlogic.senderId);
@@ -1617,12 +1623,12 @@ export class Chlor extends UnitConnection {
         debugUnit('received intellichlorConfig event');
         resolve(intellichlor);
       });
-      const msg = screenlogic.controller.chlor.sendGetSaltCellConfigMessage();
+      const msg = screenlogic.controller.chlor.sendGetSaltCellConfigMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
     return Promise.resolve(p) as Promise<SLIntellichlorData>;
   }
-  async setIntellichlorIsActiveAsync(isActive: boolean): Promise<boolean> {
+  async setIntellichlorIsActiveAsync(isActive: boolean, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
 
       debugUnit('[%d] sending salt cell enable query...', screenlogic.senderId);
@@ -1634,10 +1640,10 @@ export class Chlor extends UnitConnection {
         debugUnit('received intellichlorIsActive event');
         resolve(intellichlor);
       });
-      const msg = screenlogic.controller.chlor.sendSetSaltCellEnableMessage(isActive);
+      const msg = screenlogic.controller.chlor.sendSetSaltCellEnableMessage(isActive, senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 }
 /* debug print full buffer contents:

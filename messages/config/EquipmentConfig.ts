@@ -1,6 +1,6 @@
 
 import { PumpTypes, screenlogic, UnitConnection } from '../../index';
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 
 
 export class EquipmentConfigurationMessage {
@@ -28,7 +28,7 @@ export class EquipmentConfigurationMessage {
     return res;
   }
 
-  public static decodeControllerConfig(msg: Inbound) {
+  public static decodeControllerConfig(msg: Inbound): SLControllerConfigData {
     const controllerId = msg.readInt32LE() - 99;
 
     const minSetPoint = new Array(2);
@@ -111,6 +111,7 @@ export class EquipmentConfigurationMessage {
       POOL_ICHEMPRESENT: (equipFlags & 32768) === 32768
     };
     const data: SLControllerConfigData = {
+      senderId: msg.senderId,
       controllerId,
       minSetPoint,
       maxSetPoint,
@@ -132,28 +133,32 @@ export class EquipmentConfigurationMessage {
     return data;
   }
 
-  public static isEasyTouch(controllerType) {
+  public static isEasyTouch(controllerType: number): boolean {
     return controllerType === 14 || controllerType === 13;
   }
 
-  public static isIntelliTouch(controllerType) {
+  public static isIntelliTouch(controllerType: number): boolean {
     return controllerType !== 14 && controllerType !== 13 && controllerType !== 10;
   }
 
-  public static isEasyTouchLite(controllerType, hwType) {
+  public static isEasyTouchLite(controllerType: number, hwType: number): boolean {
     return controllerType === 13 && (hwType & 4) !== 0;
   }
 
-  public static isDualBody(controllerType) {
+  public static isDualBody(controllerType: number): boolean {
     return controllerType === 5;
   }
 
-  public static isChem2(controllerType, hwType) {
+  public static isChem2(controllerType: number, hwType: number): boolean {
     return controllerType === 252 && hwType === 2;
   }
-  public static decodeSetEquipmentConfigurationAck(msg: Inbound) {
+  public static decodeSetEquipmentConfigurationAck(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 
   public static decodeSetEquipmentConfiguration(msg: Inbound) {
@@ -200,6 +205,7 @@ export class EquipmentConfigurationMessage {
     const misc = this._loadMiscData(miscDataArray, msg);
     const remotes = this._loadRemoteData(remoteDataArray, UnitConnection.controllerType);
     const data = {
+      senderId: msg.senderId,
       pumps,
       heaterConfig,
       valves,
@@ -215,7 +221,7 @@ export class EquipmentConfigurationMessage {
 
   }
 
-  private static _getNumPumps(pumpDataArray: number[]) {
+  private static _getNumPumps(pumpDataArray: number[]): number {
     if (pumpDataArray === null) {
       return 0;
     }
@@ -339,7 +345,7 @@ export class EquipmentConfigurationMessage {
     return pump;
   }
 
-  private static _isValvePresent(valveIndex, loadCenterValveData, msg) {
+  private static _isValvePresent(valveIndex: number, loadCenterValveData: number, msg: Inbound): boolean {
     if (valveIndex < 2) {
       return true;
     } else {
@@ -347,7 +353,7 @@ export class EquipmentConfigurationMessage {
     }
   }
 
-  private static _loadHeaterData(heaterConfigDataArray: number[], msg) {
+  private static _loadHeaterData(heaterConfigDataArray: number[], msg: Inbound): HeaterConfig {
     ///// Heater config
     const heaterConfig: any = {
       body1SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 1), // bSolar1
@@ -358,18 +364,18 @@ export class EquipmentConfigurationMessage {
       // body2HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 5),  // bHPump2
       thermaFloCoolPresent: msg.isBitSet(heaterConfigDataArray[1], 1),  // ?? Source?
       units: msg.isBitSet(heaterConfigDataArray[2], 0) ? 1 : 0 // 1 == celsius, 0 = fahrenheit
-
     };
+
     return heaterConfig as HeaterConfig;
     ///// End heater config
   }
 
-  private static _loadValveData(valveDataArray, heaterConfig, controllerType, expansionsCount, msg) {
+  private static _loadValveData(valveDataArray, heaterConfig: HeaterConfig, controllerType: number, expansionsCount: number, msg: Inbound): Valves[] {
     let bEnable1 = true;
     let bEnable2 = true;
     // let isSolarValve0 = false;
     // let isSolarValve1 = false;
-    if (heaterConfig.body1SolarPresent && !heaterConfig.body1HeatPumpPresent) {
+    if (heaterConfig.body1SolarPresent && !heaterConfig.solarHeatPumpPresent) {
       bEnable1 = false;
     }
     if (heaterConfig.body2SolarPresent && !heaterConfig.thermaFloPresent && controllerType === 5) {
@@ -433,7 +439,7 @@ export class EquipmentConfigurationMessage {
     return valves as Valves[];
   }
 
-  private static _loadDelayData(delayDataArray, msg) {
+  private static _loadDelayData(delayDataArray, msg: Inbound): Delays {
     const delays = {
       poolPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 0),
       spaPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 1),
@@ -442,7 +448,7 @@ export class EquipmentConfigurationMessage {
     return delays;
   }
 
-  private static _loadMiscData(miscDataArray, msg) {
+  private static _loadMiscData(miscDataArray, msg: Inbound): Misc {
     const misc = {
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
       manualHeat: msg.isBitSet(miscDataArray[4], 0)
@@ -487,7 +493,7 @@ export class EquipmentConfigurationMessage {
       return result;
     } */
 
-  private static _loadSpeedData(speedDataArray, controllerType) {
+  private static _loadSpeedData(speedDataArray, controllerType: number): number[] {
 
     const getRange = function () {
       const ret = { min: 0, max: 0 };
@@ -523,7 +529,7 @@ export class EquipmentConfigurationMessage {
     return lights;
   }
 
-  private static _loadRemoteData(remoteDataArray, controllerType) {
+  private static _loadRemoteData(remoteDataArray, controllerType: number) {
     const data = {
       fourButton: [],
       tenButton: [[]],
@@ -580,7 +586,7 @@ export class EquipmentConfigurationMessage {
     return spaFlow;
   }
 
-  public static decodeGetEquipmentConfiguration(msg: Inbound) {
+  public static decodeGetEquipmentConfiguration(msg: Inbound): SLEquipmentConfigurationData {
 
 
     const deviceIDToString = (poolConfig) => {
@@ -701,6 +707,7 @@ export class EquipmentConfigurationMessage {
     const remotes = this._loadRemoteData(remoteDataArray, controllerType);
     const spaFlow = this._loadSpaFlowData(spaFlowDataArray);
     const data: SLEquipmentConfigurationData = {
+      senderId: msg.senderId,
       controllerType,
       hardwareType,
       expansionsCount,
@@ -721,7 +728,7 @@ export class EquipmentConfigurationMessage {
 
   }
 
-  public static decodeWeatherMessage(msg: Inbound) {
+  public static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData {
     const version = msg.readInt32LE();
     const zip = msg.readSLString();
     const lastUpdate = msg.readSLDateTime();
@@ -749,6 +756,7 @@ export class EquipmentConfigurationMessage {
     const sunrise = msg.readInt32LE();
     const sunset = msg.readInt32LE();
     const data: SLWeatherForecastData = {
+      senderId: msg.senderId,
       version,
       zip,
       lastUpdate,
@@ -768,8 +776,8 @@ export class EquipmentConfigurationMessage {
     };
     return data;
   }
-  public static decodeGetHistory(msg: Inbound) {
-    const readTimeTempPointsPairs = function () {
+  public static decodeGetHistory(msg: Inbound): SLHistoryData {
+    const readTimeTempPointsPairs = function (): TimeTempPointPairs[] {
       const retval: TimeTempPointPairs[] = [];
       // 4 bytes for the length
       if (msg.length >= msg.readOffset + 4) {
@@ -789,7 +797,7 @@ export class EquipmentConfigurationMessage {
 
       return retval;
     };
-    const readTimeTimePointsPairs = function () {
+    const readTimeTimePointsPairs = function (): TimeTimePointPairs[] {
       const retval: TimeTimePointPairs[] = [];
       // 4 bytes for the length
       if (msg.length >= msg.readOffset + 4) {
@@ -820,6 +828,7 @@ export class EquipmentConfigurationMessage {
     const heaterRuns = readTimeTimePointsPairs();
     const lightRuns = readTimeTimePointsPairs();
     const data: SLHistoryData = {
+      senderId: msg.senderId,
       airTemps,
       poolTemps,
       poolSetPointTemps,
@@ -834,7 +843,7 @@ export class EquipmentConfigurationMessage {
     return data;
 
   }
-  public getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number) {
+  public getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string {
     if (poolConfig.controllerType === 3 || poolConfig.controllerType === 4) {
       if (circuitIndex == 0) {
         return 'Hight';
@@ -849,9 +858,9 @@ export class EquipmentConfigurationMessage {
         return 'Pool';
       }
     }
-    return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? 'Aux Extra' : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
+    return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig.controllerType) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? 'Aux Extra' : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
   }
-  public static decodeCustomNames(msg: Inbound) {
+  public static decodeCustomNames(msg: Inbound): string[] {
     const nameCount = msg.readInt32LE();
     // msg.incrementReadOffset(0);
     const customNames: string[] = [];
@@ -863,9 +872,13 @@ export class EquipmentConfigurationMessage {
     return customNames;
 
   }
-  public static decodeSetCustomNameAck(msg: Inbound) {
+  public static decodeSetCustomNameAck(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
   /* public  getTypeList(poolConfig: SLEquipmentConfigurationData, circuit: number) {
     let resultList = [];
@@ -925,7 +938,7 @@ export class EquipmentConfigurationMessage {
 }
 
 
-export interface SLControllerConfigData {
+export interface SLControllerConfigData extends SLData {
   controllerId: number;
   minSetPoint: number[];
   maxSetPoint: number[];
@@ -977,7 +990,7 @@ export interface Circuit {
   deviceId: number
 }
 
-export interface SLEquipmentConfigurationData {
+export interface SLEquipmentConfigurationData extends SLData {
   controllerType: number;
   hardwareType: number;
   expansionsCount: number;
@@ -1044,7 +1057,7 @@ export interface Valves {
   deviceId: any
 }
 
-export interface SLWeatherForecastData {
+export interface SLWeatherForecastData extends SLData {
   version: number;
   zip: string;
   lastUpdate: Date;
@@ -1078,7 +1091,7 @@ export interface TimeTempPointPairs {
   temp: number;
 }
 
-export interface SLHistoryData {
+export interface SLHistoryData extends SLData {
   airTemps: TimeTempPointPairs[];
   poolTemps: TimeTempPointPairs[];
   poolSetPointTemps: TimeTempPointPairs[];

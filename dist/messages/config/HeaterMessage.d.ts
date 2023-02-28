@@ -1,6 +1,6 @@
-import { Inbound } from "../SLMessage";
+import { Inbound, SLSimpleBoolData } from '../SLMessage';
 export declare class HeaterMessage {
-    static decodeSetHeatSetPoint(msg: Inbound): boolean;
-    static decodeCoolSetHeatSetPoint(msg: Inbound): boolean;
-    static decodeSetHeatModePoint(msg: Inbound): boolean;
+    static decodeSetHeatSetPoint(msg: Inbound): SLSimpleBoolData;
+    static decodeCoolSetHeatSetPoint(msg: Inbound): SLSimpleBoolData;
+    static decodeSetHeatModePoint(msg: Inbound): SLSimpleBoolData;
 }

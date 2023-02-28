@@ -22,18 +22,20 @@ class HLEncoder {
         this.bKeyInit = false;
         this.iROUNDS = 0;
         if (password) {
-            var charCodes = new Array(password.length);
-            for (var i = 0; i < password.length; i++) {
+            const charCodes = new Array(password.length);
+            for (let i = 0; i < password.length; i++) {
                 charCodes[i] = password.charCodeAt(i);
             }
             this.makeKey(charCodes);
         }
     }
     createArray(length, max_length) {
-        var arr = new Array(length || 0);
-        var i = length;
+        max_length;
+        const arr = new Array(length || 0);
+        let i = length;
+        /* eslint prefer-rest-params: 0, prefer-spread: 0 */
         if (arguments.length > 1) {
-            var args = Array.prototype.slice.call(arguments, 1);
+            const args = Array.prototype.slice.call(arguments, 1);
             while (i--) {
                 arr[length - 1 - i] = this.createArray.apply(this, args);
             }
@@ -42,8 +44,8 @@ class HLEncoder {
     }
     getEncryptedPassword(cls) {
         if (cls) {
-            var charCodes = new Array(cls.length);
-            for (var i = 0; i < cls.length; i++) {
+            const charCodes = new Array(cls.length);
+            for (let i = 0; i < cls.length; i++) {
                 charCodes[i] = cls.charCodeAt(i);
             }
             return this.encrypt(charCodes);
@@ -54,12 +56,12 @@ class HLEncoder {
         this.makeKeyFromBlock(this.makeBlock(sChallengeStr, 0));
     }
     makeBlock(str, byFill) {
-        var iLen = BLOCK_SIZE;
+        let iLen = BLOCK_SIZE;
         if (str.length >= BLOCK_SIZE) {
             iLen = str.length;
         }
-        var block = new Array((Math.floor(iLen / BLOCK_SIZE) + (iLen % BLOCK_SIZE > 0 ? 1 : 0)) * BLOCK_SIZE);
-        for (var i = 0; i < block.length; i++) {
+        const block = new Array((Math.floor(iLen / BLOCK_SIZE) + (iLen % BLOCK_SIZE > 0 ? 1 : 0)) * BLOCK_SIZE);
+        for (let i = 0; i < block.length; i++) {
             if (i < str.length) {
                 block[i] = str[i];
             }
@@ -85,49 +87,49 @@ class HLEncoder {
                     this.iROUNDS = MAX_ROUNDS;
                     break;
             }
-            for (var round = 0; round <= this.iROUNDS; round++) {
-                for (var i = 0; i < 4; i++) {
+            for (let round = 0; round <= this.iROUNDS; round++) {
+                for (let i = 0; i < 4; i++) {
                     this.ke[round][i] = 0;
                     this.kd[round][i] = 0;
                 }
             }
-            var ROUND_KEY_COUNT = (this.iROUNDS + 1) * 4;
-            var numBlockChunks = Math.floor(block.length / 4);
-            for (var blockChunk = 0; blockChunk < numBlockChunks; blockChunk++) {
+            const ROUND_KEY_COUNT = (this.iROUNDS + 1) * 4;
+            const numBlockChunks = Math.floor(block.length / 4);
+            for (let blockChunk = 0; blockChunk < numBlockChunks; blockChunk++) {
                 this.tk[blockChunk] = ((block[(blockChunk * 4) + 0] << 24) | (block[(blockChunk * 4) + 1] << 16) | (block[(blockChunk * 4) + 2] << 8) | block[(blockChunk * 4) + 3]);
             }
-            var roundKey = 0;
-            for (i = 0; i < numBlockChunks && roundKey < ROUND_KEY_COUNT; i++, roundKey++) {
+            let roundKey = 0;
+            for (let i = 0; i < numBlockChunks && roundKey < ROUND_KEY_COUNT; i++, roundKey++) {
                 this.ke[Math.floor(roundKey / 4)][roundKey % 4] = this.tk[i];
                 this.kd[this.iROUNDS - Math.floor(roundKey / 4)][roundKey % 4] = this.tk[i];
             }
-            for (var rconPointer = 0; roundKey < ROUND_KEY_COUNT; rconPointer++) {
-                var tkVal = this.tk[numBlockChunks - 1];
+            for (let rconPointer = 0; roundKey < ROUND_KEY_COUNT; rconPointer++) {
+                let tkVal = this.tk[numBlockChunks - 1];
                 this.tk[0] ^= (((((sm_S[(tkVal >> 16) & 0xFF] << 24) ^ (sm_S[(tkVal >> 8) & 0xFF] << 16)) ^ (sm_S[tkVal & 0xFF] << 8)) ^ sm_S[(tkVal >> 24) & 0xFF]) ^ (sm_rcon[rconPointer] << 24));
                 if (numBlockChunks !== MAX_KC) {
-                    for (var prevIdx = 0, tkIdx = 1; tkIdx < numBlockChunks; prevIdx++, tkIdx++) {
+                    for (let prevIdx = 0, tkIdx = 1; tkIdx < numBlockChunks; prevIdx++, tkIdx++) {
                         this.tk[tkIdx] ^= this.tk[prevIdx];
                     }
                 }
                 else {
-                    var blockChunkMidpoint = Math.floor(numBlockChunks / 2);
-                    for (prevIdx = 0, tkIdx = 1; tkIdx < blockChunkMidpoint; prevIdx++, tkIdx++) {
+                    const blockChunkMidpoint = Math.floor(numBlockChunks / 2);
+                    for (let prevIdx = 0, tkIdx = 1; tkIdx < blockChunkMidpoint; prevIdx++, tkIdx++) {
                         this.tk[tkIdx] ^= this.tk[prevIdx];
                     }
                     tkVal = this.tk[blockChunkMidpoint - 1];
                     this.tk[blockChunkMidpoint] ^= (((sm_S[tkVal & 0xFF] ^ (sm_S[(tkVal >> 8) & 0xFF] << 8)) ^ (sm_S[(tkVal >> 16) & 0xFF] << 16)) ^ (sm_S[(tkVal >> 24) & 0xFF] << 24));
-                    for (prevIdx = blockChunkMidpoint, tkIdx = blockChunkMidpoint + 1; tkIdx < numBlockChunks; prevIdx++, tkIdx++) {
+                    for (let prevIdx = blockChunkMidpoint, tkIdx = blockChunkMidpoint + 1; tkIdx < numBlockChunks; prevIdx++, tkIdx++) {
                         this.tk[tkIdx] ^= this.tk[prevIdx];
                     }
                 }
-                for (tkIdx = 0; tkIdx < numBlockChunks && roundKey < ROUND_KEY_COUNT; tkIdx++, roundKey++) {
+                for (let tkIdx = 0; tkIdx < numBlockChunks && roundKey < ROUND_KEY_COUNT; tkIdx++, roundKey++) {
                     this.ke[Math.floor(roundKey / 4)][roundKey % 4] = this.tk[tkIdx];
                     this.kd[this.iROUNDS - Math.floor(roundKey / 4)][roundKey % 4] = this.tk[tkIdx];
                 }
             }
-            for (round = 1; round < this.iROUNDS; round++) {
-                for (i = 0; i < 4; i++) {
-                    var tt = this.kd[round][i];
+            for (let round = 1; round < this.iROUNDS; round++) {
+                for (let i = 0; i < 4; i++) {
+                    const tt = this.kd[round][i];
                     this.kd[round][i] = ((sm_U1[(tt >> 24) & 0xFF] ^ sm_U2[(tt >> 16) & 0xFF]) ^ sm_U3[(tt >> 8) & 0xFF]) ^ sm_U4[tt & 0xFF];
                 }
             }
@@ -138,15 +140,15 @@ class HLEncoder {
         if (!this.bKeyInit) {
             return null;
         }
-        var a = (block[0] << 24 | block[1] << 16 | block[2] << 8 | block[3]) ^ this.ke[0][0];
-        var b = (block[4] << 24 | block[5] << 16 | block[6] << 8 | block[7]) ^ this.ke[0][1];
-        var c = (block[8] << 24 | block[9] << 16 | block[10] << 8 | block[11]) ^ this.ke[0][2];
-        var d = (block[12] << 24 | block[13] << 16 | block[14] << 8 | block[15]) ^ this.ke[0][3];
-        for (var round = 1; round < this.iROUNDS; round++) {
-            var a1 = sm_T1[(a >> 24 & 0xFF)] ^ sm_T2[(b >> 16 & 0xFF)] ^ sm_T3[(c >> 8 & 0xFF)] ^ sm_T4[(d & 0xFF)] ^ this.ke[round][0];
-            var b1 = sm_T1[(b >> 24 & 0xFF)] ^ sm_T2[(c >> 16 & 0xFF)] ^ sm_T3[(d >> 8 & 0xFF)] ^ sm_T4[(a & 0xFF)] ^ this.ke[round][1];
-            var c1 = sm_T1[(c >> 24 & 0xFF)] ^ sm_T2[(d >> 16 & 0xFF)] ^ sm_T3[(a >> 8 & 0xFF)] ^ sm_T4[(b & 0xFF)] ^ this.ke[round][2];
-            var d1 = sm_T1[(d >> 24 & 0xFF)] ^ sm_T2[(a >> 16 & 0xFF)] ^ sm_T3[(b >> 8 & 0xFF)] ^ sm_T4[(c & 0xFF)] ^ this.ke[round][3];
+        let a = (block[0] << 24 | block[1] << 16 | block[2] << 8 | block[3]) ^ this.ke[0][0];
+        let b = (block[4] << 24 | block[5] << 16 | block[6] << 8 | block[7]) ^ this.ke[0][1];
+        let c = (block[8] << 24 | block[9] << 16 | block[10] << 8 | block[11]) ^ this.ke[0][2];
+        let d = (block[12] << 24 | block[13] << 16 | block[14] << 8 | block[15]) ^ this.ke[0][3];
+        for (let round = 1; round < this.iROUNDS; round++) {
+            const a1 = sm_T1[(a >> 24 & 0xFF)] ^ sm_T2[(b >> 16 & 0xFF)] ^ sm_T3[(c >> 8 & 0xFF)] ^ sm_T4[(d & 0xFF)] ^ this.ke[round][0];
+            const b1 = sm_T1[(b >> 24 & 0xFF)] ^ sm_T2[(c >> 16 & 0xFF)] ^ sm_T3[(d >> 8 & 0xFF)] ^ sm_T4[(a & 0xFF)] ^ this.ke[round][1];
+            const c1 = sm_T1[(c >> 24 & 0xFF)] ^ sm_T2[(d >> 16 & 0xFF)] ^ sm_T3[(a >> 8 & 0xFF)] ^ sm_T4[(b & 0xFF)] ^ this.ke[round][2];
+            const d1 = sm_T1[(d >> 24 & 0xFF)] ^ sm_T2[(a >> 16 & 0xFF)] ^ sm_T3[(b >> 8 & 0xFF)] ^ sm_T4[(c & 0xFF)] ^ this.ke[round][3];
             a = a1;
             b = b1;
             c = c1;
@@ -169,11 +171,11 @@ class HLEncoder {
         if (data == null || data.length < BLOCK_SIZE || data.length % BLOCK_SIZE !== 0) {
             return null;
         }
-        var byEncrypted = Buffer.alloc(data.length);
-        var iNBlocks = Math.floor(data.length / BLOCK_SIZE);
-        for (var iBlock = 0; iBlock < iNBlocks; iBlock++) {
-            var encryptedBlock = this.encryptBlock(data.slice(iBlock * BLOCK_SIZE, BLOCK_SIZE)) || [];
-            for (var i = 0; i < encryptedBlock.length; i++) {
+        const byEncrypted = Buffer.alloc(data.length);
+        const iNBlocks = Math.floor(data.length / BLOCK_SIZE);
+        for (let iBlock = 0; iBlock < iNBlocks; iBlock++) {
+            const encryptedBlock = this.encryptBlock(data.slice(iBlock * BLOCK_SIZE, BLOCK_SIZE)) || [];
+            for (let i = 0; i < encryptedBlock.length; i++) {
                 byEncrypted[(iBlock * BLOCK_SIZE) + i] = encryptedBlock[i];
             }
         }
@@ -181,5 +183,4 @@ class HLEncoder {
     }
 }
 exports.HLEncoder = HLEncoder;
-
 //# sourceMappingURL=PasswordEncoder.js.map

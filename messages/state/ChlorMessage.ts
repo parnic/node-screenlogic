@@ -1,9 +1,10 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 
 
 export class ChlorMessage {
   public static decodeIntellichlorConfig(msg: Inbound){
     const data: SLIntellichlorData = {
+      senderId: msg.senderId,
       installed: msg.readInt32LE() === 1,
       status: msg.readInt32LE(),
       poolSetPoint: msg.readInt32LE(),
@@ -14,16 +15,24 @@ export class ChlorMessage {
     };
     return data;
   }
-  public static decodeSetIntellichlorConfig(msg: Inbound){
+  public static decodeSetIntellichlorConfig(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeSetEnableIntellichlorConfig(msg: Inbound){
+  public static decodeSetEnableIntellichlorConfig(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 }
-export interface SLIntellichlorData {
+export interface SLIntellichlorData extends SLData {
   installed: boolean;
   status: number;
   poolSetPoint: number;

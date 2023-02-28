@@ -1,9 +1,9 @@
-import { Inbound } from "../SLMessage";
+import { Inbound, SLData } from '../SLMessage';
 export declare class ChemMessage {
     static decodeChemDataMessage(msg: Inbound): SLChemData;
     static decodecChemHistoryMessage(msg: Inbound): SLChemHistory;
 }
-export interface SLChemData {
+export interface SLChemData extends SLData {
     isValid: boolean;
     pH: number;
     orp: number;
