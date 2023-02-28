@@ -12,7 +12,7 @@ export class ConnectionMessage{
     const versionData: SLVersionData = {
       senderId: msg.senderId,
       version
-    }
+    };
     return versionData;
   }
   public static decodeAddClient(msg: Inbound): SLSimpleBoolData {
