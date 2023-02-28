@@ -60,6 +60,26 @@
                 "${workspaceFolder}/**/*.js",
                 "!**/node_modules/**"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Finder tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "test/find.spec.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
         }
     ]
 }
