@@ -15,7 +15,7 @@ async function app() {
   finder.close();
 
   // use this if you want to use a direct connection to a known unit
-  // connect(new ScreenLogic.UnitConnection(`10.0.0.85', 80));
+  // connect(new ScreenLogic.UnitConnection('10.0.0.85', 80));
 
   // use this to remote connect to a system by name (going through the Pentair servers)
 
