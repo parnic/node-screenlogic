@@ -1,5 +1,5 @@
 
-import { PumpTypes, screenlogic, UnitConnection } from '../../index';
+import { PumpTypes, UnitConnection } from '../../index';
 import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 
 
@@ -14,18 +14,26 @@ export class EquipmentConfigurationMessage {
     }
     return res;
   }
-  public static decodeNCircuitNames(msg: Inbound) {
+  public static decodeNCircuitNames(msg: Inbound): number {
     const cnt = msg.readUInt8();
     return cnt;
   }
-  public static decodeCircuitNames(msg: Inbound) {
+  public static decodeCircuitNames(msg: Inbound): SLCircuitNamesData {
     const size = msg.readUInt32LE();
-    const res = [];
+    const res: SLCircuitIdName[] = [];
     for (let id = 1; id <= size; id++) {
       const circuitName = msg.readSLString();
-      res.push({ id, circuitName });
+      const data: SLCircuitIdName = {
+        id,
+        circuitName
+      };
+      res.push(data);
     }
-    return res;
+    const data: SLCircuitNamesData = {
+      senderId: msg.senderId,
+      circuits: res
+    };
+    return data;
   }
 
   public static decodeControllerConfig(msg: Inbound): SLControllerConfigData {
@@ -392,14 +400,14 @@ export class EquipmentConfigurationMessage {
         let loadCenterName: string;
         let deviceId: number;
 
-        let bEnable = true;
+        // let bEnable = true;
         // let isSolarValve = true;
         if (loadCenterIndex === 0) {
           if (valveIndex === 0 && !bEnable1) {
-            bEnable = false;
+            // bEnable = false;
           }
           if (valveIndex === 1 && !bEnable2) {
-            bEnable = false;
+            // bEnable = false;
           }
         }
         let bPresent = false;
@@ -589,63 +597,63 @@ export class EquipmentConfigurationMessage {
   public static decodeGetEquipmentConfiguration(msg: Inbound): SLEquipmentConfigurationData {
 
 
-    const deviceIDToString = (poolConfig) => {
-      switch (poolConfig) {
-        case 128:
-          return 'Solar_Active';
-        case 129:
-          return 'Pool_or_Spa_Heater_Active';
-        case 130:
-          return 'Pool_Heater_Active';
-        case 131:
-          return 'Spa_Heater_Active';
-        case 132:
-          return 'Freeze_Mode_Active';
-        case 133:
-          return 'Heat_Boost';
-        case 134:
-          return 'Heat_Enable';
-        case 135:
-          return 'Increment_Pump_Speed';
-        case 136:
-          return 'Decrement_Pump_Speed';
-        case 137:
-        case 138:
-        case 139:
-        case 140:
-        case 141:
-        case 142:
-        case 143:
-        case 144:
-        case 145:
-        case 146:
-        case 147:
-        case 148:
-        case 149:
-        case 150:
-        case 151:
-        case 152:
-        case 153:
-        case 154:
-        default:
-          // PoolCircuit pC = poolConfig.getCircuitByDeviceID(byID);
-          // if (pC != null) {
-          //     return pC.getM_Name();
-          // }
-          // return 'None';
-          return `fix: poolConfig ${poolConfig}`;
-        case 155:
-          return 'Pool_Heater';
-        case 156:
-          return 'Spa_Heater';
-        case 157:
-          return 'Either_Heater';
-        case 158:
-          return 'Solar';
-        case 159:
-          return 'Freeze';
-      }
-    };
+    // const deviceIDToString = (poolConfig) => {
+    //   switch (poolConfig) {
+    //     case 128:
+    //       return 'Solar_Active';
+    //     case 129:
+    //       return 'Pool_or_Spa_Heater_Active';
+    //     case 130:
+    //       return 'Pool_Heater_Active';
+    //     case 131:
+    //       return 'Spa_Heater_Active';
+    //     case 132:
+    //       return 'Freeze_Mode_Active';
+    //     case 133:
+    //       return 'Heat_Boost';
+    //     case 134:
+    //       return 'Heat_Enable';
+    //     case 135:
+    //       return 'Increment_Pump_Speed';
+    //     case 136:
+    //       return 'Decrement_Pump_Speed';
+    //     case 137:
+    //     case 138:
+    //     case 139:
+    //     case 140:
+    //     case 141:
+    //     case 142:
+    //     case 143:
+    //     case 144:
+    //     case 145:
+    //     case 146:
+    //     case 147:
+    //     case 148:
+    //     case 149:
+    //     case 150:
+    //     case 151:
+    //     case 152:
+    //     case 153:
+    //     case 154:
+    //     default:
+    //       // PoolCircuit pC = poolConfig.getCircuitByDeviceID(byID);
+    //       // if (pC != null) {
+    //       //     return pC.getM_Name();
+    //       // }
+    //       // return 'None';
+    //       return `fix: poolConfig ${poolConfig}`;
+    //     case 155:
+    //       return 'Pool_Heater';
+    //     case 156:
+    //       return 'Spa_Heater';
+    //     case 157:
+    //       return 'Either_Heater';
+    //     case 158:
+    //       return 'Solar';
+    //     case 159:
+    //       return 'Freeze';
+    //   }
+    // };
 
 
 
@@ -864,7 +872,7 @@ export class EquipmentConfigurationMessage {
     const nameCount = msg.readInt32LE();
     // msg.incrementReadOffset(0);
     const customNames: string[] = [];
-    const ro = msg.readOffset;
+    // const ro = msg.readOffset;
     for (let i = 0; i < nameCount; i++) {
       const n = msg.readSLString();
       customNames.push(n);
@@ -1054,7 +1062,8 @@ export interface Valves {
   valveIndex: number,
   valveName: string,
   loadCenterName: string,
-  deviceId: any
+  deviceId: number,
+  sCircuit: string
 }
 
 export interface SLWeatherForecastData extends SLData {
@@ -1102,4 +1111,13 @@ export interface SLHistoryData extends SLData {
   solarRuns: TimeTimePointPairs[];
   heaterRuns: TimeTimePointPairs[];
   lightRuns: TimeTimePointPairs[];
+}
+
+export interface SLCircuitIdName {
+  id: number,
+  circuitName: string
+}
+
+export interface SLCircuitNamesData extends SLData {
+  circuits: SLCircuitIdName[]
 }

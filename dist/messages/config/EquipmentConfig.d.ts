@@ -2,7 +2,7 @@ import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 export declare class EquipmentConfigurationMessage {
     static decodeCircuitDefinitions(msg: Inbound): any[];
     static decodeNCircuitNames(msg: Inbound): number;
-    static decodeCircuitNames(msg: Inbound): any[];
+    static decodeCircuitNames(msg: Inbound): SLCircuitNamesData;
     static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
     static isEasyTouch(controllerType: number): boolean;
     static isIntelliTouch(controllerType: number): boolean;
@@ -173,7 +173,8 @@ export interface Valves {
     valveIndex: number;
     valveName: string;
     loadCenterName: string;
-    deviceId: any;
+    deviceId: number;
+    sCircuit: string;
 }
 export interface SLWeatherForecastData extends SLData {
     version: number;
@@ -218,4 +219,11 @@ export interface SLHistoryData extends SLData {
     solarRuns: TimeTimePointPairs[];
     heaterRuns: TimeTimePointPairs[];
     lightRuns: TimeTimePointPairs[];
+}
+export interface SLCircuitIdName {
+    id: number;
+    circuitName: string;
+}
+export interface SLCircuitNamesData extends SLData {
+    circuits: SLCircuitIdName[];
 }

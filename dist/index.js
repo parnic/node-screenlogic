@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchedTypes = exports.BodyIndex = exports.PumpTypes = exports.HeatModes = exports.LightCommands = exports.Chlor = exports.Chem = exports.Schedule = exports.Pump = exports.Body = exports.Circuit = exports.Equipment = exports.screenlogic = exports.UnitConnection = exports.RemoteLogin = exports.FindUnits = void 0;
 require("source-map-support/register");
-const dgram = require('dgram');
+const dgram = require("dgram");
 const net = require("net");
 const events_1 = require("events");
 const SLGateway = require("./messages/SLGatewayDataMessage");
@@ -19,10 +19,11 @@ const HeaterMessage_1 = require("./messages/config/HeaterMessage");
 const SLMessage_1 = require("./messages/SLMessage");
 const EquipmentState_1 = require("./messages/state/EquipmentState");
 const PasswordEncoder_1 = require("./utils/PasswordEncoder");
-const debugFind = require('debug')('sl:find');
-const debugRemote = require('debug')('sl:remote');
-const debugUnit = require('debug')('sl:unit');
+const debug_1 = require("debug");
 const timers_1 = require("timers");
+const debugFind = (0, debug_1.default)('sl:find');
+const debugRemote = (0, debug_1.default)('sl:remote');
+const debugUnit = (0, debug_1.default)('sl:unit');
 class FindUnits extends events_1.EventEmitter {
     constructor() {
         super();
@@ -55,7 +56,7 @@ class FindUnits extends events_1.EventEmitter {
         }
     }
     async searchAsync() {
-        const p = new Promise((resolve, reject) => {
+        const p = new Promise((resolve) => {
             try {
                 const units = [];
                 debugFind('Screenlogic finder searching for local units...');
@@ -169,7 +170,7 @@ class RemoteLogin extends events_1.EventEmitter {
         });
     }
     async closeAsync() {
-        const p = new Promise((resolve, reject) => {
+        const p = new Promise((resolve) => {
             debugRemote('Gateway request to close.');
             this._client.end(() => {
                 debugRemote('Gateway closed');
@@ -354,7 +355,7 @@ class UnitConnection extends events_1.EventEmitter {
         this.emit('slLogMessage', data);
     }
     async closeAsync() {
-        const p = new Promise((resolve, reject) => {
+        const p = new Promise((resolve) => {
             try {
                 if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer)
                     clearTimeout(this._keepAliveTimer);
@@ -433,7 +434,6 @@ class UnitConnection extends events_1.EventEmitter {
                     await this.reconnectAsync();
                 });
                 debugUnit('connecting...');
-                let connected = false;
                 this.client.once('ready', () => {
                     debugUnit('connected, sending init message...');
                     this.write('CONNECTSERVERHOST\r\n\r\n');
@@ -458,9 +458,7 @@ class UnitConnection extends events_1.EventEmitter {
                     const msg = exports.screenlogic.controller.connection.sendChallengeMessage();
                     this.toLogEmit(msg, 'out');
                 });
-                this.client.connect(this.serverPort, this.serverAddress, function () {
-                    connected = true;
-                });
+                this.client.connect(this.serverPort, this.serverAddress);
             }
             catch (error) {
                 debugUnit(`Caught connectAsync error ${error.message}; rethrowing...`);
@@ -982,7 +980,7 @@ class Equipment {
             exports.screenlogic.once('setEquipmentConfiguration', (data) => {
                 clearTimeout(_timeout);
                 debugUnit('received setEquipmentConfiguration event');
-                resolve(false);
+                resolve(data);
             });
             // theory here is that we may not know all of the exact bytes yet in the equipment config. 
             // Eventually we should be able to recreate it, but for now we should check to make sure
@@ -1173,7 +1171,7 @@ class Equipment {
                 exports.screenlogic.toLogEmit(msg, 'out');
             }
             else {
-                for (const [key, value] of Object.entries(resData)) {
+                for (const [key] of Object.entries(resData)) {
                     debugUnit(key);
                     for (let i = 0; i < resData[key].length; i++) {
                         if (resData[key][i] !== equipConfig.rawData[key][i]) {
