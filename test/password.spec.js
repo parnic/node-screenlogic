@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const HLEncoder = require('../PasswordEncoder').HLEncoder;
+const HLEncoder = require('../dist/utils/PasswordEncoder').HLEncoder;
 
 describe('Password encoder', function() {
   it('encodes correctly', function() {
