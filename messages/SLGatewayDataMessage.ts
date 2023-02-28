@@ -33,7 +33,7 @@ export class SLReceiveGatewayDataMessage extends Inbound {
     };
 
   }
-  get() {
+  get(): SLGateWayData {
     return this.data;
   }
 }

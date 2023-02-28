@@ -1,15 +1,15 @@
 import { Inbound } from '../SLMessage';
 
 export class HeaterMessage {
-  public static decodeSetHeatSetPoint(msg:Inbound){
+  public static decodeSetHeatSetPoint(msg: Inbound): boolean {
     // ack
     return true;
   }
-  public static decodeCoolSetHeatSetPoint(msg:Inbound){
+  public static decodeCoolSetHeatSetPoint(msg: Inbound): boolean {
     // ack
     return true;
   }
-  public static decodeSetHeatModePoint(msg:Inbound){
+  public static decodeSetHeatModePoint(msg: Inbound): boolean {
     // ack
     return true;
   }

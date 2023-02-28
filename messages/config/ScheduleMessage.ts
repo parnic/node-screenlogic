@@ -2,7 +2,7 @@ import { Inbound } from '../SLMessage';
 
 
 export class ScheduleMessage {
-  public static decodeGetScheduleMessage(msg: Inbound) {
+  public static decodeGetScheduleMessage(msg: Inbound): SLScheduleData[] {
     const eventCount = msg.readUInt32LE();
     const data: SLScheduleData[] = [];
     for (let i = 0; i < eventCount; i++) {
@@ -30,14 +30,14 @@ export class ScheduleMessage {
     }
     return data;
   }
-  public static decodeAddSchedule(msg: Inbound):number{
+  public static decodeAddSchedule(msg: Inbound): number{
     return msg.readUInt32LE() - 699;
   }
-  public static decodeDeleteSchedule(msg: Inbound){
+  public static decodeDeleteSchedule(msg: Inbound): boolean {
     // ack
     return true;
   }
-  public static decodeSetSchedule(msg: Inbound){
+  public static decodeSetSchedule(msg: Inbound): boolean {
     // ack
     return true;
   }

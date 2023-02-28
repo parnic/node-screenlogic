@@ -341,7 +341,7 @@ class EquipmentConfigurationMessage {
         let bEnable2 = true;
         // let isSolarValve0 = false;
         // let isSolarValve1 = false;
-        if (heaterConfig.body1SolarPresent && !heaterConfig.body1HeatPumpPresent) {
+        if (heaterConfig.body1SolarPresent && !heaterConfig.solarHeatPumpPresent) {
             bEnable1 = false;
         }
         if (heaterConfig.body2SolarPresent && !heaterConfig.thermaFloPresent && controllerType === 5) {
@@ -793,7 +793,7 @@ class EquipmentConfigurationMessage {
                 return 'Pool';
             }
         }
-        return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? 'Aux Extra' : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
+        return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig.controllerType) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? 'Aux Extra' : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
     }
     static decodeCustomNames(msg) {
         const nameCount = msg.readInt32LE();

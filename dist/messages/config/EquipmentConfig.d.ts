@@ -4,11 +4,11 @@ export declare class EquipmentConfigurationMessage {
     static decodeNCircuitNames(msg: Inbound): number;
     static decodeCircuitNames(msg: Inbound): any[];
     static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
-    static isEasyTouch(controllerType: any): boolean;
-    static isIntelliTouch(controllerType: any): boolean;
-    static isEasyTouchLite(controllerType: any, hwType: any): boolean;
-    static isDualBody(controllerType: any): boolean;
-    static isChem2(controllerType: any, hwType: any): boolean;
+    static isEasyTouch(controllerType: number): boolean;
+    static isIntelliTouch(controllerType: number): boolean;
+    static isEasyTouchLite(controllerType: number, hwType: number): boolean;
+    static isDualBody(controllerType: number): boolean;
+    static isChem2(controllerType: number, hwType: number): boolean;
     static decodeSetEquipmentConfigurationAck(msg: Inbound): boolean;
     static decodeSetEquipmentConfiguration(msg: Inbound): {
         pumps: any[];

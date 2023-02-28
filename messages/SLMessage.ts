@@ -80,7 +80,7 @@ export class Inbound extends SLMessage {
     this.action = this._smartBuffer.readUInt16LE();
     this.dataLength = this._smartBuffer.readInt32LE();
   }
-  isBitSet(value: number, bit: number) {
+  isBitSet(value: number, bit: number): boolean {
     return ((value >> bit) & 0x1) === 1;
   }
   decodeTime(rawTime: number) { // Takes 'rawTime' in mins past midnight and returns military time as a string
