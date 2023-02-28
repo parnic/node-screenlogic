@@ -1,25 +1,24 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-//const ScreenLogic = require('./index');
 const index_1 = require("./index");
+const finder = new index_1.FindUnits();
+// use this to find and connect to units local to the network this is running on
+// finder.on('serverFound', function(server) {
+//  connect(new ScreenLogic.UnitConnection(server));
+// });
+//
+// finder.search();
 async function app() {
-    // use this to find and connect to units local to the network this is running on
-    // var finder = new ScreenLogic.FindUnits();
-    // finder.on('serverFound', function(server) {
-    //  finder.close();
-    //  connect(new ScreenLogic.UnitConnection(server));
-    // });
-    //
-    // finder.search();
+    finder.close();
     // use this if you want to use a direct connection to a known unit
-    // connect(new ScreenLogic.UnitConnection('10.0.0.85', 80));
+    // connect(new ScreenLogic.UnitConnection(`10.0.0.85', 80));
     // use this to remote connect to a system by name (going through the Pentair servers)
     let gatewayName = 'Pentair: XX-XX-XX';
     const password = '1111';
     let unit;
     try {
-        let finder = new index_1.FindUnits();
-        let localUnits = await finder.searchAsync();
+        const finder = new index_1.FindUnits();
+        const localUnits = await finder.searchAsync();
         finder.close();
         if (localUnits.length) {
             console.log(`Found units: ${JSON.stringify(localUnits)}`);
@@ -30,13 +29,13 @@ async function app() {
             }
         }
         else
-            console.log(`No local units found`);
+            console.log('No local units found');
     }
     catch (err) {
         console.error(`Error looking for local units: ${err.message}`);
     }
     if (!gatewayName.includes('XX-XX-XX')) {
-        let gateway = new index_1.RemoteLogin(gatewayName);
+        const gateway = new index_1.RemoteLogin(gatewayName);
         unit = await gateway.connectAsync();
         if (!unit || !unit.gatewayFound || unit.ipAddr === '') {
             console.log('no unit found by that name');
@@ -44,7 +43,7 @@ async function app() {
         }
         console.log('unit ' + gateway.systemName + ' found at ' + unit.ipAddr + ':' + unit.port);
     }
-    let client = index_1.screenlogic;
+    const client = index_1.screenlogic;
     let delayCount = 0;
     // events still work, too!
     // Uncomment to log to the console.
@@ -52,11 +51,11 @@ async function app() {
       client.on('loggedIn', function () {
         console.log(`logged in event`);
       }).on('version', function (version) {
-        console.log(' version (event)=' + version);
+        console.log(` version (event)=' + version);
       }).on('equipmentState', function (data) {
         delayCount = 0; // reset intellibrite delay
         console.log(`equipmentState (event) update!`)
-        console.log('Equipment State:');
+        console.log(`Equipment State:`);
         console.log(JSON.stringify(data));
       }).on('chemicalData', function (data) {
         console.log(`chemical data (event):`)
@@ -80,45 +79,45 @@ async function app() {
     try {
         client.init(gatewayName, unit.ipAddr, unit.port, password);
         await client.connectAsync();
-        let addClient = await client.addClientAsync();
+        const addClient = await client.addClientAsync();
         console.log(`Add client result: ${addClient}`);
         // EQUIPMENT
-        let equipmentState = await client.equipment.getEquipmentStateAsync();
+        const equipmentState = await client.equipment.getEquipmentStateAsync();
         console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
-        let result = await client.getVersionAsync();
+        const result = await client.getVersionAsync();
         console.log(`Pool Version: ${result}`);
-        let customNames = await client.equipment.getCustomNamesAsync();
+        const customNames = await client.equipment.getCustomNamesAsync();
         console.log(`customNames: ${customNames}`);
-        let controller = await client.equipment.getEquipmentConfigurationAsync();
+        const controller = await client.equipment.getEquipmentConfigurationAsync();
         console.log(`Controller: ${JSON.stringify(controller)}`);
-        let equipConfig = await client.equipment.getEquipmentConfigurationAsync();
+        const equipConfig = await client.equipment.getEquipmentConfigurationAsync();
         console.log(`Equipment config: ${JSON.stringify(equipConfig)}`);
-        let cancelDelay = await client.equipment.cancelDelayAsync();
+        const cancelDelay = await client.equipment.cancelDelayAsync();
         console.log(`Cancel delay: ${cancelDelay}`);
-        let weatherForecast = await client.equipment.getWeatherForecastAsync();
+        const weatherForecast = await client.equipment.getWeatherForecastAsync();
         console.log(`Weather: ${JSON.stringify(weatherForecast)}`);
-        let systemTime = await client.equipment.getSystemTimeAsync();
+        const systemTime = await client.equipment.getSystemTimeAsync();
         console.log(`System Time: ${JSON.stringify(systemTime)}`);
-        let dt = systemTime.date;
+        const dt = systemTime.date;
         dt.setHours(12);
-        let sysTime = await index_1.screenlogic.equipment.setSystemTimeAsync(dt, true);
+        const sysTime = await index_1.screenlogic.equipment.setSystemTimeAsync(dt, true);
         console.log(`set time result: ${sysTime}`);
-        let hist = await index_1.screenlogic.equipment.getHistoryDataAsync();
+        const hist = await index_1.screenlogic.equipment.getHistoryDataAsync();
         console.log(`history data: ${JSON.stringify(hist)}`);
         // CHLOR
-        let intellichlor = await client.chlor.getIntellichlorConfigAsync();
+        const intellichlor = await client.chlor.getIntellichlorConfigAsync();
         console.log(`Intellichlor: ${JSON.stringify(intellichlor)}`);
-        let chlorOutput = await client.chlor.setIntellichlorOutputAsync(12, 0);
+        const chlorOutput = await client.chlor.setIntellichlorOutputAsync(12, 0);
         console.log(`Chlor output: ${JSON.stringify(chlorOutput)}`);
         // CHEM
-        let chem = await client.chem.getChemicalDataAsync();
+        const chem = await client.chem.getChemicalDataAsync();
         console.log(`Chem data: ${JSON.stringify(chem)}`);
-        let chemHist = await index_1.screenlogic.chem.getChemHistoryDataAsync();
+        const chemHist = await index_1.screenlogic.chem.getChemHistoryDataAsync();
         console.log(`history data: ${JSON.stringify(chemHist)}`);
         // SCHEDULES
-        let recurringSched = await client.schedule.getScheduleDataAsync(0);
+        const recurringSched = await client.schedule.getScheduleDataAsync(0);
         console.log(`reccuring schedules: ${JSON.stringify(recurringSched)}`);
-        let runOnceSched = await client.schedule.getScheduleDataAsync(1);
+        const runOnceSched = await client.schedule.getScheduleDataAsync(1);
         console.log(`Run once schedules: ${JSON.stringify(runOnceSched)}`);
         // The following will change your settings.  Proceed with Caution
         /*
@@ -130,10 +129,10 @@ async function app() {
         console.log(`Deleted sched result: ${delSched}`);
         */
         // PUMPS
-        let pumpStatus = await client.pump.getPumpStatusAsync(1);
+        const pumpStatus = await client.pump.getPumpStatusAsync(1);
         console.log(`Pump 1: ${JSON.stringify(pumpStatus)}`);
         // The following will change your settings.  Proceed with Caution
-        let pumpRes = await client.pump.setPumpSpeedAsync(1, 6, 2000, true);
+        const pumpRes = await client.pump.setPumpSpeedAsync(1, 6, 2000, true);
         console.log(`Pump speed response: ${pumpRes}`);
         // BODIES
         // The following will change your settings.  Proceed with Caution
@@ -154,10 +153,10 @@ async function app() {
         console.log(`circ run res: ${circRun}`);
     */
         setTimeout(async () => {
-            console.log(`closing connection after 60s`);
+            console.log('closing connection after 60s');
             await client.closeAsync();
         }, 60 * 1000);
-        console.log(`Waiting 60s.`);
+        console.log('Waiting 60s.');
     }
     catch (error) {
         console.log(`Error: ${error.message}`);
@@ -165,7 +164,7 @@ async function app() {
     }
 }
 app()
-    .then(() => { })
+    .then(() => { null; })
     .catch(err => {
     console.log(`App error: ${err.message}`);
 });

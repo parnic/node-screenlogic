@@ -4,14 +4,14 @@ import { rawData } from './config/EquipmentConfig';
 
 export class Commands extends Outbound {
   protected unit: UnitConnection;
-  constructor(unit: UnitConnection) {
-    super(unit.controllerId, unit.senderId);
+  constructor(unit: UnitConnection, senderId?: number) {
+    super(unit.controllerId, senderId ?? unit.senderId);
     this.unit = unit;
   }
 }
 
 export class ConnectionCommands extends Commands {
-  public sendLoginMessage(password?: string[]) {
+  public sendLoginMessage(password?: Buffer) {
     this.action = 27;
     this.createBaseMessage();
     // this.addHeader(this.senderId, this.messageId)
@@ -20,7 +20,7 @@ export class ConnectionCommands extends Commands {
     this.writeSLString('node-screenlogic'); // version
 
     if (!password) {
-      password = new Array(16);
+      password = Buffer.alloc(16);
     }
     if (password.length > 16) {
       password = password.slice(0, 16);

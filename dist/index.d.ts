@@ -97,7 +97,7 @@ export declare class UnitConnection extends EventEmitter {
     pingServerAsync(): Promise<boolean>;
     onClientMessage(msg: Inbound): void;
 }
-export declare let screenlogic: UnitConnection;
+export declare const screenlogic: UnitConnection;
 export declare class Equipment {
     setSystemTimeAsync(date: Date, shouldAdjustForDST: boolean): Promise<SLSystemTimeData>;
     getWeatherForecastAsync(): Promise<SLWeatherForecastData>;

@@ -1,5 +1,5 @@
-import { Inbound } from "../SLMessage";
-import { SLHistoryData, SLWeatherForecastData } from "../config/EquipmentConfig";
+import { Inbound } from '../SLMessage';
+import { SLHistoryData, SLWeatherForecastData } from '../config/EquipmentConfig';
 export declare class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg: Inbound): SLEquipmentStateData;
     static decodeSystemTime(msg: Inbound): SLSystemTimeData;
@@ -30,6 +30,7 @@ export interface SLEquipmentStateData {
     alarms: number;
 }
 export interface SLEquipmentBodyState {
+    id: number;
     currentTemp: number;
     heatStatus: number;
     setPoint: number;

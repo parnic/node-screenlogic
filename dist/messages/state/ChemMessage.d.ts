@@ -1,4 +1,4 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from '../SLMessage';
 export declare class ChemMessage {
     static decodeChemDataMessage(msg: Inbound): SLChemData;
     static decodecChemHistoryMessage(msg: Inbound): SLChemHistory;

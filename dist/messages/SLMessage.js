@@ -16,8 +16,8 @@ class SLMessage {
     constructor(controllerId, senderId) {
         this.senderId = 0;
         this.controllerId = 0;
-        this.controllerId = controllerId;
-        this.senderId = senderId;
+        this.controllerId = controllerId !== null && controllerId !== void 0 ? controllerId : 0;
+        this.senderId = senderId !== null && senderId !== void 0 ? senderId : 0;
     }
     get readOffset() { return this._smartBuffer.readOffset; }
     get length() { return this._smartBuffer.length; }
@@ -25,7 +25,7 @@ class SLMessage {
         return (4 - val % 4) % 4;
     }
     getDayValue(dayName) {
-        for (var i = 0; i < DAY_VALUES.length; i++) {
+        for (let i = 0; i < DAY_VALUES.length; i++) {
             if (DAY_VALUES[i][0] === dayName) {
                 return DAY_VALUES[i][1];
             }
@@ -37,7 +37,6 @@ class SLMessage {
     }
 }
 exports.SLMessage = SLMessage;
-
 class Inbound extends SLMessage {
     readFromBuffer(buf) {
         this._smartBuffer = smart_buffer_1.SmartBuffer.fromBuffer(buf);
@@ -49,15 +48,15 @@ class Inbound extends SLMessage {
         this.decode();
     }
     readSLString() {
-        var len = this._smartBuffer.readInt32LE();
-        var str = this._smartBuffer.readString(len);
+        const len = this._smartBuffer.readInt32LE();
+        const str = this._smartBuffer.readString(len);
         this._smartBuffer.readOffset += SLMessage.slackForAlignment(len);
         return str;
     }
     readSLArray() {
-        var len = this._smartBuffer.readInt32LE();
-        var retval = new Array(len);
-        for (var i = 0; i < len; i++) {
+        const len = this._smartBuffer.readInt32LE();
+        const retval = new Array(len);
+        for (let i = 0; i < len; i++) {
             retval[i] = this._smartBuffer.readUInt8();
         }
         this._smartBuffer.readOffset += SLMessage.slackForAlignment(len);
@@ -67,21 +66,20 @@ class Inbound extends SLMessage {
         this._smartBuffer.readOffset = 0;
         this.senderId = this._smartBuffer.readUInt16LE();
         this.action = this._smartBuffer.readUInt16LE();
-        // this.messageId = this._smartBuffer.readInt16LE(2);
         this.dataLength = this._smartBuffer.readInt32LE();
     }
     isBitSet(value, bit) {
         return ((value >> bit) & 0x1) === 1;
     }
     decodeTime(rawTime) {
-        var retVal;
+        let retVal;
         retVal = Math.floor(rawTime / 60) * 100 + rawTime % 60;
         retVal = String(retVal).padStart(4, '0');
         return retVal;
     }
     decodeDayMask(dayMask) {
-        var days = [];
-        for (var i = 0; i < 7; i++) {
+        const days = [];
+        for (let i = 0; i < 7; i++) {
             if (this.isBitSet(dayMask, i)) {
                 days.push(DAY_VALUES[i][0]);
             }
@@ -89,15 +87,15 @@ class Inbound extends SLMessage {
         return days;
     }
     readSLDateTime() {
-        let year = this._smartBuffer.readInt16LE();
-        let month = this._smartBuffer.readInt16LE() - 1;
+        const year = this._smartBuffer.readInt16LE();
+        const month = this._smartBuffer.readInt16LE() - 1;
         this._smartBuffer.readInt16LE(); // day of week
-        let day = this._smartBuffer.readInt16LE();
-        let hour = this._smartBuffer.readInt16LE();
-        let minute = this._smartBuffer.readInt16LE();
-        let second = this._smartBuffer.readInt16LE();
-        let millisecond = this._smartBuffer.readInt16LE();
-        let date = new Date(year, month, day, hour, minute, second, millisecond);
+        const day = this._smartBuffer.readInt16LE();
+        const hour = this._smartBuffer.readInt16LE();
+        const minute = this._smartBuffer.readInt16LE();
+        const second = this._smartBuffer.readInt16LE();
+        const millisecond = this._smartBuffer.readInt16LE();
+        const date = new Date(year, month, day, hour, minute, second, millisecond);
         return date;
     }
     readUInt8() {
@@ -122,11 +120,15 @@ class Inbound extends SLMessage {
         return this._smartBuffer.toString();
     }
     toHexStream() {
-        return this._smartBuffer.toString("hex");
+        return this._smartBuffer.toString('hex');
     }
 }
 exports.Inbound = Inbound;
 class Outbound extends SLMessage {
+    constructor(controllerId, senderId, messageId) {
+        super(controllerId, senderId);
+        this.action = messageId;
+    }
     createBaseMessage() {
         this._smartBuffer = new smart_buffer_1.SmartBuffer();
         this.addHeader();
@@ -137,8 +139,8 @@ class Outbound extends SLMessage {
         this._wroteSize = false;
     }
     encodeDayMask(daysArray) {
-        var dayMask = 0;
-        for (var i = 0; i < daysArray.length; i++) {
+        let dayMask = 0;
+        for (let i = 0; i < daysArray.length; i++) {
             dayMask += this.getDayValue(daysArray[i]);
         }
         return dayMask;
@@ -156,7 +158,7 @@ class Outbound extends SLMessage {
     writeInt32LE(val) {
         this._smartBuffer.writeInt32LE(val);
     }
-    encode() { }
+    encode() { null; }
     static getResponseId() {
         return this.MSG_ID + 1;
     }
@@ -182,7 +184,7 @@ class Outbound extends SLMessage {
     }
     writeSLArray(arr) {
         this._smartBuffer.writeInt32LE(arr.length);
-        for (var i = 0; i < arr.length; i++) {
+        for (let i = 0; i < arr.length; i++) {
             this._smartBuffer.writeUInt8(arr[i]);
         }
         this.skipWrite(SLMessage.slackForAlignment(arr.length));
@@ -193,7 +195,7 @@ class Outbound extends SLMessage {
         }
     }
     encodeTime(stringTime) {
-        return Number(stringTime.substr(0, 2) * 60) + Number(stringTime.substr(2, 2));
+        return (Number(stringTime.substring(0, 2)) * 60) + Number(stringTime.substring(2, 4));
     }
 }
 exports.Outbound = Outbound;

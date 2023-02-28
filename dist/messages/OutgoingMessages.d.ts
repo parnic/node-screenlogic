@@ -1,13 +1,13 @@
 /// <reference types="node" />
-import { Outbound } from "./SLMessage";
-import { LightCommands, UnitConnection } from "../index";
-import { rawData } from "./config/EquipmentConfig";
+import { Outbound } from './SLMessage';
+import { LightCommands, UnitConnection } from '../index';
+import { rawData } from './config/EquipmentConfig';
 export declare class Commands extends Outbound {
     protected unit: UnitConnection;
-    constructor(unit: UnitConnection);
+    constructor(unit: UnitConnection, senderId?: number);
 }
 export declare class ConnectionCommands extends Commands {
-    sendLoginMessage(password?: string[]): this;
+    sendLoginMessage(password?: Buffer): this;
     sendChallengeMessage(): this;
     sendVersionMessage(): this;
     sendAddClientMessage(): this;

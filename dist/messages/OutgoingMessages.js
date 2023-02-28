@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OutboundGateway = exports.PumpCommands = exports.ScheduleCommands = exports.BodyCommands = exports.ChemCommands = exports.ChlorCommands = exports.CircuitCommands = exports.EquipmentCommands = exports.ConnectionCommands = exports.Commands = void 0;
 const SLMessage_1 = require("./SLMessage");
 class Commands extends SLMessage_1.Outbound {
-    constructor(unit) {
-        super(unit.controllerId, unit.senderId);
+    constructor(unit, senderId) {
+        super(unit.controllerId, senderId !== null && senderId !== void 0 ? senderId : unit.senderId);
         this.unit = unit;
     }
 }
@@ -18,7 +18,7 @@ class ConnectionCommands extends Commands {
         this.writeInt32LE(0); // connection type
         this.writeSLString('node-screenlogic'); // version
         if (!password) {
-            password = new Array(16);
+            password = Buffer.alloc(16);
         }
         if (password.length > 16) {
             password = password.slice(0, 16);
@@ -64,7 +64,6 @@ class ConnectionCommands extends Commands {
     }
 }
 exports.ConnectionCommands = ConnectionCommands;
-
 class EquipmentCommands extends Commands {
     sendGetEquipmentStateMessage() {
         this.action = 12526;
@@ -366,7 +365,7 @@ class PumpCommands extends Commands {
             else
                 isRPMs = true;
         }
-        let _isRPMs = isRPMs ? 1 : 0;
+        const _isRPMs = isRPMs ? 1 : 0;
         this.createBaseMessage();
         this.writeInt32LE(this.controllerId);
         this.writeInt32LE(pumpId - 1);
@@ -388,5 +387,4 @@ class OutboundGateway extends SLMessage_1.Outbound {
     }
 }
 exports.OutboundGateway = OutboundGateway;
-
 //# sourceMappingURL=OutgoingMessages.js.map

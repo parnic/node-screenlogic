@@ -1,4 +1,4 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from '../SLMessage';
 export declare class EquipmentConfigurationMessage {
     static decodeCircuitDefinitions(msg: Inbound): any[];
     static decodeNCircuitNames(msg: Inbound): number;

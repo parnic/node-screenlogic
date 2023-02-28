@@ -3,19 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScheduleMessage = void 0;
 class ScheduleMessage {
     static decodeGetScheduleMessage(msg) {
-        let eventCount = msg.readUInt32LE();
-        let data = [];
-        for (var i = 0; i < eventCount; i++) {
-            let scheduleId = msg.readUInt32LE() - 699;
-            let circuitId = msg.readUInt32LE() - 499;
-            let startTime = msg.decodeTime(msg.readUInt32LE());
-            let stopTime = msg.decodeTime(msg.readUInt32LE());
-            let dayMask = msg.readUInt32LE();
-            let flags = msg.readUInt32LE();
-            let heatCmd = msg.readUInt32LE();
-            let heatSetPoint = msg.readUInt32LE();
-            let days = msg.decodeDayMask(dayMask);
-            let event = {
+        const eventCount = msg.readUInt32LE();
+        const data = [];
+        for (let i = 0; i < eventCount; i++) {
+            const scheduleId = msg.readUInt32LE() - 699;
+            const circuitId = msg.readUInt32LE() - 499;
+            const startTime = msg.decodeTime(msg.readUInt32LE());
+            const stopTime = msg.decodeTime(msg.readUInt32LE());
+            const dayMask = msg.readUInt32LE();
+            const flags = msg.readUInt32LE();
+            const heatCmd = msg.readUInt32LE();
+            const heatSetPoint = msg.readUInt32LE();
+            const days = msg.decodeDayMask(dayMask);
+            const event = {
                 scheduleId,
                 circuitId,
                 startTime,

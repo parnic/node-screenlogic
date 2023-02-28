@@ -18,7 +18,7 @@ import { CircuitMessage } from './messages/config/CircuitMessage';
 import { HeaterMessage } from './messages/config/HeaterMessage';
 import { Inbound } from './messages/SLMessage';
 import { EquipmentStateMessage, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
-const Encoder = require('./utils/PasswordEncoder').HLEncoder;
+import { HLEncoder } from './utils/PasswordEncoder';
 const debugFind = require('debug')('sl:find');
 const debugRemote = require('debug')('sl:remote');
 const debugUnit = require('debug')('sl:unit');
@@ -524,7 +524,7 @@ export class UnitConnection extends EventEmitter {
         debugUnit('loginFailed');
         reject(new Error('Login Failed'));
       });
-      const password = new Encoder(this.password.toString()).getEncryptedPassword(challengeString);
+      const password = new HLEncoder(this.password.toString()).getEncryptedPassword(challengeString);
       const msg = screenlogic.controller.connection.sendLoginMessage(password);
       this.toLogEmit(msg, 'out');
     });

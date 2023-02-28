@@ -1,4 +1,4 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from '../SLMessage';
 export declare class ScheduleMessage {
     static decodeGetScheduleMessage(msg: Inbound): SLScheduleData[];
     static decodeAddSchedule(msg: Inbound): number;

@@ -1,5 +1,5 @@
-import { PumpTypes } from "../../index";
-import { Inbound } from "../SLMessage";
+import { PumpTypes } from '../../index';
+import { Inbound } from '../SLMessage';
 export declare class PumpMessage {
     static decodePumpStatus(msg: Inbound): SLPumpStatusData;
     static decodeSetPumpSpeed(msg: Inbound): boolean;

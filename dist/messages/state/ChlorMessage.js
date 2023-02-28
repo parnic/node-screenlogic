@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChlorMessage = void 0;
 class ChlorMessage {
     static decodeIntellichlorConfig(msg) {
-        let data = {
+        const data = {
             installed: msg.readInt32LE() === 1,
             status: msg.readInt32LE(),
             poolSetPoint: msg.readInt32LE(),

@@ -1,4 +1,4 @@
-import { Inbound } from "../SLMessage";
+import { Inbound } from '../SLMessage';
 export declare class ChlorMessage {
     static decodeIntellichlorConfig(msg: Inbound): SLIntellichlorData;
     static decodeSetIntellichlorConfig(msg: Inbound): boolean;

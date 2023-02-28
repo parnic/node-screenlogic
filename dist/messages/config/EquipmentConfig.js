@@ -4,44 +4,44 @@ exports.EquipmentConfigurationMessage = void 0;
 const index_1 = require("../../index");
 class EquipmentConfigurationMessage {
     static decodeCircuitDefinitions(msg) {
-        let cnt = msg.readUInt32LE();
-        let res = [];
+        const cnt = msg.readUInt32LE();
+        const res = [];
         for (let i = 0; i < cnt; i++) {
-            let id = msg.readUInt32LE();
-            let circuitName = msg.readSLString();
+            const id = msg.readUInt32LE();
+            const circuitName = msg.readSLString();
             res.push({ id, circuitName });
         }
         return res;
     }
     static decodeNCircuitNames(msg) {
-        let cnt = msg.readUInt8();
+        const cnt = msg.readUInt8();
         return cnt;
     }
     static decodeCircuitNames(msg) {
-        let size = msg.readUInt32LE();
-        let res = [];
+        const size = msg.readUInt32LE();
+        const res = [];
         for (let id = 1; id <= size; id++) {
-            let circuitName = msg.readSLString();
+            const circuitName = msg.readSLString();
             res.push({ id, circuitName });
         }
         return res;
     }
     static decodeControllerConfig(msg) {
-        let controllerId = msg.readInt32LE() - 99;
-        let minSetPoint = new Array(2);
-        let maxSetPoint = new Array(2);
+        const controllerId = msg.readInt32LE() - 99;
+        const minSetPoint = new Array(2);
+        const maxSetPoint = new Array(2);
         for (let i = 0; i < 2; i++) {
             minSetPoint[i] = msg.readUInt8();
             maxSetPoint[i] = msg.readUInt8();
         }
-        let degC = msg.readUInt8() !== 0;
-        let controllerType = msg.readUInt8();
-        let hwType = msg.readUInt8();
-        let controllerData = msg.readUInt8();
-        let equipFlags = msg.readInt32LE();
-        let genCircuitName = msg.readSLString();
-        let circuitCount = msg.readInt32LE();
-        let circuitArray = new Array(circuitCount);
+        const degC = msg.readUInt8() !== 0;
+        const controllerType = msg.readUInt8();
+        const hwType = msg.readUInt8();
+        const controllerData = msg.readUInt8();
+        const equipFlags = msg.readInt32LE();
+        const genCircuitName = msg.readSLString();
+        const circuitCount = msg.readInt32LE();
+        const circuitArray = new Array(circuitCount);
         for (let i = 0; i < circuitCount; i++) {
             circuitArray[i] = {
                 circuitId: msg.readInt32LE() - 499,
@@ -62,8 +62,8 @@ class EquipmentConfigurationMessage {
             // normalize to 1 based ids for default names; 100 based for custom names
             circuitArray[i].nameIndex = circuitArray[i].nameIndex < 101 ? circuitArray[i].nameIndex + 1 : circuitArray[i].nameIndex + 99;
         }
-        let colorCount = msg.readInt32LE();
-        let colorArray = new Array(colorCount);
+        const colorCount = msg.readInt32LE();
+        const colorArray = new Array(colorCount);
         for (let i = 0; i < colorCount; i++) {
             colorArray[i] = {
                 name: msg.readSLString(),
@@ -75,14 +75,14 @@ class EquipmentConfigurationMessage {
             };
         }
         // RSG - This data doesn't look right.  Rely on pump config.
-        let pumpCircCount = 8;
-        let pumpCircArray = new Array(pumpCircCount);
+        const pumpCircCount = 8;
+        const pumpCircArray = new Array(pumpCircCount);
         for (let i = 0; i < pumpCircCount; i++) {
             pumpCircArray[i] = msg.readUInt8();
         }
-        let interfaceTabFlags = msg.readInt32LE();
-        let showAlarms = msg.readInt32LE();
-        let equipment = {
+        const interfaceTabFlags = msg.readInt32LE();
+        const showAlarms = msg.readInt32LE();
+        const equipment = {
             POOL_SOLARPRESENT: (equipFlags & 1) === 1,
             POOL_SOLARHEATPUMP: (equipFlags & 2) === 2,
             POOL_CHLORPRESENT: (equipFlags & 4) === 4,
@@ -100,7 +100,7 @@ class EquipmentConfigurationMessage {
             POOL_MAGICSTREAMPRESENT: (equipFlags & 16384) === 16384,
             POOL_ICHEMPRESENT: (equipFlags & 32768) === 32768
         };
-        let data = {
+        const data = {
             controllerId,
             minSetPoint,
             maxSetPoint,
@@ -142,18 +142,18 @@ class EquipmentConfigurationMessage {
     }
     static decodeSetEquipmentConfiguration(msg) {
         msg.readSLArray();
-        let speedDataArray = msg.readSLArray(); // 0 byte
-        let valveDataArray = msg.readSLArray(); // decodeValveData()
-        let remoteDataArray = msg.readSLArray();
-        let heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
-        let delayDataArray = msg.readSLArray(); // decodeDelayData()
-        let macroDataArray = msg.readSLArray();
-        let miscDataArray = msg.readSLArray(); // decodeMiscData()
-        let lightDataArray = msg.readSLArray();
-        let pumpDataArray = msg.readSLArray();
-        let spaFlowDataArray = msg.readSLArray();
-        let alarm = msg.readUInt8();
-        let rawData = {
+        const speedDataArray = msg.readSLArray(); // 0 byte
+        const valveDataArray = msg.readSLArray(); // decodeValveData()
+        const remoteDataArray = msg.readSLArray();
+        const heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
+        const delayDataArray = msg.readSLArray(); // decodeDelayData()
+        const macroDataArray = msg.readSLArray();
+        const miscDataArray = msg.readSLArray(); // decodeMiscData()
+        const lightDataArray = msg.readSLArray();
+        const pumpDataArray = msg.readSLArray();
+        const spaFlowDataArray = msg.readSLArray();
+        const alarm = msg.readUInt8();
+        const rawData = {
             highSpeedCircuitData: speedDataArray,
             valveData: valveDataArray,
             remoteData: remoteDataArray,
@@ -166,21 +166,21 @@ class EquipmentConfigurationMessage {
             spaFlowData: spaFlowDataArray,
             alarm
         };
-        let numPumps = this._getNumPumps(pumpDataArray);
-        let pumps = [];
+        const numPumps = this._getNumPumps(pumpDataArray);
+        const pumps = [];
         for (let i = 0; i < numPumps; i++) {
             let pump = { id: i + 1 };
             pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
             pumps.push(pump);
         }
-        let heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
-        let valves = this._loadValveData(valveDataArray, heaterConfig, index_1.UnitConnection.controllerType, index_1.UnitConnection.expansionsCount, msg);
-        let highSpeedCircuits = this._loadSpeedData(speedDataArray, index_1.UnitConnection.controllerType);
-        let delays = this._loadDelayData(delayDataArray, msg);
-        let lights = this._loadLightData(lightDataArray);
-        let misc = this._loadMiscData(miscDataArray, msg);
-        let remotes = this._loadRemoteData(remoteDataArray, index_1.UnitConnection.controllerType);
-        let data = {
+        const heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
+        const valves = this._loadValveData(valveDataArray, heaterConfig, index_1.UnitConnection.controllerType, index_1.UnitConnection.expansionsCount, msg);
+        const highSpeedCircuits = this._loadSpeedData(speedDataArray, index_1.UnitConnection.controllerType);
+        const delays = this._loadDelayData(delayDataArray, msg);
+        const lights = this._loadLightData(lightDataArray);
+        const misc = this._loadMiscData(miscDataArray, msg);
+        const remotes = this._loadRemoteData(remoteDataArray, index_1.UnitConnection.controllerType);
+        const data = {
             pumps,
             heaterConfig,
             valves,
@@ -199,7 +199,7 @@ class EquipmentConfigurationMessage {
             return 0;
         }
         let numPumps = 0;
-        for (var i = 0; i < pumpDataArray.length; i += 45) {
+        for (let i = 0; i < pumpDataArray.length; i += 45) {
             if (pumpDataArray[i] !== 0) {
                 numPumps++;
             }
@@ -210,12 +210,12 @@ class EquipmentConfigurationMessage {
         if (typeof (pumpIndex) !== 'number') {
             return {};
         }
-        let pumpIndexByte = 45 * pumpIndex;
-        let pump = {};
+        const pumpIndexByte = 45 * pumpIndex;
+        const pump = {};
         if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
             return {};
         }
-        let type = pumpDataArray[pumpIndexByte];
+        const type = pumpDataArray[pumpIndexByte];
         pump.type = type;
         if ((type & 128) === 128) {
             pump.pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
@@ -241,9 +241,9 @@ class EquipmentConfigurationMessage {
         pump.circuits = [];
         if (pump.pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS) {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
-                let _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
+                const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
-                    let circuit = {};
+                    const circuit = {};
                     circuit.id = circuitId;
                     circuit.circuit = _circuit;
                     circuit.speed =
@@ -261,9 +261,9 @@ class EquipmentConfigurationMessage {
         }
         else if (pump.pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVF) {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
-                let _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
+                const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
-                    let circuit = {};
+                    const circuit = {};
                     circuit.circuit = _circuit;
                     circuit.flow =
                         pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
@@ -290,9 +290,9 @@ class EquipmentConfigurationMessage {
         }
         else if (pump.pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVSF) {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
-                let _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
+                const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
-                    let circuit = {};
+                    const circuit = {};
                     circuit.circuit = _circuit;
                     circuit.units = (pumpDataArray[pumpIndexByte + 3] >> circuitId - 1 & 1) === 0 ? 1 : 0;
                     if (circuit.units)
@@ -323,7 +323,7 @@ class EquipmentConfigurationMessage {
     }
     static _loadHeaterData(heaterConfigDataArray, msg) {
         ///// Heater config
-        let heaterConfig = {
+        const heaterConfig = {
             body1SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 1),
             // body1HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4), // bHPump1
             solarHeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),
@@ -337,25 +337,25 @@ class EquipmentConfigurationMessage {
         ///// End heater config
     }
     static _loadValveData(valveDataArray, heaterConfig, controllerType, expansionsCount, msg) {
-        var bEnable1 = true;
-        var bEnable2 = true;
-        // var isSolarValve0 = false;
-        // var isSolarValve1 = false;
+        let bEnable1 = true;
+        let bEnable2 = true;
+        // let isSolarValve0 = false;
+        // let isSolarValve1 = false;
         if (heaterConfig.body1SolarPresent && !heaterConfig.body1HeatPumpPresent) {
             bEnable1 = false;
         }
         if (heaterConfig.body2SolarPresent && !heaterConfig.thermaFloPresent && controllerType === 5) {
             bEnable2 = false;
         }
-        var valves = [];
+        const valves = [];
         for (let loadCenterIndex = 0; loadCenterIndex <= expansionsCount; loadCenterIndex++) {
-            let loadCenterValveData = valveDataArray[loadCenterIndex];
-            for (var valveIndex = 0; valveIndex < 5; valveIndex++) {
+            const loadCenterValveData = valveDataArray[loadCenterIndex];
+            for (let valveIndex = 0; valveIndex < 5; valveIndex++) {
                 let valveName;
                 let loadCenterName;
                 let deviceId;
-                var bEnable = true;
-                // var isSolarValve = true;
+                let bEnable = true;
+                // let isSolarValve = true;
                 if (loadCenterIndex === 0) {
                     if (valveIndex === 0 && !bEnable1) {
                         bEnable = false;
@@ -372,7 +372,7 @@ class EquipmentConfigurationMessage {
                     bPresent = this._isValvePresent(valveIndex, loadCenterValveData, msg);
                 }
                 if (bPresent) {
-                    var valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
+                    const valveDataIndex = (loadCenterIndex * 5) + 4 + valveIndex;
                     deviceId = valveDataArray[valveDataIndex];
                     valveName = String.fromCharCode(65 + valveIndex);
                     if (deviceId !== 0) {
@@ -383,7 +383,7 @@ class EquipmentConfigurationMessage {
                     else {
                         loadCenterName = (loadCenterIndex + 1).toString();
                     }
-                    let v = {
+                    const v = {
                         loadCenterIndex,
                         valveIndex: valveIndex + 1,
                         valveName,
@@ -398,7 +398,7 @@ class EquipmentConfigurationMessage {
         return valves;
     }
     static _loadDelayData(delayDataArray, msg) {
-        let delays = {
+        const delays = {
             poolPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 0),
             spaPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 1),
             pumpOffDuringValveAction: msg.isBitSet(delayDataArray[0], 7)
@@ -406,7 +406,7 @@ class EquipmentConfigurationMessage {
         return delays;
     }
     static _loadMiscData(miscDataArray, msg) {
-        let misc = {
+        const misc = {
             intelliChem: msg.isBitSet(miscDataArray[3], 0),
             manualHeat: msg.isBitSet(miscDataArray[4], 0)
         };
@@ -449,8 +449,8 @@ class EquipmentConfigurationMessage {
         return result;
       } */
     static _loadSpeedData(speedDataArray, controllerType) {
-        let getRange = function () {
-            let ret = { min: 0, max: 0 };
+        const getRange = function () {
+            const ret = { min: 0, max: 0 };
             ret.max = speedDataArray.length;
             if (EquipmentConfigurationMessage.isEasyTouch(controllerType)) {
                 ret.max = 4;
@@ -466,8 +466,8 @@ class EquipmentConfigurationMessage {
             }
             return ret;
         };
-        let speed = [];
-        let range = getRange();
+        const speed = [];
+        const range = getRange();
         for (let i = range.min; i < range.max; i++) {
             if (speedDataArray[i] !== 0)
                 speed.push(speedDataArray[i]);
@@ -475,15 +475,14 @@ class EquipmentConfigurationMessage {
         return speed;
     }
     static _loadLightData(lightDataArray) {
-        let lights = { allOnAllOff: [] };
+        const lights = { allOnAllOff: [] };
         for (let i = 0; i < 8; i++) {
             lights.allOnAllOff.push(lightDataArray[i]);
         }
-        
         return lights;
     }
     static _loadRemoteData(remoteDataArray, controllerType) {
-        let data = {
+        const data = {
             fourButton: [],
             tenButton: [[]],
             quickTouch: []
@@ -529,7 +528,7 @@ class EquipmentConfigurationMessage {
         return data;
     }
     static _loadSpaFlowData(spaFlowDataArray) {
-        let spaFlow = {
+        const spaFlow = {
             isActive: spaFlowDataArray[1] === 1,
             pumpId: spaFlowDataArray[5],
             stepSize: spaFlowDataArray[6]
@@ -537,7 +536,7 @@ class EquipmentConfigurationMessage {
         return spaFlow;
     }
     static decodeGetEquipmentConfiguration(msg) {
-        let deviceIDToString = (poolConfig) => {
+        const deviceIDToString = (poolConfig) => {
             switch (poolConfig) {
                 case 128:
                     return 'Solar_Active';
@@ -594,25 +593,25 @@ class EquipmentConfigurationMessage {
                     return 'Freeze';
             }
         };
-        let controllerType = msg.readUInt8();
-        let hardwareType = msg.readUInt8();
+        const controllerType = msg.readUInt8();
+        const hardwareType = msg.readUInt8();
         msg.readUInt8();
         msg.readUInt8();
-        let controllerData = msg.readInt32LE();
-        let versionDataArray = msg.readSLArray();
+        const controllerData = msg.readInt32LE();
+        const versionDataArray = msg.readSLArray();
         let version = 0;
-        let speedDataArray = msg.readSLArray();
-        let valveDataArray = msg.readSLArray(); // decodeValveData()
-        let remoteDataArray = msg.readSLArray();
-        let heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
-        let delayDataArray = msg.readSLArray(); // decodeDelayData()
-        let macroDataArray = msg.readSLArray();
-        let miscDataArray = msg.readSLArray(); // decodeMiscData()
-        let lightDataArray = msg.readSLArray();
-        let pumpDataArray = msg.readSLArray();
-        let sgDataArray = msg.readSLArray();
-        let spaFlowDataArray = msg.readSLArray();
-        let rawData = {
+        const speedDataArray = msg.readSLArray();
+        const valveDataArray = msg.readSLArray(); // decodeValveData()
+        const remoteDataArray = msg.readSLArray();
+        const heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
+        const delayDataArray = msg.readSLArray(); // decodeDelayData()
+        const macroDataArray = msg.readSLArray();
+        const miscDataArray = msg.readSLArray(); // decodeMiscData()
+        const lightDataArray = msg.readSLArray();
+        const pumpDataArray = msg.readSLArray();
+        const sgDataArray = msg.readSLArray();
+        const spaFlowDataArray = msg.readSLArray();
+        const rawData = {
             versionData: versionDataArray,
             highSpeedCircuitData: speedDataArray,
             valveData: valveDataArray,
@@ -626,7 +625,7 @@ class EquipmentConfigurationMessage {
             sgData: sgDataArray,
             spaFlowData: spaFlowDataArray
         };
-        let expansionsCount = (controllerData & 192) >> 6 || 0;
+        const expansionsCount = (controllerData & 192) >> 6 || 0;
         index_1.UnitConnection.controllerType = controllerData;
         index_1.UnitConnection.expansionsCount = expansionsCount;
         if (versionDataArray === null || versionDataArray.length < 2) {
@@ -634,22 +633,22 @@ class EquipmentConfigurationMessage {
         }
         else
             version = (versionDataArray[0] * 1000) + (versionDataArray[1]);
-        let numPumps = this._getNumPumps(pumpDataArray);
-        let pumps = [];
+        const numPumps = this._getNumPumps(pumpDataArray);
+        const pumps = [];
         for (let i = 0; i < numPumps; i++) {
             let pump = { id: i + 1 };
             pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
             pumps.push(pump);
         }
-        let heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
-        let valves = this._loadValveData(valveDataArray, heaterConfig, controllerType, expansionsCount, msg);
-        let highSpeedCircuits = this._loadSpeedData(speedDataArray, controllerType);
-        let delays = this._loadDelayData(delayDataArray, msg);
-        let lights = this._loadLightData(lightDataArray);
-        let misc = this._loadMiscData(miscDataArray, msg);
-        let remotes = this._loadRemoteData(remoteDataArray, controllerType);
-        let spaFlow = this._loadSpaFlowData(spaFlowDataArray);
-        let data = {
+        const heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
+        const valves = this._loadValveData(valveDataArray, heaterConfig, controllerType, expansionsCount, msg);
+        const highSpeedCircuits = this._loadSpeedData(speedDataArray, controllerType);
+        const delays = this._loadDelayData(delayDataArray, msg);
+        const lights = this._loadLightData(lightDataArray);
+        const misc = this._loadMiscData(miscDataArray, msg);
+        const remotes = this._loadRemoteData(remoteDataArray, controllerType);
+        const spaFlow = this._loadSpaFlowData(spaFlowDataArray);
+        const data = {
             controllerType,
             hardwareType,
             expansionsCount,
@@ -669,21 +668,21 @@ class EquipmentConfigurationMessage {
         return data;
     }
     static decodeWeatherMessage(msg) {
-        let version = msg.readInt32LE();
-        let zip = msg.readSLString();
-        let lastUpdate = msg.readSLDateTime();
-        let lastRequest = msg.readSLDateTime();
-        let dateText = msg.readSLString();
-        let text = msg.readSLString();
-        let currentTemperature = msg.readInt32LE();
-        let humidity = msg.readInt32LE();
-        let wind = msg.readSLString();
-        let pressure = msg.readInt32LE();
-        let dewPoint = msg.readInt32LE();
-        let windChill = msg.readInt32LE();
-        let visibility = msg.readInt32LE();
-        let numDays = msg.readInt32LE();
-        let dayData = new Array(numDays);
+        const version = msg.readInt32LE();
+        const zip = msg.readSLString();
+        const lastUpdate = msg.readSLDateTime();
+        const lastRequest = msg.readSLDateTime();
+        const dateText = msg.readSLString();
+        const text = msg.readSLString();
+        const currentTemperature = msg.readInt32LE();
+        const humidity = msg.readInt32LE();
+        const wind = msg.readSLString();
+        const pressure = msg.readInt32LE();
+        const dewPoint = msg.readInt32LE();
+        const windChill = msg.readInt32LE();
+        const visibility = msg.readInt32LE();
+        const numDays = msg.readInt32LE();
+        const dayData = new Array(numDays);
         for (let i = 0; i < numDays; i++) {
             dayData[i] = {
                 dayTime: msg.readSLDateTime(),
@@ -692,9 +691,9 @@ class EquipmentConfigurationMessage {
                 text: msg.readSLString(),
             };
         }
-        let sunrise = msg.readInt32LE();
-        let sunset = msg.readInt32LE();
-        let data = {
+        const sunrise = msg.readInt32LE();
+        const sunset = msg.readInt32LE();
+        const data = {
             version,
             zip,
             lastUpdate,
@@ -715,16 +714,16 @@ class EquipmentConfigurationMessage {
         return data;
     }
     static decodeGetHistory(msg) {
-        let readTimeTempPointsPairs = function () {
-            let retval = [];
+        const readTimeTempPointsPairs = function () {
+            const retval = [];
             // 4 bytes for the length
             if (msg.length >= msg.readOffset + 4) {
-                let points = msg.readInt32LE();
+                const points = msg.readInt32LE();
                 // 16 bytes per time, 4 bytes per temperature
                 if (msg.length >= msg.readOffset + (points * (16 + 4))) {
                     for (let i = 0; i < points; i++) {
-                        let time = msg.readSLDateTime();
-                        let temp = msg.readInt32LE();
+                        const time = msg.readSLDateTime();
+                        const temp = msg.readInt32LE();
                         retval.push({
                             time: time,
                             temp: temp,
@@ -734,16 +733,16 @@ class EquipmentConfigurationMessage {
             }
             return retval;
         };
-        let readTimeTimePointsPairs = function () {
-            let retval = [];
+        const readTimeTimePointsPairs = function () {
+            const retval = [];
             // 4 bytes for the length
             if (msg.length >= msg.readOffset + 4) {
-                let points = msg.readInt32LE();
+                const points = msg.readInt32LE();
                 // 16 bytes per on time, 16 bytes per off time
                 if (msg.length >= msg.readOffset + (points * (16 + 16))) {
                     for (let i = 0; i < points; i++) {
-                        let onTime = msg.readSLDateTime();
-                        let offTime = msg.readSLDateTime();
+                        const onTime = msg.readSLDateTime();
+                        const offTime = msg.readSLDateTime();
                         retval.push({
                             on: onTime,
                             off: offTime,
@@ -753,17 +752,17 @@ class EquipmentConfigurationMessage {
             }
             return retval;
         };
-        let airTemps = readTimeTempPointsPairs();
-        let poolTemps = readTimeTempPointsPairs();
-        let poolSetPointTemps = readTimeTempPointsPairs();
-        let spaTemps = readTimeTempPointsPairs();
-        let spaSetPointTemps = readTimeTempPointsPairs();
-        let poolRuns = readTimeTimePointsPairs();
-        let spaRuns = readTimeTimePointsPairs();
-        let solarRuns = readTimeTimePointsPairs();
-        let heaterRuns = readTimeTimePointsPairs();
-        let lightRuns = readTimeTimePointsPairs();
-        let data = {
+        const airTemps = readTimeTempPointsPairs();
+        const poolTemps = readTimeTempPointsPairs();
+        const poolSetPointTemps = readTimeTempPointsPairs();
+        const spaTemps = readTimeTempPointsPairs();
+        const spaSetPointTemps = readTimeTempPointsPairs();
+        const poolRuns = readTimeTimePointsPairs();
+        const spaRuns = readTimeTimePointsPairs();
+        const solarRuns = readTimeTimePointsPairs();
+        const heaterRuns = readTimeTimePointsPairs();
+        const lightRuns = readTimeTimePointsPairs();
+        const data = {
             airTemps,
             poolTemps,
             poolSetPointTemps,
@@ -780,29 +779,29 @@ class EquipmentConfigurationMessage {
     getCircuitName(poolConfig, circuitIndex) {
         if (poolConfig.controllerType === 3 || poolConfig.controllerType === 4) {
             if (circuitIndex == 0) {
-                return "Hight";
+                return 'Hight';
             }
             if (circuitIndex == 5) {
-                return "Low";
+                return 'Low';
             }
         }
         else if (circuitIndex == 0) {
-            return "Spa";
+            return 'Spa';
         }
         else {
             if (circuitIndex == 5) {
-                return "Pool";
+                return 'Pool';
             }
         }
-        return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? "Aux Extra" : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
+        return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? 'Aux Extra' : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
     }
     static decodeCustomNames(msg) {
-        let nameCount = msg.readInt32LE();
+        const nameCount = msg.readInt32LE();
         // msg.incrementReadOffset(0);
-        let customNames = [];
-        let ro = msg.readOffset;
+        const customNames = [];
+        const ro = msg.readOffset;
         for (let i = 0; i < nameCount; i++) {
-            let n = msg.readSLString();
+            const n = msg.readSLString();
             customNames.push(n);
         }
         return customNames;

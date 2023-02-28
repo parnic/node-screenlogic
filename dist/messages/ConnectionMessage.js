@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConnectionMessage = void 0;
 class ConnectionMessage {
     static decodeChallengeResponse(msg) {
-        let challengeString = msg.readSLString();
+        const challengeString = msg.readSLString();
         return challengeString;
     }
     static decodeVersionResponse(msg) {
-        let version = msg.readSLString();
+        const version = msg.readSLString();
         return version;
     }
     static decodeAddClient(msg) {
