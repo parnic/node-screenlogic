@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "noImplicitAny": false,
+    "module": "commonjs",
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "ES2018",
+    "preserveConstEnums": true,
+    "outDir": "dist",
+    "declaration": true
+  },
+  "include": ["messages/**/*.ts", "*.ts", "index.ts", "utils/**/*.ts"],
+  "exclude": [
+    "node_modules"
+  ]
+}

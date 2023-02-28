@@ -1,8 +1,9 @@
 {
     "name": "node-screenlogic",
     "description": "Tool for connecting to Pentair ScreenLogic systems on the local network",
-    "version": "1.10.1",
-    "main": "index.js",
+    "version": "2.0.0",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "license": "MIT",
     "repository": "https://github.com/parnic/node-screenlogic.git",
     "keywords": [
@@ -13,17 +14,28 @@
     ],
     "dependencies": {
         "debug": "^4.3.2",
-        "smart-buffer": "^4.2.0"
+        "smart-buffer": "^4.2.0",
+        "source-map-support": "^0.5.21"
     },
     "devDependencies": {
-        "eslint": "^8.0.0",
+        "@types/node": "^16.18.0",
+        "@typescript-eslint/eslint-plugin": "^5.53.0",
+        "@typescript-eslint/parser": "^5.53.0",
+        "eslint": "^8.34.0",
         "eslint-config-strongloop": "^2.1.0",
-        "mocha": "^9.1.2"
+        "mocha": "^9.1.2",
+        "typescript": "^4.9.5"
     },
     "scripts": {
         "test": "mocha test/*.spec.js",
-        "pretest": "eslint --ignore-path .gitignore .",
+        "pretest": "eslint . ",
         "test-slmessage": "mocha test/slmessage.spec.js",
-        "test-passwordencoder": "mocha test/password.spec.js"
+        "test-passwordencoder": "mocha test/password.spec.js",
+        "build": "tsc",
+        "lint": "eslint --fix --ext .js,.jsx,.ts ."
+    },
+    "engines": {
+        "npm": ">=6.0.0",
+        "node": ">=14.0.0"
     }
 }

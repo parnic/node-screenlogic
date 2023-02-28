@@ -1,79 +1,110 @@
 'use strict';
 
-const ScreenLogic = require('../index');
+const ScreenLogic = require('../dist/index');
 var assert = require('assert');
 
 // you'll need a ScreenLogic-enabled device on your network for this to succeed
 describe('Unit', function() {
-  let unit;
+  let unit = ScreenLogic.screenlogic;
   before(function(done) {
     let finder = new ScreenLogic.FindUnits();
-    finder.on('serverFound', server => {
+    finder.on('serverFound', async server => {
       finder.close();
 
-      unit = new ScreenLogic.UnitConnection(server);
-      unit.on('loggedIn', () => {
+      unit.initUnit(server);
+      unit.once('loggedIn', () => {
         done();
       });
 
-      unit.connect();
+      try {
+        if (!await unit.connectAsync()) {
+          console.error('failed connection');
+        }
+      } catch(err) {
+        console.error(`caught error trying to connect: ${err}`);
+        done(err);
+      }
     });
 
     finder.search();
   });
 
-  after(function() {
-    unit.close();
+  after(async function() {
+    await unit.closeAsync();
   });
 
   it('gets pool status', function(done) {
-    unit.on('poolStatus', status => {
+    unit.once('equipmentState', status => {
       assert.equal(status.senderId, 0);
       done();
     });
 
-    unit.getPoolStatus();
+    unit.equipment.getEquipmentStateAsync();
   });
 
   it('gets controller config', function(done) {
-    unit.on('controllerConfig', config => {
+    unit.once('equipmentConfig', config => {
       assert.equal(config.senderId, 42);
       done();
     });
 
-    unit.getControllerConfig(42);
+    unit.equipment.getControllerConfigAsync(42);
   });
 
   it('gets chemical data', function(done) {
-    unit.on('chemicalData', chemData => {
+    unit.once('chemicalData', chemData => {
       assert.equal(chemData.senderId, 123);
       done();
     });
 
-    unit.getChemicalData(123);
+    unit.chem.getChemicalDataAsync(123);
   });
 
   it('gets salt cell config', function(done) {
-    unit.on('saltCellConfig', saltConfig => {
+    unit.once('intellichlorConfig', saltConfig => {
       assert.equal(saltConfig.senderId, 0);
       done();
     });
 
-    unit.getSaltCellConfig();
+    unit.chlor.getIntellichlorConfigAsync();
   });
 
   it('gets version', function(done) {
-    unit.on('version', version => {
+    unit.once('version', version => {
       assert.equal(version.senderId, 41239);
       done();
     });
 
-    unit.getVersion(41239);
+    unit.getVersionAsync(41239);
+  });
+
+  it('can add and remove a client', function(done) {
+    unit.once('addClient', response => {
+      assert.equal(response.senderId, 4321);
+      unit.removeClientAsync(5432);
+    }).once('removeClient', response => {
+      assert.equal(response.senderId, 5432);
+      done();
+    });
+
+    unit.addClientAsync(1234, 4321);
+  });
+
+  it('can add and remove a client with async/await', async function() {
+    const addClientResponse = await unit.addClientAsync(1234, 4321);
+    assert.equal(addClientResponse.senderId, 4321);
+    const removeClientResponse = await unit.removeClientAsync(5432);
+    assert.equal(removeClientResponse.senderId, 5432);
+  });
+
+  it('can ping the server', async () => {
+    const pong = await unit.pingServerAsync(1122);
+    assert.equal(pong.senderId, 1122);
   });
 
   /* uncomment this and the `circuit` stuff above to test setting state
   it('sets circuit state', function(done) {
-    unit.on('circuitStateChanged', () => {
+    unit.once('circuitStateChanged', () => {
       done();
     });
     unit.setCircuitState(0, circuit.id, circuit.state);

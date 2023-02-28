@@ -8,13 +8,98 @@
             "type": "node",
             "request": "launch",
             "name": "Example",
-            "program": "${workspaceFolder}/example.js",
+            "program": "${workspaceFolder}/example.ts",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "env": {
                 "DEBUG": "sl:*"
-            }
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "SLMessage tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "test/slmessage.spec.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Password tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "test/password.spec.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Finder tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "test/find.spec.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "SLUnit tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "test/unit.spec.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
         }
     ]
 }

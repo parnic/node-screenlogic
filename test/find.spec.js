@@ -1,6 +1,6 @@
 'use strict';
 
-const ScreenLogic = require('../index');
+const ScreenLogic = require('../dist/index');
 
 // you'll need a ScreenLogic-enabled device on your network for this to succeed
 describe('Finder', function() {
