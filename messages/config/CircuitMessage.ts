@@ -1,21 +1,37 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLSimpleBoolData } from '../SLMessage';
 
 
 export class CircuitMessage {
-  public static decodeSetCircuit(msg: Inbound): boolean {
-    return true;
+  public static decodeSetCircuit(msg: Inbound): SLSimpleBoolData {
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 
-  public static decodeSetCircuitState(msg: Inbound): boolean {
+  public static decodeSetCircuitState(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeSetLight(msg: Inbound): boolean {
+  public static decodeSetLight(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeSetCircuitRunTime(msg: Inbound): boolean {
+  public static decodeSetCircuitRunTime(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 }

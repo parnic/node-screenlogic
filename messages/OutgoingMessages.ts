@@ -11,9 +11,9 @@ export class Commands extends Outbound {
 }
 
 export class ConnectionCommands extends Commands {
-  public sendLoginMessage(password?: Buffer) {
+  public sendLoginMessage(password?: Buffer, senderId?: number): ConnectionCommands {
     this.action = 27;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     // this.addHeader(this.senderId, this.messageId)
     this.writeInt32LE(348); // schema
     this.writeInt32LE(0); // connection type
@@ -32,37 +32,37 @@ export class ConnectionCommands extends Commands {
     return this;
   }
 
-  public sendChallengeMessage() {
+  public sendChallengeMessage(senderId?: number): ConnectionCommands {
     this.action = 14;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendVersionMessage() {
+  public sendVersionMessage(senderId?: number): ConnectionCommands {
     this.action = 8120;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendAddClientMessage() {
+  public sendAddClientMessage(senderId?: number): ConnectionCommands {
     this.action = 12522;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(this.unit.clientId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendRemoveClientMessage() {
+  public sendRemoveClientMessage(senderId?: number): ConnectionCommands {
     this.action = 12524;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(this.unit.clientId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendPingMessage() {
+  public sendPingMessage(senderId?: number): ConnectionCommands {
     this.action = 16;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.unit.write(this.toBuffer());
     return this;
   }
@@ -70,111 +70,111 @@ export class ConnectionCommands extends Commands {
 
 
 export class EquipmentCommands extends Commands {
-  public sendGetEquipmentStateMessage() {
+  public sendGetEquipmentStateMessage(senderId?: number): EquipmentCommands {
     this.action = 12526;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetControllerConfigMessage() {
+  public sendGetControllerConfigMessage(senderId?: number): EquipmentCommands {
     this.action = 12532; // controller config
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetNumCircuitNamesMessage() {
+  public sendGetNumCircuitNamesMessage(senderId?: number): EquipmentCommands {
     this.action = 12558;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetCircuitNamesMessage(idx, cnt) {
+  public sendGetCircuitNamesMessage(idx: number, cnt: number, senderId?: number): EquipmentCommands {
     this.action = 12561;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(idx);
     this.writeInt32LE(cnt);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetCircuitDefinitionsMessage() {
+  public sendGetCircuitDefinitionsMessage(senderId?: number): EquipmentCommands {
     this.action = 12510;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetEquipmentConfigurationMessage() {
+  public sendGetEquipmentConfigurationMessage(senderId?: number): EquipmentCommands {
     this.action = 12566; //equipconfg
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public async sendSetEquipmentConfigurationMessageAsync(data: rawData) {
+  public sendSetEquipmentConfigurationMessageAsync(data: rawData, senderId?: number): EquipmentCommands {
 
     this.action = 12568; //setequipconfg
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetSystemTimeMessage() {
+  public sendGetSystemTimeMessage(senderId?: number): EquipmentCommands {
     this.action = 8110;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendCancelDelayMessage() {
+  public sendCancelDelayMessage(senderId?: number): EquipmentCommands {
     this.action = 12580;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetCustomNamesMessage() {
+  public sendGetCustomNamesMessage(senderId?: number): EquipmentCommands {
     this.action = 12562;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetCustomNameMessage(idx: number, name: string) {
+  public sendSetCustomNameMessage(idx: number, name: string, senderId?: number): EquipmentCommands {
     this.action = 12564;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.controllerId);
     this.writeInt32LE(idx);
     this.writeSLString(name);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetWeatherMessage() {
+  public sendGetWeatherMessage(senderId?: number): EquipmentCommands {
     this.action = 9807;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetSystemTimeMessage(date: Date, shouldAdjustForDST: boolean) {
+  public sendSetSystemTimeMessage(date: Date, shouldAdjustForDST: boolean, senderId?: number): EquipmentCommands {
     this.action = 8112;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeSLDateTime(date);
     this.writeInt32LE(shouldAdjustForDST ? 1 : 0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetHistoryMessage(fromTime: Date, toTime: Date) {
+  public sendGetHistoryMessage(fromTime: Date, toTime: Date, senderId?: number): EquipmentCommands {
     this.action = 12534;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.controllerId);
     this.writeSLDateTime(fromTime);
     this.writeSLDateTime(toTime);
@@ -185,9 +185,9 @@ export class EquipmentCommands extends Commands {
 }
 
 export class CircuitCommands extends Commands {
-  public sendSetCircuitMessage(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number) {
+  public sendSetCircuitMessage(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number, senderId?: number): CircuitCommands {
     this.action = 12520;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.controllerId);
     this.writeInt32LE(circuitId + 499);
     // normalize to 1 based ids for default names; 100 based for custom names
@@ -201,9 +201,9 @@ export class CircuitCommands extends Commands {
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetCircuitStateMessage(circuitId: number, circuitState: boolean) {
+  public sendSetCircuitStateMessage(circuitId: number, circuitState: boolean, senderId?: number): CircuitCommands {
     this.action = 12530;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     // this.addHeader(this.senderId, this.messageId);
     // this._controllerId = controllerId;
     this.writeInt32LE(this.controllerId);
@@ -213,17 +213,17 @@ export class CircuitCommands extends Commands {
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendIntellibriteMessage(command: LightCommands) {
+  public sendIntellibriteMessage(command: LightCommands, senderId?: number): CircuitCommands {
     this.action = 12556;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(command || 0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetCircuitRuntimeMessage(circuitId: number, runTime: number) {
+  public sendSetCircuitRuntimeMessage(circuitId: number, runTime: number, senderId?: number): CircuitCommands {
     this.action = 12550;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(circuitId + 499);
     this.writeInt32LE(runTime);
@@ -232,9 +232,9 @@ export class CircuitCommands extends Commands {
   }
 }
 export class ChlorCommands extends Commands {
-  public sendSetChlorOutputMessage(poolOutput: number, spaOutput: number) {
+  public sendSetChlorOutputMessage(poolOutput: number, spaOutput: number, senderId?: number): ChlorCommands {
     this.action = 12576;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(poolOutput || 0);
     this.writeInt32LE(spaOutput || 0);
@@ -243,16 +243,16 @@ export class ChlorCommands extends Commands {
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetSaltCellConfigMessage() {
+  public sendGetSaltCellConfigMessage(senderId?: number): ChlorCommands {
     this.action = 12572;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetSaltCellEnableMessage(isActive?: boolean) {
+  public sendSetSaltCellEnableMessage(isActive?: boolean, senderId?: number): ChlorCommands {
     this.action = 12574;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(isActive ? 1 : 0);
     this.unit.write(this.toBuffer());
@@ -260,16 +260,16 @@ export class ChlorCommands extends Commands {
   }
 }
 export class ChemCommands extends Commands {
-  public sendGetChemStatusMessage() {
+  public sendGetChemStatusMessage(senderId?: number): ChemCommands {
     this.action = 12592;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendGetChemHistoryMessage(fromTime: Date, toTime: Date) {
+  public sendGetChemHistoryMessage(fromTime: Date, toTime: Date, senderId?: number): ChemCommands {
     this.action = 12596;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeSLDateTime(fromTime);
     this.writeSLDateTime(toTime);
@@ -279,27 +279,27 @@ export class ChemCommands extends Commands {
   }
 }
 export class BodyCommands extends Commands {
-  public sendSetPointMessage(bodyType: number, temperature: number) {
+  public sendSetPointMessage(bodyType: number, temperature: number, senderId?: number): BodyCommands {
     this.action = 12528;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(bodyType || 0);
     this.writeInt32LE(temperature || 0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendCoolSetPointMessage(bodyType: number, temperature: number) {
+  public sendCoolSetPointMessage(bodyType: number, temperature: number, senderId?: number): BodyCommands {
     this.action = 12590;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE(bodyType || 0);
     this.writeInt32LE(temperature || 0);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendHeatModeMessage(bodyType: number, heatMode: number) {
+  public sendHeatModeMessage(bodyType: number, heatMode: number, senderId?: number): BodyCommands {
     this.action = 12538;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
     this.writeInt32LE((bodyType - 1) || 0);
     this.writeInt32LE(heatMode || 0);
@@ -308,33 +308,33 @@ export class BodyCommands extends Commands {
   }
 }
 export class ScheduleCommands extends Commands {
-  public sendGetSchedulesMessage(schedType: number) {
+  public sendGetSchedulesMessage(schedType: number, senderId?: number): ScheduleCommands {
     this.action = 12542;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(schedType);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendAddScheduleEventMessage(schedType: number) {
+  public sendAddScheduleEventMessage(schedType: number, senderId?: number): ScheduleCommands {
     this.action = 12544;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(schedType);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendDeleteScheduleEventMessage(schedId: number) {
+  public sendDeleteScheduleEventMessage(schedId: number, senderId?: number): ScheduleCommands {
     this.action = 12546;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.controllerId);
     this.writeInt32LE(schedId + 699);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetScheduleEventMessage(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number) {
+  public sendSetScheduleEventMessage(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number, senderId?: number): ScheduleCommands {
     this.action = 12548;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(0);
     this.writeInt32LE(scheduleId + 699);
     this.writeInt32LE(circuitId + 499);
@@ -349,22 +349,22 @@ export class ScheduleCommands extends Commands {
   }
 }
 export class PumpCommands extends Commands {
-  public sendGetPumpStatusMessage(pumpId: number) {
+  public sendGetPumpStatusMessage(pumpId: number, senderId?: number): PumpCommands {
     this.action = 12584;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.controllerId);
     this.writeInt32LE(pumpId - 1);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendSetPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean) {
+  public sendSetPumpSpeed(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean, senderId?: number): PumpCommands {
     this.action = 12586;
     if (typeof isRPMs === 'undefined') {
       if (speed < 400) { isRPMs = false; }
       else isRPMs = true;
     }
     const _isRPMs = isRPMs ? 1 : 0;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeInt32LE(this.controllerId);
     this.writeInt32LE(pumpId - 1);
     this.writeInt32LE(circuitId); // This is indexed to the array of circuits returned in GetPumpStatus
@@ -375,9 +375,9 @@ export class PumpCommands extends Commands {
   }
 }
 export class OutboundGateway extends Outbound {
-  public createSendGatewayMessage(systemName: string) {
+  public createSendGatewayMessage(systemName: string, senderId?: number): Buffer {
     this.action = 18003; // SLSendGatewayDataMessage.MSG_ID;
-    this.createBaseMessage();
+    this.createBaseMessage(senderId);
     this.writeSLString(systemName);
     this.writeSLString(systemName);
     return this.toBuffer();

@@ -1,4 +1,4 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData } from '../SLMessage';
 
 
 export class ChemMessage {
@@ -35,6 +35,7 @@ export class ChemMessage {
       const scaling = (balance & 2) !== 0;
       const error = (salt & 128) !== 0;
       const data: SLChemData = {
+        senderId: msg.senderId,
         isValid,
         pH,
         orp,
@@ -129,7 +130,7 @@ export class ChemMessage {
   }
 }
 
-export interface SLChemData {
+export interface SLChemData extends SLData {
   isValid: boolean;
   pH: number;
   orp: number;

@@ -1,5 +1,5 @@
 import { PumpTypes } from '../../index';
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 
 
 export class PumpMessage {
@@ -28,6 +28,7 @@ export class PumpMessage {
       pumpCircuits.push(_pumpCirc);
     }
     const data: SLPumpStatusData = {
+      senderId: msg.senderId,
       pumpCircuits,
       pumpType,
       isRunning,
@@ -39,14 +40,17 @@ export class PumpMessage {
     };
     return data;
   }
-  public static decodeSetPumpSpeed(msg:Inbound){
+  public static decodeSetPumpSpeed(msg:Inbound): SLSimpleBoolData {
     // ack
-    msg;
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 }
 
-export interface SLPumpStatusData {
+export interface SLPumpStatusData extends SLData {
   pumpCircuits: SLPumpCircuitData[];
   pumpType: PumpTypes;
   isRunning: boolean;

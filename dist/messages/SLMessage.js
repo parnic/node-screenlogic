@@ -129,12 +129,12 @@ class Outbound extends SLMessage {
         super(controllerId, senderId);
         this.action = messageId;
     }
-    createBaseMessage() {
+    createBaseMessage(senderId) {
         this._smartBuffer = new smart_buffer_1.SmartBuffer();
-        this.addHeader();
+        this.addHeader(senderId);
     }
-    addHeader() {
-        this._smartBuffer.writeUInt16LE(this.senderId);
+    addHeader(senderId) {
+        this._smartBuffer.writeUInt16LE(senderId !== null && senderId !== void 0 ? senderId : this.senderId);
         this._smartBuffer.writeUInt16LE(this.action);
         this._wroteSize = false;
     }

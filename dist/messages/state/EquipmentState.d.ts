@@ -1,16 +1,16 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 import { SLHistoryData, SLWeatherForecastData } from '../config/EquipmentConfig';
 export declare class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg: Inbound): SLEquipmentStateData;
     static decodeSystemTime(msg: Inbound): SLSystemTimeData;
-    static decodeCancelDelay(msg: Inbound): boolean;
-    static decodeSetSystemTime(msg: Inbound): boolean;
+    static decodeCancelDelay(msg: Inbound): SLSimpleBoolData;
+    static decodeSetSystemTime(msg: Inbound): SLSimpleBoolData;
     static decodeEquipmentConfiguration(msg: Inbound): any;
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
     static decodeGeneric(msg: Inbound): void;
 }
-export interface SLEquipmentStateData {
+export interface SLEquipmentStateData extends SLData {
     panelMode: number;
     freezeMode: number;
     remotes: number;

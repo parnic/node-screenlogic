@@ -14,6 +14,20 @@ const DAY_VALUES = [
 ];
 
 
+export interface SLData {
+  senderId: number;
+}
+
+
+export interface SLSimpleBoolData extends SLData {
+  val: boolean
+}
+
+
+export interface SLSimpleNumberData extends SLData {
+  val: number
+}
+
 
 export class SLMessage {
   static MSG_ID: number;
@@ -149,13 +163,13 @@ export class Outbound extends SLMessage {
 
     this.action = messageId;
   }
-  public createBaseMessage() {
+  public createBaseMessage(senderId?: number) {
     this._smartBuffer = new SmartBuffer();
-    this.addHeader();
+    this.addHeader(senderId);
   }
-  public addHeader() {
+  public addHeader(senderId?: number) {
 
-    this._smartBuffer.writeUInt16LE(this.senderId);
+    this._smartBuffer.writeUInt16LE(senderId ?? this.senderId);
     this._smartBuffer.writeUInt16LE(this.action);
 
     this._wroteSize = false;

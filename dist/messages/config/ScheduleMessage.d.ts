@@ -1,11 +1,11 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData, SLSimpleNumberData } from '../SLMessage';
 export declare class ScheduleMessage {
     static decodeGetScheduleMessage(msg: Inbound): SLScheduleData[];
-    static decodeAddSchedule(msg: Inbound): number;
-    static decodeDeleteSchedule(msg: Inbound): boolean;
-    static decodeSetSchedule(msg: Inbound): boolean;
+    static decodeAddSchedule(msg: Inbound): SLSimpleNumberData;
+    static decodeDeleteSchedule(msg: Inbound): SLSimpleBoolData;
+    static decodeSetSchedule(msg: Inbound): SLSimpleBoolData;
 }
-export interface SLScheduleData {
+export interface SLScheduleData extends SLData {
     scheduleId: number;
     circuitId: number;
     startTime: number;

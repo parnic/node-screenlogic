@@ -27,6 +27,7 @@ class PumpMessage {
             pumpCircuits.push(_pumpCirc);
         }
         const data = {
+            senderId: msg.senderId,
             pumpCircuits,
             pumpType,
             isRunning,
@@ -40,8 +41,11 @@ class PumpMessage {
     }
     static decodeSetPumpSpeed(msg) {
         // ack
-        msg;
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
 }
 exports.PumpMessage = PumpMessage;

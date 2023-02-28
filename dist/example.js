@@ -51,7 +51,7 @@ async function app() {
       client.on('loggedIn', function () {
         console.log(`logged in event`);
       }).on('version', function (version) {
-        console.log(` version (event)=' + version);
+        console.log(` version (event)=' + version.version);
       }).on('equipmentState', function (data) {
         delayCount = 0; // reset intellibrite delay
         console.log(`equipmentState (event) update!`)
@@ -85,7 +85,7 @@ async function app() {
         const equipmentState = await client.equipment.getEquipmentStateAsync();
         console.log(`Equipment State: ${JSON.stringify(equipmentState)}`);
         const result = await client.getVersionAsync();
-        console.log(`Pool Version: ${result}`);
+        console.log(`Pool Version: ${result.version}`);
         const customNames = await client.equipment.getCustomNamesAsync();
         console.log(`customNames: ${customNames}`);
         const controller = await client.equipment.getEquipmentConfigurationAsync();

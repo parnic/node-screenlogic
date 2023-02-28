@@ -1,6 +1,6 @@
 
 import { PumpTypes, screenlogic, UnitConnection } from '../../index';
-import { Inbound } from '../SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 
 
 export class EquipmentConfigurationMessage {
@@ -111,6 +111,7 @@ export class EquipmentConfigurationMessage {
       POOL_ICHEMPRESENT: (equipFlags & 32768) === 32768
     };
     const data: SLControllerConfigData = {
+      senderId: msg.senderId,
       controllerId,
       minSetPoint,
       maxSetPoint,
@@ -151,9 +152,13 @@ export class EquipmentConfigurationMessage {
   public static isChem2(controllerType: number, hwType: number): boolean {
     return controllerType === 252 && hwType === 2;
   }
-  public static decodeSetEquipmentConfigurationAck(msg: Inbound): boolean {
+  public static decodeSetEquipmentConfigurationAck(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 
   public static decodeSetEquipmentConfiguration(msg: Inbound) {
@@ -200,6 +205,7 @@ export class EquipmentConfigurationMessage {
     const misc = this._loadMiscData(miscDataArray, msg);
     const remotes = this._loadRemoteData(remoteDataArray, UnitConnection.controllerType);
     const data = {
+      senderId: msg.senderId,
       pumps,
       heaterConfig,
       valves,
@@ -358,8 +364,8 @@ export class EquipmentConfigurationMessage {
       // body2HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 5),  // bHPump2
       thermaFloCoolPresent: msg.isBitSet(heaterConfigDataArray[1], 1),  // ?? Source?
       units: msg.isBitSet(heaterConfigDataArray[2], 0) ? 1 : 0 // 1 == celsius, 0 = fahrenheit
-
     };
+
     return heaterConfig as HeaterConfig;
     ///// End heater config
   }
@@ -701,6 +707,7 @@ export class EquipmentConfigurationMessage {
     const remotes = this._loadRemoteData(remoteDataArray, controllerType);
     const spaFlow = this._loadSpaFlowData(spaFlowDataArray);
     const data: SLEquipmentConfigurationData = {
+      senderId: msg.senderId,
       controllerType,
       hardwareType,
       expansionsCount,
@@ -749,6 +756,7 @@ export class EquipmentConfigurationMessage {
     const sunrise = msg.readInt32LE();
     const sunset = msg.readInt32LE();
     const data: SLWeatherForecastData = {
+      senderId: msg.senderId,
       version,
       zip,
       lastUpdate,
@@ -820,6 +828,7 @@ export class EquipmentConfigurationMessage {
     const heaterRuns = readTimeTimePointsPairs();
     const lightRuns = readTimeTimePointsPairs();
     const data: SLHistoryData = {
+      senderId: msg.senderId,
       airTemps,
       poolTemps,
       poolSetPointTemps,
@@ -863,9 +872,13 @@ export class EquipmentConfigurationMessage {
     return customNames;
 
   }
-  public static decodeSetCustomNameAck(msg: Inbound): boolean {
+  public static decodeSetCustomNameAck(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
   /* public  getTypeList(poolConfig: SLEquipmentConfigurationData, circuit: number) {
     let resultList = [];
@@ -925,7 +938,7 @@ export class EquipmentConfigurationMessage {
 }
 
 
-export interface SLControllerConfigData {
+export interface SLControllerConfigData extends SLData {
   controllerId: number;
   minSetPoint: number[];
   maxSetPoint: number[];
@@ -977,7 +990,7 @@ export interface Circuit {
   deviceId: number
 }
 
-export interface SLEquipmentConfigurationData {
+export interface SLEquipmentConfigurationData extends SLData {
   controllerType: number;
   hardwareType: number;
   expansionsCount: number;
@@ -1044,7 +1057,7 @@ export interface Valves {
   deviceId: any
 }
 
-export interface SLWeatherForecastData {
+export interface SLWeatherForecastData extends SLData {
   version: number;
   zip: string;
   lastUpdate: Date;
@@ -1078,7 +1091,7 @@ export interface TimeTempPointPairs {
   temp: number;
 }
 
-export interface SLHistoryData {
+export interface SLHistoryData extends SLData {
   airTemps: TimeTempPointPairs[];
   poolTemps: TimeTempPointPairs[];
   poolSetPointTemps: TimeTempPointPairs[];

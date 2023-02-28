@@ -34,6 +34,7 @@ class ChemMessage {
             const scaling = (balance & 2) !== 0;
             const error = (salt & 128) !== 0;
             const data = {
+                senderId: msg.senderId,
                 isValid,
                 pH,
                 orp,

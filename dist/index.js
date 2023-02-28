@@ -186,6 +186,7 @@ class UnitConnection extends events_1.EventEmitter {
         this.isConnected = false;
         this._controllerId = 0;
         this._isMock = false;
+        this._hasAddedClient = false;
         // private _expectedMsgLen: number;
         // private challengeString;
         this._senderId = 0;
@@ -227,13 +228,16 @@ class UnitConnection extends events_1.EventEmitter {
         this.serverPort = port;
         this.serverAddress = address;
         this.password = password;
-        this.senderId = typeof senderId !== 'undefined' ? senderId : Math.min(Math.max(1, Math.trunc(Math.random() * 10000)), 10000);
+        this.senderId = typeof senderId !== 'undefined' ? senderId : 0;
         this.clientId = Math.round(Math.random() * 100000);
         this._initCommands();
         this._isMock = false;
         this._keepAliveTimer = (0, timers_1.setTimeout)(() => {
             this.keepAliveAsync();
         }, this._keepAliveDuration || 30000);
+    }
+    initUnit(server) {
+        this.init(server.gatewayName, server.address, server.port, '');
     }
     _initCommands() {
         this.controller = {
@@ -359,7 +363,7 @@ class UnitConnection extends events_1.EventEmitter {
                     resolve(true);
                 }
                 else {
-                    if (this.isConnected) {
+                    if (this.isConnected && this._hasAddedClient) {
                         const removeClient = this.removeClientAsync().catch(e => { throw e; });
                         debugUnit(`Removed client: ${removeClient}`);
                     }
@@ -465,7 +469,7 @@ class UnitConnection extends events_1.EventEmitter {
         });
         return Promise.resolve(p);
     }
-    async loginAsync(challengeString) {
+    async loginAsync(challengeString, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('sending login message...');
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -484,7 +488,7 @@ class UnitConnection extends events_1.EventEmitter {
                 reject(new Error('Login Failed'));
             });
             const password = new PasswordEncoder_1.HLEncoder(this.password.toString()).getEncryptedPassword(challengeString);
-            const msg = exports.screenlogic.controller.connection.sendLoginMessage(password);
+            const msg = exports.screenlogic.controller.connection.sendLoginMessage(password, senderId);
             this.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -513,7 +517,7 @@ class UnitConnection extends events_1.EventEmitter {
             readyState: this.client.readyState,
         };
     }
-    async getVersionAsync() {
+    async getVersionAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending version query...', this.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -524,14 +528,14 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('received version event');
                 resolve(version);
             });
-            const msg = exports.screenlogic.controller.connection.sendVersionMessage();
+            const msg = exports.screenlogic.controller.connection.sendVersionMessage(senderId);
             this.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async addClientAsync(clientId) {
+    async addClientAsync(clientId, senderId) {
         if (this._isMock)
-            return Promise.resolve(true);
+            return Promise.resolve({ senderId: senderId !== null && senderId !== void 0 ? senderId : 0, val: true });
         if (clientId)
             this.clientId = clientId;
         const p = new Promise((resolve, reject) => {
@@ -542,16 +546,17 @@ class UnitConnection extends events_1.EventEmitter {
             this.once('addClient', (clientAck) => {
                 clearTimeout(_timeout);
                 debugUnit('received addClient event');
-                resolve(true);
+                this._hasAddedClient = true;
+                resolve(clientAck);
             });
-            const msg = this.controller.connection.sendAddClientMessage();
+            const msg = exports.screenlogic.controller.connection.sendAddClientMessage(senderId);
             this.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async removeClientAsync() {
+    async removeClientAsync(senderId) {
         if (this._isMock)
-            return Promise.resolve(true);
+            return Promise.resolve({ senderId: senderId !== null && senderId !== void 0 ? senderId : 0, val: true });
         const p = new Promise((resolve, reject) => {
             try {
                 debugUnit(`[${this.senderId}] sending remove client command, clientId ${this.clientId}...`);
@@ -561,9 +566,10 @@ class UnitConnection extends events_1.EventEmitter {
                 this.once('removeClient', (clientAck) => {
                     clearTimeout(_timeout);
                     debugUnit('received removeClient event');
-                    resolve(true);
+                    this._hasAddedClient = false;
+                    resolve(clientAck);
                 });
-                const msg = exports.screenlogic.controller.connection.sendRemoveClientMessage();
+                const msg = exports.screenlogic.controller.connection.sendRemoveClientMessage(senderId);
                 this.toLogEmit(msg, 'out');
             }
             catch (error) {
@@ -573,7 +579,7 @@ class UnitConnection extends events_1.EventEmitter {
         });
         return Promise.resolve(p);
     }
-    async pingServerAsync() {
+    async pingServerAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] pinging server', this.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -582,9 +588,9 @@ class UnitConnection extends events_1.EventEmitter {
             this.once('pong', (pong) => {
                 clearTimeout(_timeout);
                 debugUnit('received pong event');
-                resolve(true);
+                resolve(pong);
             });
-            const msg = exports.screenlogic.controller.connection.sendPingMessage();
+            const msg = exports.screenlogic.controller.connection.sendPingMessage(senderId);
             this.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -806,7 +812,7 @@ UnitConnection.controllerType = 0; // for set equip message decode
 UnitConnection.expansionsCount = 0; // for set equip message decode
 exports.screenlogic = new UnitConnection();
 class Equipment {
-    async setSystemTimeAsync(date, shouldAdjustForDST) {
+    async setSystemTimeAsync(date, shouldAdjustForDST, senderId) {
         const p = new Promise((resolve, reject) => {
             if (!(date instanceof Date)) {
                 debugUnit('setSystemTime() must receive valid Date object for the date argument');
@@ -829,12 +835,12 @@ class Equipment {
                 debugUnit('received setSystemTime event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.equipment.sendSetSystemTimeMessage(date, shouldAdjustForDST);
+            const msg = exports.screenlogic.controller.equipment.sendSetSystemTimeMessage(date, shouldAdjustForDST, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getWeatherForecastAsync() {
+    async getWeatherForecastAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] requesting weather forecast', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -845,12 +851,12 @@ class Equipment {
                 debugUnit('received weatherForecast event');
                 resolve(equipment);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetWeatherMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetWeatherMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getHistoryDataAsync(fromTime, toTime) {
+    async getHistoryDataAsync(fromTime, toTime, senderId) {
         const p = new Promise((resolve, reject) => {
             const _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for get history response'));
@@ -864,17 +870,17 @@ class Equipment {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             debugUnit('[%d] requesting history data from `%s` to `%s`', exports.screenlogic.senderId, fromTime || yesterday, toTime || now);
-            const msg = exports.screenlogic.controller.equipment.sendGetHistoryMessage(fromTime || yesterday, toTime || now);
+            const msg = exports.screenlogic.controller.equipment.sendGetHistoryMessage(fromTime || yesterday, toTime || now, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getAllCircuitNamesAsync() {
-        const size = await this.getNCircuitNamesAsync();
-        const circNames = await this.getCircuitNamesAsync(size);
+    async getAllCircuitNamesAsync(senderId) {
+        const size = await this.getNCircuitNamesAsync(senderId);
+        const circNames = await this.getCircuitNamesAsync(size, senderId);
         return circNames;
     }
-    async getNCircuitNamesAsync() {
+    async getNCircuitNamesAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending get n circuit names query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -885,12 +891,12 @@ class Equipment {
                 debugUnit('received n circuit names event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetNumCircuitNamesMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetNumCircuitNamesMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getCircuitNamesAsync(size) {
+    async getCircuitNamesAsync(size, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending get circuit names query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -901,7 +907,7 @@ class Equipment {
                 debugUnit('received n circuit names event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetCircuitNamesMessage(0, 101);
+            const msg = exports.screenlogic.controller.equipment.sendGetCircuitNamesMessage(0, 101, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
             /*
             // This method works and is how SL does it; but it is also possible to get all the names in one pass, so why not?
@@ -930,7 +936,7 @@ class Equipment {
         });
         return Promise.resolve(p);
     }
-    async getCircuitDefinitionsAsync() {
+    async getCircuitDefinitionsAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending get circuit definitions query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -941,12 +947,12 @@ class Equipment {
                 debugUnit('received circuit definitions event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getEquipmentConfigurationAsync() {
+    async getEquipmentConfigurationAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending equipment configuration query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -957,12 +963,12 @@ class Equipment {
                 debugUnit('received equipmentConfiguration event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetEquipmentConfigurationMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setEquipmentConfigurationAsync(data) {
+    async setEquipmentConfigurationAsync(data, senderId) {
         function updateBit(number, bitPosition, bitValue) {
             const bitValueNormalized = bitValue ? 1 : 0;
             const clearMask = ~(1 << bitPosition);
@@ -983,7 +989,7 @@ class Equipment {
             // we don't screw anything up.  We can do that by comparing the existing array to the
             // constructed array and look for differences that shouldn't be there.
             let equipConfig;
-            exports.screenlogic.equipment.getEquipmentConfigurationAsync()
+            exports.screenlogic.equipment.getEquipmentConfigurationAsync(senderId)
                 .then(res => { equipConfig = res; })
                 .catch(e => { throw e; });
             const resData = {
@@ -1163,7 +1169,7 @@ class Equipment {
                 return (dec >>> 0).toString(2).padStart(8, '0');
             }
             if (ready) {
-                const msg = exports.screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData);
+                const msg = exports.screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData, senderId);
                 exports.screenlogic.toLogEmit(msg, 'out');
             }
             else {
@@ -1179,7 +1185,7 @@ class Equipment {
         });
         return Promise.resolve(p);
     }
-    async cancelDelayAsync() {
+    async cancelDelayAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending cancel delay command...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1188,14 +1194,14 @@ class Equipment {
             exports.screenlogic.once('cancelDelay', (delay) => {
                 clearTimeout(_timeout);
                 debugUnit('received cancelDelay event');
-                resolve(true);
+                resolve(delay);
             });
-            const msg = exports.screenlogic.controller.equipment.sendCancelDelayMessage();
+            const msg = exports.screenlogic.controller.equipment.sendCancelDelayMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getSystemTimeAsync() {
+    async getSystemTimeAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending get system time query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1206,12 +1212,12 @@ class Equipment {
                 debugUnit('received getSystemTime event');
                 resolve(systemTime);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetSystemTimeMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetSystemTimeMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getControllerConfigAsync() {
+    async getControllerConfigAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending controller config query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1222,12 +1228,12 @@ class Equipment {
                 debugUnit('received equipmentConfig event');
                 resolve(controller);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetControllerConfigMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetControllerConfigMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getEquipmentStateAsync() {
+    async getEquipmentStateAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending pool status query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1238,12 +1244,12 @@ class Equipment {
                 debugUnit('received equipmentState event');
                 resolve(equipmentState);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetEquipmentStateMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetEquipmentStateMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getCustomNamesAsync() {
+    async getCustomNamesAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending get custom names: %d...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1254,12 +1260,12 @@ class Equipment {
                 debugUnit('received getCustomNames event');
                 resolve(customNames);
             });
-            const msg = exports.screenlogic.controller.equipment.sendGetCustomNamesMessage();
+            const msg = exports.screenlogic.controller.equipment.sendGetCustomNamesMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setCustomNameAsync(idx, name) {
+    async setCustomNameAsync(idx, name, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set custom names: %d...', exports.screenlogic.senderId);
             if (name.length > 11)
@@ -1272,7 +1278,7 @@ class Equipment {
                 debugUnit('received setCustomName event');
                 resolve(customNames);
             });
-            const msg = exports.screenlogic.controller.equipment.sendSetCustomNameMessage(idx, name);
+            const msg = exports.screenlogic.controller.equipment.sendSetCustomNameMessage(idx, name, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -1280,7 +1286,7 @@ class Equipment {
 }
 exports.Equipment = Equipment;
 class Circuit extends UnitConnection {
-    async sendLightCommandAsync(command) {
+    async sendLightCommandAsync(command, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending light command: controllerId: %d, command: %d...', exports.screenlogic.senderId, this.controllerId, command);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1291,12 +1297,12 @@ class Circuit extends UnitConnection {
                 debugUnit('received sentLightCommand event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.circuits.sendIntellibriteMessage(command);
+            const msg = exports.screenlogic.controller.circuits.sendIntellibriteMessage(command, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setCircuitRuntimebyIdAsync(circuitId, runTime) {
+    async setCircuitRuntimebyIdAsync(circuitId, runTime, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set circuit runtime command for circuitId: %d, runTime: %d...', exports.screenlogic.senderId, circuitId, runTime);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1307,12 +1313,12 @@ class Circuit extends UnitConnection {
                 debugUnit('received setCircuitRuntimebyId event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime);
+            const msg = exports.screenlogic.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos) {
+    async setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit(`[${exports.screenlogic.senderId}] sending set circuit command: controllerId: ${this.controllerId}, circuitId: ${circuitId}, nameIndex: ${nameIndex} circuitFunc: ${circuitFunction} circInterface: ${circuitInterface} freeze: ${freeze ? 'true' : 'false'} colorPos: ${colorPos}...`);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1323,12 +1329,12 @@ class Circuit extends UnitConnection {
                 debugUnit('received circuit event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos);
+            const msg = exports.screenlogic.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setCircuitStateAsync(circuitId, circuitState) {
+    async setCircuitStateAsync(circuitId, circuitState, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set circuit state command: controllerId: %d, circuitId: %d, circuitState: %d...', exports.screenlogic.senderId, this.controllerId, circuitId, circuitState);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1339,7 +1345,7 @@ class Circuit extends UnitConnection {
                 debugUnit('received circuitStateChanged event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState);
+            const msg = exports.screenlogic.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -1347,7 +1353,7 @@ class Circuit extends UnitConnection {
 }
 exports.Circuit = Circuit;
 class Body extends UnitConnection {
-    async setSetPointAsync(bodyIndex, temperature) {
+    async setSetPointAsync(bodyIndex, temperature, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set setpoint command: controllerId: %d, bodyIndex: %d, temperature: %d...', exports.screenlogic.senderId, this.controllerId, bodyIndex, temperature);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1358,12 +1364,12 @@ class Body extends UnitConnection {
                 debugUnit('received setPointChanged event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature);
+            const msg = exports.screenlogic.controller.bodies.sendSetPointMessage(bodyIndex, temperature, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setCoolSetPointAsync(bodyIndex, temperature) {
+    async setCoolSetPointAsync(bodyIndex, temperature, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set cool setpoint command: controllerId: %d, bodyIndex: %d, temperature: %d...', exports.screenlogic.senderId, this.controllerId, bodyIndex, temperature);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1374,12 +1380,12 @@ class Body extends UnitConnection {
                 debugUnit('received coolSetPointChanged event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.bodies.sendCoolSetPointMessage(bodyIndex, temperature);
+            const msg = exports.screenlogic.controller.bodies.sendCoolSetPointMessage(bodyIndex, temperature, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setHeatModeAsync(bodyIndex, heatMode) {
+    async setHeatModeAsync(bodyIndex, heatMode, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set heatmode command: controllerId: %d, bodyIndex: %d, heatMode: %d...', exports.screenlogic.senderId, this.controllerId, bodyIndex, heatMode);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1390,7 +1396,7 @@ class Body extends UnitConnection {
                 debugUnit('received heatModeChanged event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode);
+            const msg = exports.screenlogic.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -1398,7 +1404,7 @@ class Body extends UnitConnection {
 }
 exports.Body = Body;
 class Pump extends UnitConnection {
-    async setPumpSpeedAsync(pumpId, circuitId, speed, isRPMs) {
+    async setPumpSpeedAsync(pumpId, circuitId, speed, isRPMs, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit(`[%d] sending set pump flow command for pumpId: ${pumpId}.  CircuitId: ${circuitId}, setPoint: ${speed}, isRPMs: ${isRPMs}}`);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1410,12 +1416,12 @@ class Pump extends UnitConnection {
                 debugUnit('received setPumpSpeed event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs);
+            const msg = exports.screenlogic.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getPumpStatusAsync(pumpId) {
+    async getPumpStatusAsync(pumpId, senderId) {
         const p = new Promise((resolve, reject) => {
             try {
                 debugUnit('[%d] sending get pump status command for pumpId: %d...', exports.screenlogic.senderId, pumpId);
@@ -1428,7 +1434,7 @@ class Pump extends UnitConnection {
                     debugUnit('received getPumpStatus event');
                     resolve(data);
                 });
-                const msg = exports.screenlogic.controller.pumps.sendGetPumpStatusMessage(pumpId);
+                const msg = exports.screenlogic.controller.pumps.sendGetPumpStatusMessage(pumpId, senderId);
                 exports.screenlogic.toLogEmit(msg, 'out');
             }
             catch (err) {
@@ -1441,7 +1447,7 @@ class Pump extends UnitConnection {
 }
 exports.Pump = Pump;
 class Schedule extends UnitConnection {
-    async setScheduleEventByIdAsync(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint) {
+    async setScheduleEventByIdAsync(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set schedule event command for scheduleId: %d, circuitId: %d, startTime: %d, stopTime: %d, dayMask: %d, flags: %d, heatCmd: %d, heatSetPoint: %d...', exports.screenlogic.senderId, scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1452,12 +1458,12 @@ class Schedule extends UnitConnection {
                 debugUnit('received setScheduleEventById event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint);
+            const msg = exports.screenlogic.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async addNewScheduleEventAsync(scheduleType) {
+    async addNewScheduleEventAsync(scheduleType, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending add new schedule event command for scheduleType: %d...', exports.screenlogic.senderId, scheduleType);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1468,12 +1474,12 @@ class Schedule extends UnitConnection {
                 debugUnit('received addNewScheduleEvent event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.schedules.sendAddScheduleEventMessage(scheduleType);
+            const msg = exports.screenlogic.controller.schedules.sendAddScheduleEventMessage(scheduleType, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async deleteScheduleEventByIdAsync(scheduleId) {
+    async deleteScheduleEventByIdAsync(scheduleId, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending delete schedule event command for scheduleId: %d...', exports.screenlogic.senderId, scheduleId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1484,12 +1490,12 @@ class Schedule extends UnitConnection {
                 debugUnit('received deleteScheduleEventById event');
                 resolve(data);
             });
-            const msg = exports.screenlogic.controller.schedules.sendDeleteScheduleEventMessage(scheduleId);
+            const msg = exports.screenlogic.controller.schedules.sendDeleteScheduleEventMessage(scheduleId, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getScheduleDataAsync(scheduleType) {
+    async getScheduleDataAsync(scheduleType, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending get schedule data query for scheduleType: %d...', exports.screenlogic.senderId, scheduleType);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1500,7 +1506,7 @@ class Schedule extends UnitConnection {
                 debugUnit('received getScheduleData event');
                 resolve(schedule);
             });
-            const msg = exports.screenlogic.controller.schedules.sendGetSchedulesMessage(scheduleType);
+            const msg = exports.screenlogic.controller.schedules.sendGetSchedulesMessage(scheduleType, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -1508,7 +1514,7 @@ class Schedule extends UnitConnection {
 }
 exports.Schedule = Schedule;
 class Chem extends UnitConnection {
-    async getChemHistoryDataAsync(fromTime, toTime) {
+    async getChemHistoryDataAsync(fromTime, toTime, senderId) {
         const p = new Promise((resolve, reject) => {
             const _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for get chem history response'));
@@ -1522,12 +1528,12 @@ class Chem extends UnitConnection {
             const yesterday = new Date();
             debugUnit('[%d] requesting chem history data from `%s` to `%s`', exports.screenlogic.senderId, fromTime || yesterday, toTime || now);
             yesterday.setHours(now.getHours() - 24);
-            const msg = exports.screenlogic.controller.chem.sendGetChemHistoryMessage(fromTime || yesterday, toTime || now);
+            const msg = exports.screenlogic.controller.chem.sendGetChemHistoryMessage(fromTime || yesterday, toTime || now, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getChemicalDataAsync() {
+    async getChemicalDataAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending chemical data query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1538,7 +1544,7 @@ class Chem extends UnitConnection {
                 debugUnit('received chemicalData event');
                 resolve(chemical);
             });
-            const msg = exports.screenlogic.controller.chem.sendGetChemStatusMessage();
+            const msg = exports.screenlogic.controller.chem.sendGetChemStatusMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
@@ -1546,7 +1552,7 @@ class Chem extends UnitConnection {
 }
 exports.Chem = Chem;
 class Chlor extends UnitConnection {
-    async setIntellichlorOutputAsync(poolOutput, spaOutput) {
+    async setIntellichlorOutputAsync(poolOutput, spaOutput, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set intellichlor output command: controllerId: %d, poolOutput: %d, spaOutput: %d...', exports.screenlogic.senderId, this.controllerId, poolOutput, spaOutput);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1557,12 +1563,12 @@ class Chlor extends UnitConnection {
                 debugUnit('received setIntellichlorConfig event');
                 resolve(equipment);
             });
-            const msg = exports.screenlogic.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput);
+            const msg = exports.screenlogic.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async getIntellichlorConfigAsync() {
+    async getIntellichlorConfigAsync(senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending salt cell config query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1573,12 +1579,12 @@ class Chlor extends UnitConnection {
                 debugUnit('received intellichlorConfig event');
                 resolve(intellichlor);
             });
-            const msg = exports.screenlogic.controller.chlor.sendGetSaltCellConfigMessage();
+            const msg = exports.screenlogic.controller.chlor.sendGetSaltCellConfigMessage(senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async setIntellichlorIsActiveAsync(isActive) {
+    async setIntellichlorIsActiveAsync(isActive, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending salt cell enable query...', exports.screenlogic.senderId);
             const _timeout = (0, timers_1.setTimeout)(() => {
@@ -1589,7 +1595,7 @@ class Chlor extends UnitConnection {
                 debugUnit('received intellichlorIsActive event');
                 resolve(intellichlor);
             });
-            const msg = exports.screenlogic.controller.chlor.sendSetSaltCellEnableMessage(isActive);
+            const msg = exports.screenlogic.controller.chlor.sendSetSaltCellEnableMessage(isActive, senderId);
             exports.screenlogic.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);

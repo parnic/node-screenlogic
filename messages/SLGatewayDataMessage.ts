@@ -1,6 +1,6 @@
 'use strict';
 
-import { Inbound, Outbound, SLMessage } from './SLMessage';
+import { Inbound } from './SLMessage';
 
 const _MSG_ID = 18003;
 

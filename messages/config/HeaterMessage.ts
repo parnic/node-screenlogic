@@ -1,16 +1,28 @@
-import { Inbound } from '../SLMessage';
+import { Inbound, SLSimpleBoolData } from '../SLMessage';
 
 export class HeaterMessage {
-  public static decodeSetHeatSetPoint(msg: Inbound): boolean {
+  public static decodeSetHeatSetPoint(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeCoolSetHeatSetPoint(msg: Inbound): boolean {
+  public static decodeCoolSetHeatSetPoint(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeSetHeatModePoint(msg: Inbound): boolean {
+  public static decodeSetHeatModePoint(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
 }

@@ -54,6 +54,7 @@ class EquipmentStateMessage {
         const orpTank = msg.readInt32LE();
         const alarms = msg.readInt32LE();
         const data = {
+            senderId: msg.senderId,
             panelMode,
             freezeMode,
             remotes,
@@ -101,13 +102,19 @@ class EquipmentStateMessage {
     }
     static decodeCancelDelay(msg) {
         // ack
-        msg;
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeSetSystemTime(msg) {
         // ack
-        msg;
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeEquipmentConfiguration(msg) {
         const getNumPumps = function () {
@@ -399,6 +406,7 @@ class EquipmentStateMessage {
         const sunrise = msg.readInt32LE();
         const sunset = msg.readInt32LE();
         const data = {
+            senderId: msg.senderId,
             version,
             zip,
             lastUpdate,
@@ -468,6 +476,7 @@ class EquipmentStateMessage {
         const heaterRuns = readTimeTimePointsPairs();
         const lightRuns = readTimeTimePointsPairs();
         const data = {
+            senderId: msg.senderId,
             airTemps,
             poolTemps,
             poolSetPointTemps,

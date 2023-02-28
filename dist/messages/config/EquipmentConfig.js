@@ -101,6 +101,7 @@ class EquipmentConfigurationMessage {
             POOL_ICHEMPRESENT: (equipFlags & 32768) === 32768
         };
         const data = {
+            senderId: msg.senderId,
             controllerId,
             minSetPoint,
             maxSetPoint,
@@ -138,7 +139,11 @@ class EquipmentConfigurationMessage {
     }
     static decodeSetEquipmentConfigurationAck(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeSetEquipmentConfiguration(msg) {
         msg.readSLArray();
@@ -181,6 +186,7 @@ class EquipmentConfigurationMessage {
         const misc = this._loadMiscData(miscDataArray, msg);
         const remotes = this._loadRemoteData(remoteDataArray, index_1.UnitConnection.controllerType);
         const data = {
+            senderId: msg.senderId,
             pumps,
             heaterConfig,
             valves,
@@ -649,6 +655,7 @@ class EquipmentConfigurationMessage {
         const remotes = this._loadRemoteData(remoteDataArray, controllerType);
         const spaFlow = this._loadSpaFlowData(spaFlowDataArray);
         const data = {
+            senderId: msg.senderId,
             controllerType,
             hardwareType,
             expansionsCount,
@@ -694,6 +701,7 @@ class EquipmentConfigurationMessage {
         const sunrise = msg.readInt32LE();
         const sunset = msg.readInt32LE();
         const data = {
+            senderId: msg.senderId,
             version,
             zip,
             lastUpdate,
@@ -763,6 +771,7 @@ class EquipmentConfigurationMessage {
         const heaterRuns = readTimeTimePointsPairs();
         const lightRuns = readTimeTimePointsPairs();
         const data = {
+            senderId: msg.senderId,
             airTemps,
             poolTemps,
             poolSetPointTemps,
@@ -808,7 +817,11 @@ class EquipmentConfigurationMessage {
     }
     static decodeSetCustomNameAck(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
 }
 exports.EquipmentConfigurationMessage = EquipmentConfigurationMessage;

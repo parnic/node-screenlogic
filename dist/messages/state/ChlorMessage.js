@@ -4,6 +4,7 @@ exports.ChlorMessage = void 0;
 class ChlorMessage {
     static decodeIntellichlorConfig(msg) {
         const data = {
+            senderId: msg.senderId,
             installed: msg.readInt32LE() === 1,
             status: msg.readInt32LE(),
             poolSetPoint: msg.readInt32LE(),
@@ -16,11 +17,19 @@ class ChlorMessage {
     }
     static decodeSetIntellichlorConfig(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeSetEnableIntellichlorConfig(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
 }
 exports.ChlorMessage = ChlorMessage;

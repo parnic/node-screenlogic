@@ -8,19 +8,35 @@ class ConnectionMessage {
     }
     static decodeVersionResponse(msg) {
         const version = msg.readSLString();
-        return version;
+        const versionData = {
+            senderId: msg.senderId,
+            version
+        };
+        return versionData;
     }
     static decodeAddClient(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodeRemoveClient(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
     static decodePingClient(msg) {
         // ack
-        return true;
+        const response = {
+            senderId: msg.senderId,
+            val: true
+        };
+        return response;
     }
 }
 exports.ConnectionMessage = ConnectionMessage;

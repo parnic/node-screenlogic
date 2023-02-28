@@ -80,6 +80,26 @@
                 "${workspaceFolder}/**/*.js",
                 "!**/node_modules/**"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "SLUnit tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "test/unit.spec.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "sl:*"
+            },
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js",
+                "!**/node_modules/**"
+            ]
         }
     ]
 }

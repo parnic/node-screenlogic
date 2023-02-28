@@ -1,5 +1,5 @@
 
-import { Inbound } from './SLMessage';
+import { Inbound, SLData, SLSimpleBoolData } from './SLMessage';
 
 
 export class ConnectionMessage{
@@ -7,20 +7,40 @@ export class ConnectionMessage{
     const challengeString = msg.readSLString();
     return challengeString;
   }
-  public static decodeVersionResponse(msg: Inbound): string {
+  public static decodeVersionResponse(msg: Inbound): SLVersionData {
     const version = msg.readSLString();
-    return version;
+    const versionData: SLVersionData = {
+      senderId: msg.senderId,
+      version
+    }
+    return versionData;
   }
-  public static decodeAddClient(msg: Inbound): boolean {
+  public static decodeAddClient(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodeRemoveClient(msg: Inbound): boolean {
+  public static decodeRemoveClient(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
-  public static decodePingClient(msg: Inbound): boolean {
+  public static decodePingClient(msg: Inbound): SLSimpleBoolData {
     // ack
-    return true;
+    const response: SLSimpleBoolData = {
+      senderId: msg.senderId,
+      val: true
+    };
+    return response;
   }
+}
+
+export interface SLVersionData extends SLData {
+  version: string
 }
