@@ -980,13 +980,13 @@ export class Equipment {
     });
     return Promise.resolve(p) as Promise<SLCircuitNamesData>;
   }
-  async getCircuitDefinitionsAsync(senderId?: number): Promise<any> {
+  async getCircuitDefinitionsAsync(senderId?: number): Promise<SLCircuitNamesData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get circuit definitions query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for get circuit definitions response'));
       }, screenlogic.netTimeout);
-      screenlogic.once('circuitDefinitions', (data) => {
+      screenlogic.once('circuitDefinitions', (data: SLCircuitNamesData) => {
         clearTimeout(_timeout);
         debugUnit('received circuit definitions event');
         resolve(data);
@@ -994,7 +994,7 @@ export class Equipment {
       const msg = screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p);
+    return Promise.resolve(p) as Promise<SLCircuitNamesData>;
   }
   async getEquipmentConfigurationAsync(senderId?: number): Promise<SLEquipmentConfigurationData> {
     const p = new Promise((resolve, reject) => {
@@ -1012,7 +1012,7 @@ export class Equipment {
     });
     return Promise.resolve(p) as Promise<SLEquipmentConfigurationData>;
   }
-  async setEquipmentConfigurationAsync(data: any, senderId?: number): Promise<SLEquipmentConfigurationData> {
+  async setEquipmentConfigurationAsync(data, senderId?: number): Promise<SLSetEquipmentConfigurationData> {
     function updateBit(number: number, bitPosition: number, bitValue: number): number {
       const bitValueNormalized = bitValue ? 1 : 0;
       const clearMask = ~(1 << bitPosition);
@@ -1023,7 +1023,7 @@ export class Equipment {
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for set equipment configuration response'));
       }, screenlogic.netTimeout);
-      screenlogic.once('setEquipmentConfiguration', (data: SLEquipmentConfigurationData) => {
+      screenlogic.once('setEquipmentConfiguration', (data: SLSetEquipmentConfigurationData) => {
         clearTimeout(_timeout);
         debugUnit('received setEquipmentConfiguration event');
         resolve(data);
@@ -1225,7 +1225,7 @@ export class Equipment {
         }
       }
     });
-    return Promise.resolve(p) as Promise<SLEquipmentConfigurationData>;
+    return Promise.resolve(p) as Promise<SLSetEquipmentConfigurationData>;
   }
   async cancelDelayAsync(senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {

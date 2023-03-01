@@ -4,15 +4,19 @@ import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 
 
 export class EquipmentConfigurationMessage {
-  public static decodeCircuitDefinitions(msg: Inbound) {
+  public static decodeCircuitDefinitions(msg: Inbound): SLCircuitNamesData {
     const cnt = msg.readUInt32LE();
-    const res = [];
+    const res: SLCircuitIdName[] = [];
     for (let i = 0; i < cnt; i++) {
       const id = msg.readUInt32LE();
       const circuitName = msg.readSLString();
       res.push({ id, circuitName });
     }
-    return res;
+    const data: SLCircuitNamesData = {
+      senderId: msg.senderId,
+      circuits: res
+    };
+    return data;
   }
   public static decodeNCircuitNames(msg: Inbound): number {
     const cnt = msg.readUInt8();
@@ -77,7 +81,7 @@ export class EquipmentConfigurationMessage {
     }
 
     const colorCount = msg.readInt32LE();
-    const colorArray = new Array(colorCount);
+    const colorArray: SLNameColor[] = new Array(colorCount);
     for (let i = 0; i < colorCount; i++) {
       colorArray[i] = {
         name: msg.readSLString(),
@@ -91,7 +95,7 @@ export class EquipmentConfigurationMessage {
 
     // RSG - This data doesn't look right.  Rely on pump config.
     const pumpCircCount = 8;
-    const pumpCircArray = new Array(pumpCircCount);
+    const pumpCircArray: number[] = new Array(pumpCircCount);
     for (let i = 0; i < pumpCircCount; i++) {
       pumpCircArray[i] = msg.readUInt8();
     }
@@ -169,7 +173,7 @@ export class EquipmentConfigurationMessage {
     return response;
   }
 
-  public static decodeSetEquipmentConfiguration(msg: Inbound) {
+  public static decodeSetEquipmentConfiguration(msg: Inbound): SLSetEquipmentConfigurationData {
 
     msg.readSLArray();
     const speedDataArray = msg.readSLArray(); // 0 byte
@@ -198,10 +202,9 @@ export class EquipmentConfigurationMessage {
     };
     const numPumps = this._getNumPumps(pumpDataArray);
 
-    const pumps = [];
+    const pumps: Pump[] = [];
     for (let i = 0; i < numPumps; i++) {
-      let pump: any = { id: i + 1 };
-      pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
+      const pump = this._getPumpData(i, pumpDataArray);
       pumps.push(pump);
     }
 
@@ -212,7 +215,7 @@ export class EquipmentConfigurationMessage {
     const lights = this._loadLightData(lightDataArray);
     const misc = this._loadMiscData(miscDataArray, msg);
     const remotes = this._loadRemoteData(remoteDataArray, UnitConnection.controllerType);
-    const data = {
+    const data: SLSetEquipmentConfigurationData = {
       senderId: msg.senderId,
       pumps,
       heaterConfig,
@@ -244,36 +247,29 @@ export class EquipmentConfigurationMessage {
     return numPumps;
   }
 
-  private static _getPumpData(pumpIndex: number, pumpDataArray: number[]) {
-    if (typeof (pumpIndex) !== 'number') {
-      return {};
-    }
+  private static _getPumpData(pumpIndex: number, pumpDataArray: number[]): Pump {
     const pumpIndexByte = 45 * pumpIndex;
-    const pump: any = {};
 
     if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
-      return {};
+      return null;
     }
+    let pump: Pump;
+    pump.id = pumpIndex + 1;
     const type = pumpDataArray[pumpIndexByte];
     pump.type = type;
     if ((type & 128) === 128) {
       pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVS;
       pump.name = 'Intelliflo VS';
-    }
-    else if ((type & 134) === 134) {
+    } else if ((type & 134) === 134) {
       pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVS;
       pump.name = 'Intelliflo VS Ultra Efficiency';
-    }
-    else if ((type & 169) === 169) {
+    } else if ((type & 169) === 169) {
       pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVS;
       pump.name = 'Intelliflo VS+SVRS';
-    }
-    else if ((type & 64) === 64) {
+    } else if ((type & 64) === 64) {
       pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVSF;
       pump.name = 'Intelliflo VSF';
-
-    }
-    else {
+    } else {
       pump.pentairType = PumpTypes.PUMP_TYPE_INTELLIFLOVF;
       pump.name = 'Intelliflo VF';
     }
@@ -284,13 +280,12 @@ export class EquipmentConfigurationMessage {
       for (let circuitId = 1; circuitId <= 8; circuitId++) {
         const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
         if (_circuit !== 0) {
-          const circuit: any = {};
-          circuit.id = circuitId;
-          circuit.circuit = _circuit;
-          circuit.speed =
-            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 +
-            pumpDataArray[pumpIndexByte + (circuitId + 20)];
-          circuit.units = 0;
+          const circuit: PumpCircuit = {
+            id: circuitId,
+            circuit: _circuit,
+            speed: pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)],
+            units: 0
+          };
           pump.circuits.push(circuit);
         }
       }
@@ -299,16 +294,16 @@ export class EquipmentConfigurationMessage {
       pump.minSpeed = 450;
       pump.maxSpeed = 3450;
       pump.speedStepSize = 10;
-    }
-    else if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVF) {
+    } else if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVF) {
       for (let circuitId = 1; circuitId <= 8; circuitId++) {
         const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
         if (_circuit !== 0) {
-          const circuit: any = {};
-          circuit.circuit = _circuit;
-          circuit.flow =
-            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
-          circuit.units = 1;
+          const circuit: PumpCircuit = {
+            id: circuitId,
+            circuit: _circuit,
+            flow: pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)],
+            units: 1
+          };
           pump.circuits.push(circuit);
         }
       }
@@ -328,18 +323,20 @@ export class EquipmentConfigurationMessage {
       pump.rinseTime = pumpDataArray[pumpIndexByte + 26];
       pump.vacuumFlow = pumpDataArray[pumpIndexByte + 27];
       pump.vacuumTime = pumpDataArray[pumpIndexByte + 29];
-    }
-    else if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVSF) {
+    } else if (pump.pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVSF) {
       for (let circuitId = 1; circuitId <= 8; circuitId++) {
         const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
         if (_circuit !== 0) {
-          const circuit: any = {};
-          circuit.circuit = _circuit;
-          circuit.units = (pumpDataArray[pumpIndexByte + 3] >> circuitId - 1 & 1) === 0 ? 1 : 0;
-          if (circuit.units) circuit.flow = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
-          else circuit.speed =
-            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 +
-            pumpDataArray[pumpIndexByte + (circuitId + 20)];
+          const circuit: PumpCircuit = {
+            id: circuitId,
+            circuit: _circuit,
+            units: (pumpDataArray[pumpIndexByte + 3] >> circuitId - 1 & 1) === 0 ? 1 : 0
+          };
+          if (circuit.units) {
+            circuit.flow = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
+          } else {
+            circuit.speed = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)];
+          }
           pump.circuits.push(circuit);
         }
       }
@@ -363,7 +360,7 @@ export class EquipmentConfigurationMessage {
 
   private static _loadHeaterData(heaterConfigDataArray: number[], msg: Inbound): HeaterConfig {
     ///// Heater config
-    const heaterConfig: any = {
+    const heaterConfig: HeaterConfig = {
       body1SolarPresent: msg.isBitSet(heaterConfigDataArray[0], 1), // bSolar1
       // body1HeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4), // bHPump1
       solarHeatPumpPresent: msg.isBitSet(heaterConfigDataArray[2], 4),  // ?? bHPump1
@@ -374,7 +371,7 @@ export class EquipmentConfigurationMessage {
       units: msg.isBitSet(heaterConfigDataArray[2], 0) ? 1 : 0 // 1 == celsius, 0 = fahrenheit
     };
 
-    return heaterConfig as HeaterConfig;
+    return heaterConfig;
     ///// End heater config
   }
 
@@ -430,7 +427,7 @@ export class EquipmentConfigurationMessage {
           } else {
             loadCenterName = (loadCenterIndex + 1).toString();
           }
-          const v: any = {
+          const v: Valves = {
             loadCenterIndex,
             valveIndex: valveIndex + 1,
             valveName,
@@ -529,16 +526,20 @@ export class EquipmentConfigurationMessage {
     return speed;
   }
 
-  private static _loadLightData(lightDataArray) {
-    const lights = { allOnAllOff: [] };
+  private static _loadLightData(lightDataArray: number[]): Lights {
+    const lights: Lights = {
+      allOnAllOff: []
+    };
+
     for (let i = 0; i < 8; i++) {
       lights.allOnAllOff.push(lightDataArray[i]);
     }
+
     return lights;
   }
 
-  private static _loadRemoteData(remoteDataArray, controllerType: number) {
-    const data = {
+  private static _loadRemoteData(remoteDataArray, controllerType: number): SLRemoteData {
+    const data: SLRemoteData = {
       fourButton: [],
       tenButton: [[]],
       quickTouch: []
@@ -585,8 +586,8 @@ export class EquipmentConfigurationMessage {
     return data;
   }
 
-  private static _loadSpaFlowData(spaFlowDataArray) {
-    const spaFlow = {
+  private static _loadSpaFlowData(spaFlowDataArray): SpaFlow {
+    const spaFlow: SpaFlow = {
       isActive: spaFlowDataArray[1] === 1,
       pumpId: spaFlowDataArray[5],
       stepSize: spaFlowDataArray[6]
@@ -700,10 +701,9 @@ export class EquipmentConfigurationMessage {
     else version = (versionDataArray[0] * 1000) + (versionDataArray[1]);
     const numPumps = this._getNumPumps(pumpDataArray);
 
-    const pumps = [];
+    const pumps: Pump[] = [];
     for (let i = 0; i < numPumps; i++) {
-      let pump: any = { id: i + 1 };
-      pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
+      const pump = this._getPumpData(i, pumpDataArray);
       pumps.push(pump);
     }
     const heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
@@ -960,9 +960,9 @@ export interface SLControllerConfigData extends SLData {
   interfaceTabFlags: number;
   circuitArray: Circuit[];
   colorCount: number;
-  colorArray: any[];
+  colorArray: SLNameColor[];
   pumpCircCount: number;
-  pumpCircArray: any[];
+  pumpCircArray: number[];
   showAlarms: number;
 }
 export interface Equipment {
@@ -998,20 +998,44 @@ export interface Circuit {
   deviceId: number
 }
 
+export interface SLColor {
+  r: number,
+  g: number,
+  b: number
+}
+
+export interface SLNameColor {
+  name: string,
+  color: SLColor
+}
+
+export interface SLSetEquipmentConfigurationData extends SLData {
+  pumps: Pump[],
+  heaterConfig: HeaterConfig,
+  valves: Valves[],
+  delays: Delays,
+  misc: Misc,
+  lights: Lights,
+  highSpeedCircuits: number[],
+  remotes: SLRemoteData,
+  numPumps: number,
+  rawData
+}
+
 export interface SLEquipmentConfigurationData extends SLData {
   controllerType: number;
   hardwareType: number;
   expansionsCount: number;
   version: number;
-  pumps: any;
+  pumps: Pump[];
   heaterConfig: HeaterConfig;
   valves: Valves[];
   delays: Delays;
   misc: Misc;
   remotes: SLRemoteData;
-  highSpeedCircuits: any[],
-  lights: { allOnAllOff: number[] },
-  spaFlow: { isActive: boolean, pumpId: number, stepSize: number }
+  highSpeedCircuits: number[],
+  lights: Lights,
+  spaFlow: SpaFlow
   numPumps: number;
   rawData: rawData;
 }
@@ -1035,6 +1059,52 @@ export interface rawData {
   pumpData: number[],
   sgData: number[],
   spaFlowData: number[]
+}
+
+export interface PumpCircuit {
+  id: number,
+  circuit: number,
+  speed?: number,
+  flow?: number
+  units: number,
+}
+
+export interface Pump {
+  id: number,
+  type: number,
+  pentairType: PumpTypes,
+  name: string,
+  address: number,
+  circuits: PumpCircuit[],
+  primingSpeed: number,
+  primingTime: number,
+  minSpeed: number,
+  maxSpeed: number,
+  speedStepSize: number,
+  backgroundCircuit: number,
+  filterSize: number,
+  turnovers: number,
+  manualFilterGPM: number,
+  minFlow: number,
+  maxFlow: number,
+  flowStepSize: number,
+  maxSystemTime: number,
+  maxPressureIncrease: number,
+  backwashFlow: number,
+  backwashTime: number,
+  rinseTime: number,
+  vacuumFlow: number,
+  vacuumTime: number
+}
+
+export interface Lights {
+  allOnAllOff: number[]
+}
+
+export interface SpaFlow {
+  isActive: boolean,
+  pumpId: number,
+  stepSize: number
 }
 
 export interface HeaterConfig {
@@ -1063,7 +1133,7 @@ export interface Valves {
   valveName: string,
   loadCenterName: string,
   deviceId: number,
-  sCircuit: string
+  sCircuit?: string
 }
 
 export interface SLWeatherForecastData extends SLData {
