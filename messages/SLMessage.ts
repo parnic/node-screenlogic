@@ -76,7 +76,7 @@ export class Inbound extends SLMessage {
     this._smartBuffer.readOffset += SLMessage.slackForAlignment(len);
     return str;
   }
-  readSLArray() {
+  readSLArray(): Array<number> {
     const len = this._smartBuffer.readInt32LE();
 
     const retval = new Array(len);

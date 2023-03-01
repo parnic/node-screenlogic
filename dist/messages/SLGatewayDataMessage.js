@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SLReceiveGatewayDataMessage = void 0;
 const SLMessage_1 = require("./SLMessage");
-const _MSG_ID = 18003;
 class SLReceiveGatewayDataMessage extends SLMessage_1.Inbound {
     constructor(buf) {
         super(0, 0);

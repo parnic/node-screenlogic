@@ -1,6 +1,6 @@
 'use strict';
 
-import { RemoteLogin, FindUnits, UnitConnection, HeatModes, LightCommands, screenlogic, SchedTypes, LocalUnit } from './index';
+import { RemoteLogin, FindUnits, screenlogic, LocalUnit } from './index';
 import { SLGateWayData } from './messages/SLGatewayDataMessage';
 
 const finder = new FindUnits();

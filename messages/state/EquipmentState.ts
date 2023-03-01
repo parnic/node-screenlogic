@@ -1,7 +1,7 @@
 
 import { PumpTypes } from '../../index';
 import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
-import { Delays, Misc, SLHistoryData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from '../config/EquipmentConfig';
+import { Delays, Misc, SLCircuitIdName, SLHistoryData, SLWeatherForecastData, SLWeatherForecastDayData, TimeTempPointPairs, TimeTimePointPairs, Valves } from '../config/EquipmentConfig';
 
 
 export class EquipmentStateMessage {
@@ -126,7 +126,7 @@ export class EquipmentStateMessage {
     return response;
   }
   public static decodeEquipmentConfiguration(msg: Inbound) {
-    const getNumPumps = function () {
+    const getNumPumps = function (): number {
       if (flowDataArray === null) {
         return 0;
       }
@@ -139,11 +139,7 @@ export class EquipmentStateMessage {
       }
       return numPumps;
     };
-    const getPumpType = function (pumpIndex) {
-      if (typeof (pumpIndex) !== 'number') {
-        return 0;
-      }
-
+    const getPumpType = function (pumpIndex: number): PumpTypes {
       if (flowDataArray === null || flowDataArray.length < (pumpIndex + 1) * 45) {
         return 0;
       }
@@ -154,14 +150,14 @@ export class EquipmentStateMessage {
       }
       return 0;
     };
-    const isValvePresent = function (valveIndex, loadCenterValveData) {
+    const isValvePresent = function (valveIndex: number, loadCenterValveData: number): boolean {
       if (valveIndex < 2) {
         return true;
       } else {
         return msg.isBitSet(loadCenterValveData, valveIndex);
       }
     };
-    const deviceIDToString = (poolConfig) => {
+    const deviceIDToString = (poolConfig: number): string => {
       switch (poolConfig) {
         case 128:
           return 'Solar_Active';
@@ -218,34 +214,34 @@ export class EquipmentStateMessage {
           return 'Freeze';
       }
     };
-    const loadSpeedCircuits = (speedDataArray, isPool) => {
+    const loadSpeedCircuits = (speedDataArray: number[], isPool: boolean): SLCircuitIdName[] => {
       isPool;
       // let  loadSpeedCircuits(poolConfig,isPool) {
       // ArrayList<Pair<String, Integer>> result = new ArrayList<>();
-      const result = [];
+      const result: SLCircuitIdName[] = [];
       // Pair<Integer, Integer> minMax = getRange(poolConfig, isPool);
       const minMax = [0, 255];
       // int iMin = ((Integer) minMax.first).intValue();
       // int iMax = ((Integer) minMax.second).intValue();
       const iMin = minMax[0];
       const iMax = minMax[1];
-      let iCount = 0;
+      // let iCount = 0;
       for (let i = iMin; i < iMax; i++) {
         // let byCircuit = poolConfig.getEquipconfig().getSpeedDataArray().get(i);
         const byCircuit = speedDataArray[i];
-        if (byCircuit.byteValue() > 0) {
-          if (byCircuit.byteValue() >= 128 && byCircuit.byteValue() <= 132) {
-            // let name = get().deviceIDToString(poolConfig, byCircuit.byteValue());
-            const name = `string ${byCircuit}`;
-            const id = byCircuit.byteValue();
-            result.push([name, id]);
-            iCount++;
+        if (byCircuit > 0) {
+          if (byCircuit >= 128 && byCircuit <= 132) {
+            // let name = get().deviceIDToString(poolConfig, byCircuit);
+            const circuitName = `string ${byCircuit}`;
+            const id = byCircuit;
+            result.push({id, circuitName});
+            // iCount++;
           } else {
             const circuit = byCircuit;
             if (circuit != null) {
-              const name2 = circuit.getM_Name();
-              const id2 = byCircuit.byteValue();
-              result.push([name2, id2]);
+              const circuitName = '';//circuit.getM_Name();
+              const id = byCircuit;
+              result.push({id, circuitName});
               // iCount++;
             }
           }
@@ -322,14 +318,14 @@ export class EquipmentStateMessage {
         let loadCenterName: string;
         let deviceId: number;
 
-        let bEnable = true;
+        // let bEnable = true;
         // let isSolarValve = true;
         if (loadCenterIndex === 0) {
           if (valveIndex === 0 && !bEnable1) {
-            bEnable = false;
+            // bEnable = false;
           }
           if (valveIndex === 1 && !bEnable2) {
-            bEnable = false;
+            // bEnable = false;
           }
         }
         let bPresent = false;
@@ -355,7 +351,7 @@ export class EquipmentStateMessage {
           } else {
             loadCenterName = (loadCenterIndex + 1).toString();
           }
-          const v: any = {
+          const v: Valves = {
             loadCenterIndex,
             valveIndex,
             valveName,
@@ -385,9 +381,8 @@ export class EquipmentStateMessage {
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
       manualHeat: miscDataArray[4] !== 0
     } as Misc;
-    let speed: any[] = [];
-    speed = loadSpeedCircuits(speedDataArray, true);
-    const data: any = {
+    const speed = loadSpeedCircuits(speedDataArray, true);
+    const data = {
       // let data: SLEquipmentConfigurationData = {
       controllerType,
       hardwareType,
@@ -564,13 +559,13 @@ export interface SLEquipmentCircuitArrayState {
 
 export interface SLSystemTimeData {
   date: Date;
-  year: any;
-  month: any;
-  dayOfWeek: any;
-  day: any;
-  hour: any;
-  minute: any;
-  second: any;
-  millisecond: any;
+  year: number;
+  month: number;
+  dayOfWeek: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+  millisecond: number;
   adjustForDST: boolean;
 }

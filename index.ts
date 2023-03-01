@@ -1,15 +1,14 @@
 'use strict';
 
 import 'source-map-support/register';
-const dgram = require('dgram');
+import * as dgram from 'dgram';
 import * as net from 'net';
 import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { ConnectionMessage, SLVersionData } from './messages/ConnectionMessage';
-// import { Inbound } from './messages/SLMessage';
-import { EquipmentConfigurationMessage, rawData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
+import { EquipmentConfigurationMessage, rawData, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLSetEquipmentConfigurationData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
 import { ChemMessage, SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { ScheduleMessage, SLScheduleData } from './messages/config/ScheduleMessage';
@@ -19,11 +18,12 @@ import { HeaterMessage } from './messages/config/HeaterMessage';
 import { Inbound, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { EquipmentStateMessage, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
 import { HLEncoder } from './utils/PasswordEncoder';
-const debugFind = require('debug')('sl:find');
-const debugRemote = require('debug')('sl:remote');
-const debugUnit = require('debug')('sl:unit');
+import debug from 'debug';
 import { setTimeout as setTimeoutSync } from 'timers';
 import { Socket } from 'dgram';
+const debugFind = debug('sl:find');
+const debugRemote = debug('sl:remote');
+const debugUnit = debug('sl:unit');
 export class FindUnits extends EventEmitter {
   constructor() {
     super();
@@ -62,7 +62,7 @@ export class FindUnits extends EventEmitter {
   }
 
   public async searchAsync(): Promise<LocalUnit[]> {
-    const p = new Promise((resolve, reject) => {
+    const p = new Promise((resolve) => {
       try {
         const units: LocalUnit[] = [];
         debugFind('Screenlogic finder searching for local units...',);
@@ -188,7 +188,7 @@ export class RemoteLogin extends EventEmitter {
   }
 
   public async closeAsync() {
-    const p = new Promise((resolve, reject) => {
+    const p = new Promise((resolve) => {
       debugRemote('Gateway request to close.');
       this._client.end(() => {
         debugRemote('Gateway closed');
@@ -396,7 +396,7 @@ export class UnitConnection extends EventEmitter {
   }
 
   async closeAsync(): Promise<boolean> {
-    const p = new Promise((resolve, reject) => {
+    const p = new Promise((resolve) => {
       try {
 
         if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer) clearTimeout(this._keepAliveTimer);
@@ -475,7 +475,7 @@ export class UnitConnection extends EventEmitter {
           });
 
         debugUnit('connecting...');
-        let connected = false;
+
         this.client.once('ready', () => {
           debugUnit('connected, sending init message...');
           this.write('CONNECTSERVERHOST\r\n\r\n');
@@ -499,9 +499,7 @@ export class UnitConnection extends EventEmitter {
           this.toLogEmit(msg, 'out');
         });
 
-        this.client.connect(this.serverPort, this.serverAddress, function () {
-          connected = true;
-        });
+        this.client.connect(this.serverPort, this.serverAddress);
       } catch (error) {
         debugUnit(`Caught connectAsync error ${error.message}; rethrowing...`);
         throw error;
@@ -919,12 +917,12 @@ export class Equipment {
     });
     return Promise.resolve(p) as Promise<SLHistoryData>;
   }
-  async getAllCircuitNamesAsync(senderId?: number): Promise<any> {
+  async getAllCircuitNamesAsync(senderId?: number): Promise<SLCircuitNamesData> {
     const size = await this.getNCircuitNamesAsync(senderId);
     const circNames = await this.getCircuitNamesAsync(size, senderId);
     return circNames;
   }
-  async getNCircuitNamesAsync(senderId?: number): Promise<any> {
+  async getNCircuitNamesAsync(senderId?: number): Promise<number> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get n circuit names query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -938,9 +936,9 @@ export class Equipment {
       const msg = screenlogic.controller.equipment.sendGetNumCircuitNamesMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p);
+    return Promise.resolve(p) as Promise<number>;
   }
-  async getCircuitNamesAsync(size: number, senderId?: number): Promise<any> {
+  async getCircuitNamesAsync(size: number, senderId?: number): Promise<SLCircuitNamesData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get circuit names query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
@@ -979,15 +977,15 @@ export class Equipment {
       screenlogic.toLogEmit(msg, 'out'); 
       */
     });
-    return Promise.resolve(p);
+    return Promise.resolve(p) as Promise<SLCircuitNamesData>;
   }
-  async getCircuitDefinitionsAsync(senderId?: number): Promise<any> {
+  async getCircuitDefinitionsAsync(senderId?: number): Promise<SLCircuitNamesData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get circuit definitions query...', screenlogic.senderId);
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for get circuit definitions response'));
       }, screenlogic.netTimeout);
-      screenlogic.once('circuitDefinitions', (data) => {
+      screenlogic.once('circuitDefinitions', (data: SLCircuitNamesData) => {
         clearTimeout(_timeout);
         debugUnit('received circuit definitions event');
         resolve(data);
@@ -995,7 +993,7 @@ export class Equipment {
       const msg = screenlogic.controller.equipment.sendGetCircuitDefinitionsMessage(senderId);
       screenlogic.toLogEmit(msg, 'out');
     });
-    return Promise.resolve(p);
+    return Promise.resolve(p) as Promise<SLCircuitNamesData>;
   }
   async getEquipmentConfigurationAsync(senderId?: number): Promise<SLEquipmentConfigurationData> {
     const p = new Promise((resolve, reject) => {
@@ -1013,7 +1011,7 @@ export class Equipment {
     });
     return Promise.resolve(p) as Promise<SLEquipmentConfigurationData>;
   }
-  async setEquipmentConfigurationAsync(data: any, senderId?: number): Promise<boolean> {
+  async setEquipmentConfigurationAsync(data, senderId?: number): Promise<SLSetEquipmentConfigurationData> {
     function updateBit(number: number, bitPosition: number, bitValue: number): number {
       const bitValueNormalized = bitValue ? 1 : 0;
       const clearMask = ~(1 << bitPosition);
@@ -1024,10 +1022,10 @@ export class Equipment {
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for set equipment configuration response'));
       }, screenlogic.netTimeout);
-      screenlogic.once('setEquipmentConfiguration', (data: SLEquipmentConfigurationData) => {
+      screenlogic.once('setEquipmentConfiguration', (data: SLSetEquipmentConfigurationData) => {
         clearTimeout(_timeout);
         debugUnit('received setEquipmentConfiguration event');
-        resolve(false);
+        resolve(data);
       });
       // theory here is that we may not know all of the exact bytes yet in the equipment config. 
       // Eventually we should be able to recreate it, but for now we should check to make sure
@@ -1216,7 +1214,7 @@ export class Equipment {
         screenlogic.toLogEmit(msg, 'out');
       }
       else {
-        for (const [key, value] of Object.entries(resData)) {
+        for (const [key] of Object.entries(resData)) {
           debugUnit(key);
           for (let i = 0; i < resData[key].length; i++) {
             if (resData[key][i] !== equipConfig.rawData[key][i]) {
@@ -1226,7 +1224,7 @@ export class Equipment {
         }
       }
     });
-    return Promise.resolve(p) as Promise<boolean>;
+    return Promise.resolve(p) as Promise<SLSetEquipmentConfigurationData>;
   }
   async cancelDelayAsync(senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {

@@ -218,7 +218,7 @@ class EquipmentStateMessage {
             // int iMax = ((Integer) minMax.second).intValue();
             const iMin = minMax[0];
             const iMax = minMax[1];
-            let iCount = 0;
+            // let iCount = 0;
             for (let i = iMin; i < iMax; i++) {
                 // let byCircuit = poolConfig.getEquipconfig().getSpeedDataArray().get(i);
                 const byCircuit = speedDataArray[i];
@@ -228,7 +228,7 @@ class EquipmentStateMessage {
                         const name = `string ${byCircuit}`;
                         const id = byCircuit.byteValue();
                         result.push([name, id]);
-                        iCount++;
+                        // iCount++;
                     }
                     else {
                         const circuit = byCircuit;
@@ -305,14 +305,14 @@ class EquipmentStateMessage {
                 let valveName;
                 let loadCenterName;
                 let deviceId;
-                let bEnable = true;
+                // let bEnable = true;
                 // let isSolarValve = true;
                 if (loadCenterIndex === 0) {
                     if (valveIndex === 0 && !bEnable1) {
-                        bEnable = false;
+                        // bEnable = false;
                     }
                     if (valveIndex === 1 && !bEnable2) {
-                        bEnable = false;
+                        // bEnable = false;
                     }
                 }
                 let bPresent = false;

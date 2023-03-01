@@ -2,8 +2,6 @@
 
 import { Inbound } from './SLMessage';
 
-const _MSG_ID = 18003;
-
 export class SLReceiveGatewayDataMessage extends Inbound {
   // static MSG_ID = _MSG_ID;
   private data: SLGateWayData;

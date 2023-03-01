@@ -47,13 +47,13 @@ export interface SLEquipmentCircuitArrayState {
 }
 export interface SLSystemTimeData {
     date: Date;
-    year: any;
-    month: any;
-    dayOfWeek: any;
-    day: any;
-    hour: any;
-    minute: any;
-    second: any;
-    millisecond: any;
+    year: number;
+    month: number;
+    dayOfWeek: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
     adjustForDST: boolean;
 }
