@@ -8,15 +8,14 @@ import * as SLGateway from './messages/SLGatewayDataMessage';
 
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { ConnectionMessage, SLVersionData } from './messages/ConnectionMessage';
-// import { Inbound } from './messages/SLMessage';
-import { EquipmentConfigurationMessage, rawData, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
+import { EquipmentConfigurationMessage, rawData, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLSetEquipmentConfigurationData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
 import { ChemMessage, SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { ScheduleMessage, SLScheduleData } from './messages/config/ScheduleMessage';
 import { PumpMessage, SLPumpStatusData } from './messages/state/PumpMessage';
 import { CircuitMessage } from './messages/config/CircuitMessage';
 import { HeaterMessage } from './messages/config/HeaterMessage';
-import { Inbound, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
+import { Inbound, SLMessage, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { EquipmentStateMessage, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
 import { HLEncoder } from './utils/PasswordEncoder';
 import debug from 'debug';
