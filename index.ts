@@ -15,7 +15,7 @@ import { ScheduleMessage, SLScheduleData } from './messages/config/ScheduleMessa
 import { PumpMessage, SLPumpStatusData } from './messages/state/PumpMessage';
 import { CircuitMessage } from './messages/config/CircuitMessage';
 import { HeaterMessage } from './messages/config/HeaterMessage';
-import { Inbound, SLMessage, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
+import { Inbound, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { EquipmentStateMessage, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
 import { HLEncoder } from './utils/PasswordEncoder';
 import debug from 'debug';
