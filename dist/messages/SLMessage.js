@@ -1,17 +1,16 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Outbound = exports.Inbound = exports.SLMessage = void 0;
-// const SmartBuffer = require('smart-buffer').SmartBuffer;
 const smart_buffer_1 = require("smart-buffer");
-const DAY_VALUES = [
-    ['Mon', 0x1],
-    ['Tue', 0x2],
-    ['Wed', 0x4],
-    ['Thu', 0x8],
-    ['Fri', 0x10],
-    ['Sat', 0x20],
-    ['Sun', 0x40],
-];
+const DAY_VALUES = {
+    Mon: 0x1,
+    Tue: 0x2,
+    Wed: 0x4,
+    Thu: 0x8,
+    Fri: 0x10,
+    Sat: 0x20,
+    Sun: 0x40,
+};
 class SLMessage {
     constructor(controllerId, senderId) {
         this.senderId = 0;
@@ -25,12 +24,10 @@ class SLMessage {
         return (4 - val % 4) % 4;
     }
     getDayValue(dayName) {
-        for (let i = 0; i < DAY_VALUES.length; i++) {
-            if (DAY_VALUES[i][0] === dayName) {
-                return DAY_VALUES[i][1];
-            }
+        if (!(dayName in DAY_VALUES)) {
+            return 0;
         }
-        return 0;
+        return DAY_VALUES[dayName];
     }
     toBuffer() {
         return this._smartBuffer.toBuffer();
@@ -81,7 +78,7 @@ class Inbound extends SLMessage {
         const days = [];
         for (let i = 0; i < 7; i++) {
             if (this.isBitSet(dayMask, i)) {
-                days.push(DAY_VALUES[i][0]);
+                days.push(Object.keys(DAY_VALUES)[i]);
             }
         }
         return days;

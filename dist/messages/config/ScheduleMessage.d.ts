@@ -8,11 +8,11 @@ export declare class ScheduleMessage {
 export interface SLScheduleData extends SLData {
     scheduleId: number;
     circuitId: number;
-    startTime: number;
-    stopTime: number;
+    startTime: string;
+    stopTime: string;
     dayMask: number;
     flags: number;
     heatCmd: number;
     heatSetPoint: number;
-    days: number[];
+    days: string[];
 }

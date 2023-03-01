@@ -1,6 +1,7 @@
+import { PumpTypes } from '../../index';
 import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
 export declare class EquipmentConfigurationMessage {
-    static decodeCircuitDefinitions(msg: Inbound): any[];
+    static decodeCircuitDefinitions(msg: Inbound): SLCircuitNamesData;
     static decodeNCircuitNames(msg: Inbound): number;
     static decodeCircuitNames(msg: Inbound): SLCircuitNamesData;
     static decodeControllerConfig(msg: Inbound): SLControllerConfigData;
@@ -10,37 +11,7 @@ export declare class EquipmentConfigurationMessage {
     static isDualBody(controllerType: number): boolean;
     static isChem2(controllerType: number, hwType: number): boolean;
     static decodeSetEquipmentConfigurationAck(msg: Inbound): SLSimpleBoolData;
-    static decodeSetEquipmentConfiguration(msg: Inbound): {
-        senderId: number;
-        pumps: any[];
-        heaterConfig: HeaterConfig;
-        valves: Valves[];
-        delays: Delays;
-        misc: Misc;
-        lights: {
-            allOnAllOff: any[];
-        };
-        highSpeedCircuits: number[];
-        remotes: {
-            fourButton: any[];
-            tenButton: any[][];
-            quickTouch: any[];
-        };
-        numPumps: number;
-        rawData: {
-            highSpeedCircuitData: any[];
-            valveData: any[];
-            remoteData: any[];
-            heaterConfigData: any[];
-            delayData: any[];
-            macroData: any[];
-            miscData: any[];
-            lightData: any[];
-            pumpData: any[];
-            spaFlowData: any[];
-            alarm: number;
-        };
-    };
+    static decodeSetEquipmentConfiguration(msg: Inbound): SLSetEquipmentConfigurationData;
     private static _getNumPumps;
     private static _getPumpData;
     private static _isValvePresent;
@@ -64,18 +35,18 @@ export interface SLControllerConfigData extends SLData {
     minSetPoint: number[];
     maxSetPoint: number[];
     degC: boolean;
-    controllerType: any;
+    controllerType: number;
     circuitCount: number;
-    hwType: any;
-    controllerData: any;
+    hwType: number;
+    controllerData: number;
     equipment: Equipment;
-    genCircuitName: any;
+    genCircuitName: string;
     interfaceTabFlags: number;
     circuitArray: Circuit[];
     colorCount: number;
-    colorArray: any[];
+    colorArray: SLNameColor[];
     pumpCircCount: number;
-    pumpCircArray: any[];
+    pumpCircArray: number[];
     showAlarms: number;
 }
 export interface Equipment {
@@ -109,26 +80,40 @@ export interface Circuit {
     eggTimer: number;
     deviceId: number;
 }
+export interface SLColor {
+    r: number;
+    g: number;
+    b: number;
+}
+export interface SLNameColor {
+    name: string;
+    color: SLColor;
+}
+export interface SLSetEquipmentConfigurationData extends SLData {
+    pumps: Pump[];
+    heaterConfig: HeaterConfig;
+    valves: Valves[];
+    delays: Delays;
+    misc: Misc;
+    lights: Lights;
+    highSpeedCircuits: number[];
+    remotes: SLRemoteData;
+    numPumps: number;
+}
 export interface SLEquipmentConfigurationData extends SLData {
     controllerType: number;
     hardwareType: number;
     expansionsCount: number;
     version: number;
-    pumps: any;
+    pumps: Pump[];
     heaterConfig: HeaterConfig;
     valves: Valves[];
     delays: Delays;
     misc: Misc;
     remotes: SLRemoteData;
-    highSpeedCircuits: any[];
-    lights: {
-        allOnAllOff: number[];
-    };
-    spaFlow: {
-        isActive: boolean;
-        pumpId: number;
-        stepSize: number;
-    };
+    highSpeedCircuits: number[];
+    lights: Lights;
+    spaFlow: SpaFlow;
     numPumps: number;
     rawData: rawData;
 }
@@ -151,6 +136,48 @@ export interface rawData {
     sgData: number[];
     spaFlowData: number[];
 }
+export interface PumpCircuit {
+    id: number;
+    circuit: number;
+    speed?: number;
+    flow?: number;
+    units: number;
+}
+export interface Pump {
+    id: number;
+    type: number;
+    pentairType: PumpTypes;
+    name: string;
+    address: number;
+    circuits: PumpCircuit[];
+    primingSpeed: number;
+    primingTime: number;
+    minSpeed: number;
+    maxSpeed: number;
+    speedStepSize: number;
+    backgroundCircuit: number;
+    filterSize: number;
+    turnovers: number;
+    manualFilterGPM: number;
+    minFlow: number;
+    maxFlow: number;
+    flowStepSize: number;
+    maxSystemTime: number;
+    maxPressureIncrease: number;
+    backwashFlow: number;
+    backwashTime: number;
+    rinseTime: number;
+    vacuumFlow: number;
+    vacuumTime: number;
+}
+export interface Lights {
+    allOnAllOff: number[];
+}
+export interface SpaFlow {
+    isActive: boolean;
+    pumpId: number;
+    stepSize: number;
+}
 export interface HeaterConfig {
     body1SolarPresent: boolean;
     body2SolarPresent: boolean;
@@ -162,7 +189,7 @@ export interface HeaterConfig {
 export interface Delays {
     poolPumpOnDuringHeaterCooldown: boolean;
     spaPumpOnDuringHeaterCooldown: boolean;
-    pumpOffDuringValveAction: any;
+    pumpOffDuringValveAction: boolean;
 }
 export interface Misc {
     intelliChem: boolean;
@@ -174,7 +201,7 @@ export interface Valves {
     valveName: string;
     loadCenterName: string;
     deviceId: number;
-    sCircuit: string;
+    sCircuit?: string;
 }
 export interface SLWeatherForecastData extends SLData {
     version: number;

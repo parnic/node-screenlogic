@@ -1,7 +1,9 @@
 /// <reference types="node" />
 /// <reference types="node" />
 /// <reference types="node" />
+/// <reference types="node" />
 import 'source-map-support/register';
+import * as dgram from 'dgram';
 import * as net from 'net';
 import { EventEmitter } from 'events';
 import * as SLGateway from './messages/SLGatewayDataMessage';
@@ -12,7 +14,7 @@ import { SLIntellichlorData } from './messages/state/ChlorMessage';
 import { SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { SLScheduleData } from './messages/config/ScheduleMessage';
 import { SLPumpStatusData } from './messages/state/PumpMessage';
-import { Inbound, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
+import { Inbound, SLMessage, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
 export declare class FindUnits extends EventEmitter {
     constructor();
@@ -21,17 +23,17 @@ export declare class FindUnits extends EventEmitter {
     private message;
     search(): void;
     searchAsync(): Promise<LocalUnit[]>;
-    foundServer(msg: any, remote: any): void;
+    foundServer(msg: Buffer, remote: dgram.RemoteInfo): void;
     sendServerBroadcast(): void;
     close(): void;
 }
 export declare class RemoteLogin extends EventEmitter {
-    constructor(systemName: any);
+    constructor(systemName: string);
     systemName: string;
     private _client;
     private _gateway;
     connectAsync(): Promise<SLGateway.SLGateWayData>;
-    closeAsync(): Promise<unknown>;
+    closeAsync(): Promise<boolean>;
 }
 export declare class UnitConnection extends EventEmitter {
     constructor();
@@ -77,7 +79,7 @@ export declare class UnitConnection extends EventEmitter {
     readMockBytesAsString(hexStr: string): void;
     keepAliveAsync(): void;
     processData(msg: Buffer): void;
-    toLogEmit(message: any, direction: any): void;
+    toLogEmit(message: SLMessage, direction: string): void;
     closeAsync(): Promise<boolean>;
     connectAsync(): Promise<boolean>;
     loginAsync(challengeString: string, senderId?: number): Promise<unknown>;
@@ -86,8 +88,8 @@ export declare class UnitConnection extends EventEmitter {
     status(): {
         destroyed: boolean;
         connecting: boolean;
-        timeout: any;
         readyState: string;
+        timeout?: undefined;
     } | {
         destroyed: boolean;
         connecting: boolean;
@@ -108,9 +110,8 @@ export declare class Equipment {
     getAllCircuitNamesAsync(senderId?: number): Promise<SLCircuitNamesData>;
     getNCircuitNamesAsync(senderId?: number): Promise<number>;
     getCircuitNamesAsync(size: number, senderId?: number): Promise<SLCircuitNamesData>;
-    getCircuitDefinitionsAsync(senderId?: number): Promise<any>;
+    getCircuitDefinitionsAsync(senderId?: number): Promise<SLCircuitNamesData>;
     getEquipmentConfigurationAsync(senderId?: number): Promise<SLEquipmentConfigurationData>;
-    setEquipmentConfigurationAsync(data: any, senderId?: number): Promise<SLEquipmentConfigurationData>;
     cancelDelayAsync(senderId?: number): Promise<SLSimpleBoolData>;
     getSystemTimeAsync(senderId?: number): Promise<SLSystemTimeData>;
     getControllerConfigAsync(senderId?: number): Promise<SLControllerConfigData>;

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "module": "commonjs",
     "noEmitOnError": true,
     "removeComments": false,
