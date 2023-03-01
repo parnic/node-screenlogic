@@ -1,11 +1,27 @@
 import { Inbound, SLData, SLSimpleBoolData } from '../SLMessage';
-import { SLHistoryData, SLWeatherForecastData } from '../config/EquipmentConfig';
+import { Delays, Misc, SLCircuitIdName, SLHistoryData, SLWeatherForecastData, Valves } from '../config/EquipmentConfig';
 export declare class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg: Inbound): SLEquipmentStateData;
     static decodeSystemTime(msg: Inbound): SLSystemTimeData;
     static decodeCancelDelay(msg: Inbound): SLSimpleBoolData;
     static decodeSetSystemTime(msg: Inbound): SLSimpleBoolData;
-    static decodeEquipmentConfiguration(msg: Inbound): any;
+    static decodeEquipmentConfiguration(msg: Inbound): {
+        controllerType: number;
+        hardwareType: number;
+        expansionsCount: number;
+        version: number;
+        heaterConfig: {
+            body1SolarPresent: boolean;
+            body1HeatPumpPresent: boolean;
+            body2SolarPresent: boolean;
+            thermaFloPresent: boolean;
+            thermaFloCoolPresent: boolean;
+        };
+        valves: Valves[];
+        delays: Delays;
+        misc: Misc;
+        speed: SLCircuitIdName[];
+    };
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
     static decodeGeneric(msg: Inbound): void;

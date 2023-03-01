@@ -8,14 +8,14 @@ import * as SLGateway from './messages/SLGatewayDataMessage';
 
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { ConnectionMessage, SLVersionData } from './messages/ConnectionMessage';
-import { EquipmentConfigurationMessage, rawData, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLSetEquipmentConfigurationData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
+import { EquipmentConfigurationMessage, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
 import { ChemMessage, SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { ScheduleMessage, SLScheduleData } from './messages/config/ScheduleMessage';
 import { PumpMessage, SLPumpStatusData } from './messages/state/PumpMessage';
 import { CircuitMessage } from './messages/config/CircuitMessage';
 import { HeaterMessage } from './messages/config/HeaterMessage';
-import { Inbound, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
+import { Inbound, SLMessage, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { EquipmentStateMessage, SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
 import { HLEncoder } from './utils/PasswordEncoder';
 import debug from 'debug';
@@ -84,7 +84,7 @@ export class FindUnits extends EventEmitter {
     return Promise.resolve(p) as Promise<LocalUnit[]>;
   }
 
-  foundServer(msg, remote) {
+  foundServer(msg: Buffer, remote: dgram.RemoteInfo) {
     debugFind('found something');
     if (msg.length >= 40) {
       const server: LocalUnit = {
@@ -116,7 +116,7 @@ export class FindUnits extends EventEmitter {
 }
 
 export class RemoteLogin extends EventEmitter {
-  constructor(systemName) {
+  constructor(systemName: string) {
     super();
 
     this.systemName = systemName;
@@ -164,7 +164,7 @@ export class RemoteLogin extends EventEmitter {
             reject(new Error('Message of length <= 4 is invalid.'));
           }
         }
-        this.closeAsync().catch((err) => {
+        this.closeAsync().catch((err: Error) => {
           debugRemote(`Error with closeAsync: ${err.message};`);
         });
       }).on('close', (had_error) => {
@@ -378,7 +378,7 @@ export class UnitConnection extends EventEmitter {
     }
   }
 
-  toLogEmit(message, direction) {
+  toLogEmit(message: SLMessage, direction: string) {
     if (this._isMock) return;
     const data = {
       systemName: this.systemName,
@@ -447,25 +447,25 @@ export class UnitConnection extends EventEmitter {
           this.emit('bytesRead', this.client.bytesRead);
           this.processData(msg);
         })
-          .once('close', (had_error) => {
+          .once('close', (had_error: boolean) => {
             debugUnit(`closed.  any error? ${had_error}`);
             this.emit('close', had_error);
           })
-          .once('end', (e) => {
+          .once('end', () => {
             // often, during debugging, the socket will timeout
-            debugUnit(`end event for unit: ${e.message}`);
-            this.emit('end', e);
+            debugUnit('end event for unit');
+            this.emit('end');
           })
-          .once('error', async (e) => {
+          .once('error', async (e: Error) => {
             // often, during debugging, the socket will timeout
             debugUnit(`error event for unit: ${typeof e !== 'undefined' ? e.message : 'unknown unit'}`);
             // this.emit('error', e);
             await this.reconnectAsync();
           })
-          .once('timeout', async (e) => {
+          .once('timeout', async () => {
             // often, during debugging, the socket will timeout
-            debugUnit(`timeout event for unit: ${e.message}`);
-            this.emit('timeout', e);
+            debugUnit('timeout event for unit');
+            this.emit('timeout');
             await this.reconnectAsync();
           })
           .once('clientError', async (err, socket) => {
@@ -544,7 +544,6 @@ export class UnitConnection extends EventEmitter {
         destroyed: true,
         connecting: false,
         // pending: this.client.pending, // should be here but isn't?
-        timeout: undefined,
         readyState: 'closed',
       };
     }
@@ -1011,221 +1010,221 @@ export class Equipment {
     });
     return Promise.resolve(p) as Promise<SLEquipmentConfigurationData>;
   }
-  async setEquipmentConfigurationAsync(data, senderId?: number): Promise<SLSetEquipmentConfigurationData> {
-    function updateBit(number: number, bitPosition: number, bitValue: number): number {
-      const bitValueNormalized = bitValue ? 1 : 0;
-      const clearMask = ~(1 << bitPosition);
-      return (number & clearMask) | (bitValueNormalized << bitPosition);
-    }
-    const p = new Promise((resolve, reject) => {
-      debugUnit('[%d] sending set equipment configuration query...', screenlogic.senderId);
-      const _timeout = setTimeoutSync(() => {
-        reject(new Error('time out waiting for set equipment configuration response'));
-      }, screenlogic.netTimeout);
-      screenlogic.once('setEquipmentConfiguration', (data: SLSetEquipmentConfigurationData) => {
-        clearTimeout(_timeout);
-        debugUnit('received setEquipmentConfiguration event');
-        resolve(data);
-      });
-      // theory here is that we may not know all of the exact bytes yet in the equipment config. 
-      // Eventually we should be able to recreate it, but for now we should check to make sure
-      // we don't screw anything up.  We can do that by comparing the existing array to the
-      // constructed array and look for differences that shouldn't be there.
-      let equipConfig: SLEquipmentConfigurationData;
-      screenlogic.equipment.getEquipmentConfigurationAsync(senderId)
-        .then(res => { equipConfig = res; })
-        .catch(e => { throw e; });
+  // async setEquipmentConfigurationAsync(data, senderId?: number): Promise<SLSetEquipmentConfigurationData> {
+  //   function updateBit(number: number, bitPosition: number, bitValue: number): number {
+  //     const bitValueNormalized = bitValue ? 1 : 0;
+  //     const clearMask = ~(1 << bitPosition);
+  //     return (number & clearMask) | (bitValueNormalized << bitPosition);
+  //   }
+  //   const p = new Promise((resolve, reject) => {
+  //     debugUnit('[%d] sending set equipment configuration query...', screenlogic.senderId);
+  //     const _timeout = setTimeoutSync(() => {
+  //       reject(new Error('time out waiting for set equipment configuration response'));
+  //     }, screenlogic.netTimeout);
+  //     screenlogic.once('setEquipmentConfiguration', (data: SLSetEquipmentConfigurationData) => {
+  //       clearTimeout(_timeout);
+  //       debugUnit('received setEquipmentConfiguration event');
+  //       resolve(data);
+  //     });
+  //     // theory here is that we may not know all of the exact bytes yet in the equipment config. 
+  //     // Eventually we should be able to recreate it, but for now we should check to make sure
+  //     // we don't screw anything up.  We can do that by comparing the existing array to the
+  //     // constructed array and look for differences that shouldn't be there.
+  //     let equipConfig: SLEquipmentConfigurationData;
+  //     screenlogic.equipment.getEquipmentConfigurationAsync(senderId)
+  //       .then(res => { equipConfig = res; })
+  //       .catch(e => { throw e; });
 
-      const resData: rawData & { alarm: number } = {
-        ...JSON.parse(JSON.stringify(equipConfig.rawData)),
-        alarm: data.alarm
-      };
+  //     const resData: rawData & { alarm: number } = {
+  //       ...JSON.parse(JSON.stringify(equipConfig.rawData)),
+  //       alarm: data.alarm
+  //     };
 
-      // High Speed
-      if (typeof data.highSpeedCircuits !== 'undefined') {
-        let max = 0;
-        if (EquipmentConfigurationMessage.isEasyTouch(UnitConnection.controllerType)) {
-          // easytouch = 4; it = 8
-          max = 4;
-        }
-        else if (EquipmentConfigurationMessage.isDualBody(UnitConnection.controllerType)) {
-          max = 8;
-        }
-        for (let i = 0; i < max; i++) {
-          if (typeof data.highSpeedCircuits[i] !== 'undefined') {
-            resData.highSpeedCircuitData = data.highSpeedCircuits[i];
-          }
-        }
-      }
+  //     // High Speed
+  //     if (typeof data.highSpeedCircuits !== 'undefined') {
+  //       let max = 0;
+  //       if (EquipmentConfigurationMessage.isEasyTouch(UnitConnection.controllerType)) {
+  //         // easytouch = 4; it = 8
+  //         max = 4;
+  //       }
+  //       else if (EquipmentConfigurationMessage.isDualBody(UnitConnection.controllerType)) {
+  //         max = 8;
+  //       }
+  //       for (let i = 0; i < max; i++) {
+  //         if (typeof data.highSpeedCircuits[i] !== 'undefined') {
+  //           resData.highSpeedCircuitData = data.highSpeedCircuits[i];
+  //         }
+  //       }
+  //     }
 
-      // PUMPS
-      if (typeof data.pumps !== 'undefined') {
-        for (let i = 0; i < data.pumps.length; i++) {
-          const pump = data.pumps[i];
-          if (pump.id === 0) continue;
-          const pumpIndex = pump.id || i + 1;
-          const pumpIndexByte = 45 * pumpIndex;
-          resData.pumpData[pumpIndexByte] = pump.type;
-          if (pump.type === 128 || pump.type === 169 || pump.type === 169 || pump.type === 255) {
-            for (let pc = 0; pc < pump.circuits.length; pc++) {
-              const circuit = pump.circuits[pc];
-              if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
-                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = 0;
-              }
-              else {
-                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = Math.floor(circuit.speed / 256) || 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = circuit.speed % 256 || 0;
-              }
-            }
-            resData.pumpData[pumpIndexByte + 20] = Math.floor(pump.primingSpeed / 256) || 0;
-            resData.pumpData[pumpIndexByte + 29] = pump.primingSpeed % 256 || 0;
-            resData.pumpData[pumpIndexByte + 1] = pump.primingTime || 0;
-          }
-          else if (pump.type < 64) {
-            for (let pc = 0; pc < 8; pc++) {
-              const circuit = pump.circuits[pc];
-              if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
-                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
-              }
-              else {
-                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = circuit.flow || 0;
-              }
-            }
-            resData.pumpData[pumpIndexByte] = pump.backgroundCircuit || 6;
-            resData.pumpData[pumpIndexByte + 1] = pump.filterSize / 1000 || 15000;
-            resData.pumpData[pumpIndexByte + 2] = pump.turnovers || 2;
-            resData.pumpData[pumpIndexByte + 20] = pump.manualFilterGPM || 30;
-            resData.pumpData[pumpIndexByte + 21] = pump.primingSpeed || 55;
-            resData.pumpData[pumpIndexByte + 22] = (pump.primingTime | pump.maxSystemTime << 4) || 0;
-            resData.pumpData[pumpIndexByte + 23] = pump.maxPressureIncrease || 0;
-            resData.pumpData[pumpIndexByte + 24] = pump.backwashFlow || 60;
-            resData.pumpData[pumpIndexByte + 25] = pump.backwashTime || 5;
-            resData.pumpData[pumpIndexByte + 26] = pump.rinseTime || 1;
-            resData.pumpData[pumpIndexByte + 27] = pump.vacuumFlow || 50;
-            resData.pumpData[pumpIndexByte + 29] = pump.vacuumTime || 10;
+  //     // PUMPS
+  //     if (typeof data.pumps !== 'undefined') {
+  //       for (let i = 0; i < data.pumps.length; i++) {
+  //         const pump = data.pumps[i];
+  //         if (pump.id === 0) continue;
+  //         const pumpIndex = pump.id || i + 1;
+  //         const pumpIndexByte = 45 * pumpIndex;
+  //         resData.pumpData[pumpIndexByte] = pump.type;
+  //         if (pump.type === 128 || pump.type === 169 || pump.type === 169 || pump.type === 255) {
+  //           for (let pc = 0; pc < pump.circuits.length; pc++) {
+  //             const circuit = pump.circuits[pc];
+  //             if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = 0;
+  //             }
+  //             else {
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = Math.floor(circuit.speed / 256) || 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = circuit.speed % 256 || 0;
+  //             }
+  //           }
+  //           resData.pumpData[pumpIndexByte + 20] = Math.floor(pump.primingSpeed / 256) || 0;
+  //           resData.pumpData[pumpIndexByte + 29] = pump.primingSpeed % 256 || 0;
+  //           resData.pumpData[pumpIndexByte + 1] = pump.primingTime || 0;
+  //         }
+  //         else if (pump.type < 64) {
+  //           for (let pc = 0; pc < 8; pc++) {
+  //             const circuit = pump.circuits[pc];
+  //             if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
+  //             }
+  //             else {
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = circuit.flow || 0;
+  //             }
+  //           }
+  //           resData.pumpData[pumpIndexByte] = pump.backgroundCircuit || 6;
+  //           resData.pumpData[pumpIndexByte + 1] = pump.filterSize / 1000 || 15000;
+  //           resData.pumpData[pumpIndexByte + 2] = pump.turnovers || 2;
+  //           resData.pumpData[pumpIndexByte + 20] = pump.manualFilterGPM || 30;
+  //           resData.pumpData[pumpIndexByte + 21] = pump.primingSpeed || 55;
+  //           resData.pumpData[pumpIndexByte + 22] = (pump.primingTime | pump.maxSystemTime << 4) || 0;
+  //           resData.pumpData[pumpIndexByte + 23] = pump.maxPressureIncrease || 0;
+  //           resData.pumpData[pumpIndexByte + 24] = pump.backwashFlow || 60;
+  //           resData.pumpData[pumpIndexByte + 25] = pump.backwashTime || 5;
+  //           resData.pumpData[pumpIndexByte + 26] = pump.rinseTime || 1;
+  //           resData.pumpData[pumpIndexByte + 27] = pump.vacuumFlow || 50;
+  //           resData.pumpData[pumpIndexByte + 29] = pump.vacuumTime || 10;
 
-          }
-          else if (pump.type === 64) {
-            let ubyte = 0;
-            for (let pc = 0; pc < 8; pc++) {
-              const circuit = pump.circuits[pc];
-              if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
-                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
-                resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = 0;
-              }
-              else {
-                resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
-                if (circuit.units) {
-                  // gpm
-                  resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = circuit.flow || 0;
-                  ubyte |= (1 << (i - 1));
-                }
-                else {
-                  resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = Math.floor(circuit.speed / 256) || 0;
-                  resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = circuit.speed % 256 || 0;
-                }
+  //         }
+  //         else if (pump.type === 64) {
+  //           let ubyte = 0;
+  //           for (let pc = 0; pc < 8; pc++) {
+  //             const circuit = pump.circuits[pc];
+  //             if (typeof pump.circuit === 'undefined' || pump.circuit === 0) {
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = 0;
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = 0;
+  //             }
+  //             else {
+  //               resData.pumpData[pumpIndexByte + (pc * 2 + 2)] = circuit.circuit || 0;
+  //               if (circuit.units) {
+  //                 // gpm
+  //                 resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = circuit.flow || 0;
+  //                 ubyte |= (1 << (i - 1));
+  //               }
+  //               else {
+  //                 resData.pumpData[pumpIndexByte + (pc * 2 + 3)] = Math.floor(circuit.speed / 256) || 0;
+  //                 resData.pumpData[pumpIndexByte + (pc * 2 + 20)] = circuit.speed % 256 || 0;
+  //               }
 
-              }
-            }
-            resData.pumpData[pumpIndexByte + 3] = ubyte || 0;
-          }
-        }
-      }
+  //             }
+  //           }
+  //           resData.pumpData[pumpIndexByte + 3] = ubyte || 0;
+  //         }
+  //       }
+  //     }
 
-      // HEATERS
-      if (typeof data.heaters !== 'undefined') {
-        let thermaFloPresent = false;
-        let thermaFloCoolPresent = false;
-        let body1SolarPresent = false;
-        const solarHeatPumpPresent = false;
-        const body2SolarPresent = false; // dual body?
-        for (let i = 0; i < data.heaters.length; i++) {
-          const heater = data.heaters[i];
-          if (heater.type === 3) {
-            thermaFloPresent = true;
-            thermaFloCoolPresent = heater.thermaFloCoolPresent;
-          }
-          else if (heater.type === 2) {
-            body1SolarPresent = true;
-          }
-          // RSG - Which type is this?
-          // else if (heater.type === 3) {
-          //   solarHeatPumpPresent = true;
-          // }
-        }
-        if (body2SolarPresent) resData.heaterConfigData[0] = resData.heaterConfigData[0] |= (1 << 4);
-        if (body1SolarPresent) resData.heaterConfigData[0] = resData.heaterConfigData[0] |= (1 << 1);
-        if (thermaFloCoolPresent) resData.heaterConfigData[1] = resData.heaterConfigData[1] |= (1 << 1);
-        if (thermaFloPresent) resData.heaterConfigData[2] = resData.heaterConfigData[2] |= (1 << 5);
-        if (solarHeatPumpPresent) resData.heaterConfigData[2] = resData.heaterConfigData[2] |= (1 << 4);
-        // manual heat is in misc section
-      }
+  //     // HEATERS
+  //     if (typeof data.heaters !== 'undefined') {
+  //       let thermaFloPresent = false;
+  //       let thermaFloCoolPresent = false;
+  //       let body1SolarPresent = false;
+  //       const solarHeatPumpPresent = false;
+  //       const body2SolarPresent = false; // dual body?
+  //       for (let i = 0; i < data.heaters.length; i++) {
+  //         const heater = data.heaters[i];
+  //         if (heater.type === 3) {
+  //           thermaFloPresent = true;
+  //           thermaFloCoolPresent = heater.thermaFloCoolPresent;
+  //         }
+  //         else if (heater.type === 2) {
+  //           body1SolarPresent = true;
+  //         }
+  //         // RSG - Which type is this?
+  //         // else if (heater.type === 3) {
+  //         //   solarHeatPumpPresent = true;
+  //         // }
+  //       }
+  //       if (body2SolarPresent) resData.heaterConfigData[0] = resData.heaterConfigData[0] |= (1 << 4);
+  //       if (body1SolarPresent) resData.heaterConfigData[0] = resData.heaterConfigData[0] |= (1 << 1);
+  //       if (thermaFloCoolPresent) resData.heaterConfigData[1] = resData.heaterConfigData[1] |= (1 << 1);
+  //       if (thermaFloPresent) resData.heaterConfigData[2] = resData.heaterConfigData[2] |= (1 << 5);
+  //       if (solarHeatPumpPresent) resData.heaterConfigData[2] = resData.heaterConfigData[2] |= (1 << 4);
+  //       // manual heat is in misc section
+  //     }
 
-      // DELAYS
-      if (typeof data.misc !== 'undefined') {
-        if (typeof data.misc.poolPumpOnDuringHeaterCooldown !== 'undefined') resData.delayData[0] = updateBit(resData.delayData[0], 0, data.misc.poolPumpOnDuringHeaterCooldown ? 1 : 0);
-        if (typeof data.misc.spaPumpOnDuringHeaterCooldown !== 'undefined') resData.delayData[0] = updateBit(resData.delayData[0], 1, data.misc.spaPumpOnDuringHeaterCooldown ? 1 : 0);
-        if (typeof data.misc.pumpDelay !== 'undefined') resData.delayData[0] = updateBit(resData.delayData[0], 7, data.misc.pumpDelay ? 1 : 0);
-      }
-      // INTELLICHEM
+  //     // DELAYS
+  //     if (typeof data.misc !== 'undefined') {
+  //       if (typeof data.misc.poolPumpOnDuringHeaterCooldown !== 'undefined') resData.delayData[0] = updateBit(resData.delayData[0], 0, data.misc.poolPumpOnDuringHeaterCooldown ? 1 : 0);
+  //       if (typeof data.misc.spaPumpOnDuringHeaterCooldown !== 'undefined') resData.delayData[0] = updateBit(resData.delayData[0], 1, data.misc.spaPumpOnDuringHeaterCooldown ? 1 : 0);
+  //       if (typeof data.misc.pumpDelay !== 'undefined') resData.delayData[0] = updateBit(resData.delayData[0], 7, data.misc.pumpDelay ? 1 : 0);
+  //     }
+  //     // INTELLICHEM
 
-      if (typeof data.chem !== 'undefined') {
-        const active = typeof data.chem.isActive !== 'undefined' ? (data.chem.isActive ? 1 : 0) : resData.miscData[3] & 0x01;
-        resData.miscData[3] = updateBit(resData.miscData[3], 0, active);
-      }
-      // MISC
-      if (typeof data.misc !== 'undefined') {
-        if (typeof data.misc.units !== 'undefined') resData.heaterConfigData[2] = updateBit(resData.heaterConfigData[2], 0, data.misc.units ? 1 : 0);
-        if (typeof data.misc.manualHeat !== 'undefined') resData.miscData[4] = data.misc.manualHeat ? 1 : 0;
-      }
+  //     if (typeof data.chem !== 'undefined') {
+  //       const active = typeof data.chem.isActive !== 'undefined' ? (data.chem.isActive ? 1 : 0) : resData.miscData[3] & 0x01;
+  //       resData.miscData[3] = updateBit(resData.miscData[3], 0, active);
+  //     }
+  //     // MISC
+  //     if (typeof data.misc !== 'undefined') {
+  //       if (typeof data.misc.units !== 'undefined') resData.heaterConfigData[2] = updateBit(resData.heaterConfigData[2], 0, data.misc.units ? 1 : 0);
+  //       if (typeof data.misc.manualHeat !== 'undefined') resData.miscData[4] = data.misc.manualHeat ? 1 : 0;
+  //     }
 
-      // VALVES
-      if (typeof data.valves !== 'undefined') {
-        // ignore for now
-      }
-      // REMOTES
-      if (typeof data.remotes !== 'undefined') {
-        // ignore for now
-      }
-      // LIGHTS
-      if (typeof data.lightGroup !== 'undefined') {
-        // ignore for now
-      }
-      // MACRO
-      if (typeof data.circuitGroup !== 'undefined') {
-        // ignore for now
-      }
-      // SPA COMMAND
-      if (typeof data.spaCommand !== 'undefined') {
-        null;
-      }
-      const ready = false;
-      function dec2bin(dec) {
-        return (dec >>> 0).toString(2).padStart(8, '0');
-      }
-      if (ready) {
-        const msg = screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData, senderId);
-        screenlogic.toLogEmit(msg, 'out');
-      }
-      else {
-        for (const [key] of Object.entries(resData)) {
-          debugUnit(key);
-          for (let i = 0; i < resData[key].length; i++) {
-            if (resData[key][i] !== equipConfig.rawData[key][i]) {
-              debugUnit(`Difference at ${key}[${i}].  prev: ${resData[key][i]} (${dec2bin(resData[key][i])})-> new: ${equipConfig.rawData[key][i]} (${dec2bin(equipConfig.rawData[key][i])})`);
-            }
-          }
-        }
-      }
-    });
-    return Promise.resolve(p) as Promise<SLSetEquipmentConfigurationData>;
-  }
+  //     // VALVES
+  //     if (typeof data.valves !== 'undefined') {
+  //       // ignore for now
+  //     }
+  //     // REMOTES
+  //     if (typeof data.remotes !== 'undefined') {
+  //       // ignore for now
+  //     }
+  //     // LIGHTS
+  //     if (typeof data.lightGroup !== 'undefined') {
+  //       // ignore for now
+  //     }
+  //     // MACRO
+  //     if (typeof data.circuitGroup !== 'undefined') {
+  //       // ignore for now
+  //     }
+  //     // SPA COMMAND
+  //     if (typeof data.spaCommand !== 'undefined') {
+  //       null;
+  //     }
+  //     const ready = false;
+  //     function dec2bin(dec) {
+  //       return (dec >>> 0).toString(2).padStart(8, '0');
+  //     }
+  //     if (ready) {
+  //       const msg = screenlogic.controller.equipment.sendSetEquipmentConfigurationMessageAsync(resData, senderId);
+  //       screenlogic.toLogEmit(msg, 'out');
+  //     }
+  //     else {
+  //       for (const [key] of Object.entries(resData)) {
+  //         debugUnit(key);
+  //         for (let i = 0; i < resData[key].length; i++) {
+  //           if (resData[key][i] !== equipConfig.rawData[key][i]) {
+  //             debugUnit(`Difference at ${key}[${i}].  prev: ${resData[key][i]} (${dec2bin(resData[key][i])})-> new: ${equipConfig.rawData[key][i]} (${dec2bin(equipConfig.rawData[key][i])})`);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  //   return Promise.resolve(p) as Promise<SLSetEquipmentConfigurationData>;
+  // }
   async cancelDelayAsync(senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending cancel delay command...', screenlogic.senderId);

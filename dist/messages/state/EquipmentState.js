@@ -130,9 +130,6 @@ class EquipmentStateMessage {
             return numPumps;
         };
         const getPumpType = function (pumpIndex) {
-            if (typeof (pumpIndex) !== 'number') {
-                return 0;
-            }
             if (flowDataArray === null || flowDataArray.length < (pumpIndex + 1) * 45) {
                 return 0;
             }
@@ -222,20 +219,20 @@ class EquipmentStateMessage {
             for (let i = iMin; i < iMax; i++) {
                 // let byCircuit = poolConfig.getEquipconfig().getSpeedDataArray().get(i);
                 const byCircuit = speedDataArray[i];
-                if (byCircuit.byteValue() > 0) {
-                    if (byCircuit.byteValue() >= 128 && byCircuit.byteValue() <= 132) {
-                        // let name = get().deviceIDToString(poolConfig, byCircuit.byteValue());
-                        const name = `string ${byCircuit}`;
-                        const id = byCircuit.byteValue();
-                        result.push([name, id]);
+                if (byCircuit > 0) {
+                    if (byCircuit >= 128 && byCircuit <= 132) {
+                        // let name = get().deviceIDToString(poolConfig, byCircuit);
+                        const circuitName = `string ${byCircuit}`;
+                        const id = byCircuit;
+                        result.push({ id, circuitName });
                         // iCount++;
                     }
                     else {
                         const circuit = byCircuit;
                         if (circuit != null) {
-                            const name2 = circuit.getM_Name();
-                            const id2 = byCircuit.byteValue();
-                            result.push([name2, id2]);
+                            const circuitName = ''; //circuit.getM_Name();
+                            const id = byCircuit;
+                            result.push({ id, circuitName });
                             // iCount++;
                         }
                     }
@@ -363,8 +360,7 @@ class EquipmentStateMessage {
             intelliChem: msg.isBitSet(miscDataArray[3], 0),
             manualHeat: miscDataArray[4] !== 0
         };
-        let speed = [];
-        speed = loadSpeedCircuits(speedDataArray, true);
+        const speed = loadSpeedCircuits(speedDataArray, true);
         const data = {
             // let data: SLEquipmentConfigurationData = {
             controllerType,

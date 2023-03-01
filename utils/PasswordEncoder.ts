@@ -17,7 +17,7 @@ const sm_rcon = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6
 
 
 export class HLEncoder {
-  constructor(password) {
+  constructor(password: string) {
     this.kd = this.createArray(MAX_ROUNDS + 1, MAX_KC);
     this.ke = this.createArray(MAX_ROUNDS + 1, MAX_KC);
     this.tk = new Array(MAX_KC);
@@ -39,7 +39,7 @@ export class HLEncoder {
   private bKeyInit: boolean;
   private iROUNDS: number;
 
-  createArray(length, max_length) {
+  createArray(length: number, max_length: number) {
     max_length;
     const arr = new Array(length || 0);
     let i = length;
@@ -65,11 +65,11 @@ export class HLEncoder {
     return null;
   }
 
-  makeKey(sChallengeStr) {
+  makeKey(sChallengeStr: string[]) {
     this.makeKeyFromBlock(this.makeBlock(sChallengeStr, 0));
   }
 
-  makeBlock(str, byFill) {
+  makeBlock(str: string[], byFill: number) {
     let iLen = BLOCK_SIZE;
     if (str.length >= BLOCK_SIZE) {
       iLen = str.length;
@@ -86,7 +86,7 @@ export class HLEncoder {
     return block;
   }
 
-  makeKeyFromBlock(block) {
+  makeKeyFromBlock(block: number[]) {
     if (!block) {
       return;
     }
@@ -160,7 +160,7 @@ export class HLEncoder {
     }
   }
 
-  encryptBlock(block) {
+  encryptBlock(block: number[]) {
     if (!this.bKeyInit) {
       return null;
     }
@@ -189,14 +189,14 @@ export class HLEncoder {
     ];
   }
 
-  encrypt(source) {
+  encrypt(source: string[]) {
     if (this.bKeyInit) {
       return this.encryptData(this.makeBlock(source, 0));
     }
     return null;
   }
 
-  encryptData(data) {
+  encryptData(data: number[]) {
     if (data == null || data.length < BLOCK_SIZE || data.length % BLOCK_SIZE !== 0) {
       return null;
     }

@@ -11,7 +11,11 @@ class EquipmentConfigurationMessage {
             const circuitName = msg.readSLString();
             res.push({ id, circuitName });
         }
-        return res;
+        const data = {
+            senderId: msg.senderId,
+            circuits: res
+        };
+        return data;
     }
     static decodeNCircuitNames(msg) {
         const cnt = msg.readUInt8();
@@ -166,24 +170,23 @@ class EquipmentConfigurationMessage {
         const pumpDataArray = msg.readSLArray();
         const spaFlowDataArray = msg.readSLArray();
         const alarm = msg.readUInt8();
-        const rawData = {
-            highSpeedCircuitData: speedDataArray,
-            valveData: valveDataArray,
-            remoteData: remoteDataArray,
-            heaterConfigData: heaterConfigDataArray,
-            delayData: delayDataArray,
-            macroData: macroDataArray,
-            miscData: miscDataArray,
-            lightData: lightDataArray,
-            pumpData: pumpDataArray,
-            spaFlowData: spaFlowDataArray,
-            alarm
-        };
+        // const rawData = {
+        //   highSpeedCircuitData: speedDataArray,
+        //   valveData: valveDataArray,
+        //   remoteData: remoteDataArray,
+        //   heaterConfigData: heaterConfigDataArray,
+        //   delayData: delayDataArray,
+        //   macroData: macroDataArray,
+        //   miscData: miscDataArray,
+        //   lightData: lightDataArray,
+        //   pumpData: pumpDataArray,
+        //   spaFlowData: spaFlowDataArray,
+        //   alarm
+        // };
         const numPumps = this._getNumPumps(pumpDataArray);
         const pumps = [];
         for (let i = 0; i < numPumps; i++) {
-            let pump = { id: i + 1 };
-            pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
+            const pump = this._getPumpData(i, pumpDataArray);
             pumps.push(pump);
         }
         const heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);
@@ -204,7 +207,7 @@ class EquipmentConfigurationMessage {
             highSpeedCircuits,
             remotes,
             numPumps,
-            rawData
+            // rawData
         };
         return data;
     }
@@ -221,14 +224,12 @@ class EquipmentConfigurationMessage {
         return numPumps;
     }
     static _getPumpData(pumpIndex, pumpDataArray) {
-        if (typeof (pumpIndex) !== 'number') {
-            return {};
-        }
         const pumpIndexByte = 45 * pumpIndex;
-        const pump = {};
         if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
-            return {};
+            return null;
         }
+        let pump;
+        pump.id = pumpIndex + 1;
         const type = pumpDataArray[pumpIndexByte];
         pump.type = type;
         if ((type & 128) === 128) {
@@ -257,13 +258,12 @@ class EquipmentConfigurationMessage {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
                 const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
-                    const circuit = {};
-                    circuit.id = circuitId;
-                    circuit.circuit = _circuit;
-                    circuit.speed =
-                        pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 +
-                            pumpDataArray[pumpIndexByte + (circuitId + 20)];
-                    circuit.units = 0;
+                    const circuit = {
+                        id: circuitId,
+                        circuit: _circuit,
+                        speed: pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)],
+                        units: 0
+                    };
                     pump.circuits.push(circuit);
                 }
             }
@@ -277,11 +277,12 @@ class EquipmentConfigurationMessage {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
                 const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
-                    const circuit = {};
-                    circuit.circuit = _circuit;
-                    circuit.flow =
-                        pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
-                    circuit.units = 1;
+                    const circuit = {
+                        id: circuitId,
+                        circuit: _circuit,
+                        flow: pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)],
+                        units: 1
+                    };
                     pump.circuits.push(circuit);
                 }
             }
@@ -306,15 +307,17 @@ class EquipmentConfigurationMessage {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
                 const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
-                    const circuit = {};
-                    circuit.circuit = _circuit;
-                    circuit.units = (pumpDataArray[pumpIndexByte + 3] >> circuitId - 1 & 1) === 0 ? 1 : 0;
-                    if (circuit.units)
+                    const circuit = {
+                        id: circuitId,
+                        circuit: _circuit,
+                        units: (pumpDataArray[pumpIndexByte + 3] >> circuitId - 1 & 1) === 0 ? 1 : 0
+                    };
+                    if (circuit.units) {
                         circuit.flow = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)];
-                    else
-                        circuit.speed =
-                            pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 +
-                                pumpDataArray[pumpIndexByte + (circuitId + 20)];
+                    }
+                    else {
+                        circuit.speed = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)];
+                    }
                     pump.circuits.push(circuit);
                 }
             }
@@ -489,7 +492,9 @@ class EquipmentConfigurationMessage {
         return speed;
     }
     static _loadLightData(lightDataArray) {
-        const lights = { allOnAllOff: [] };
+        const lights = {
+            allOnAllOff: []
+        };
         for (let i = 0; i < 8; i++) {
             lights.allOnAllOff.push(lightDataArray[i]);
         }
@@ -650,8 +655,7 @@ class EquipmentConfigurationMessage {
         const numPumps = this._getNumPumps(pumpDataArray);
         const pumps = [];
         for (let i = 0; i < numPumps; i++) {
-            let pump = { id: i + 1 };
-            pump = Object.assign(pump, this._getPumpData(i, pumpDataArray));
+            const pump = this._getPumpData(i, pumpDataArray);
             pumps.push(pump);
         }
         const heaterConfig = this._loadHeaterData(heaterConfigDataArray, msg);

@@ -1,17 +1,20 @@
 'use strict';
 
-// const SmartBuffer = require('smart-buffer').SmartBuffer;
 import { SmartBuffer } from 'smart-buffer';
 
-const DAY_VALUES = [
-  ['Mon', 0x1],
-  ['Tue', 0x2],
-  ['Wed', 0x4],
-  ['Thu', 0x8],
-  ['Fri', 0x10],
-  ['Sat', 0x20],
-  ['Sun', 0x40],
-];
+interface Map {
+  [key: string]: number
+}
+
+const DAY_VALUES: Map = {
+  Mon: 0x1,
+  Tue: 0x2,
+  Wed: 0x4,
+  Thu: 0x8,
+  Fri: 0x10,
+  Sat: 0x20,
+  Sun: 0x40,
+};
 
 
 export interface SLData {
@@ -46,13 +49,11 @@ export class SLMessage {
   public static slackForAlignment(val: number) {
     return (4 - val % 4) % 4;
   }
-  public getDayValue(dayName: string) {
-    for (let i = 0; i < DAY_VALUES.length; i++) {
-      if (DAY_VALUES[i][0] === dayName) {
-        return DAY_VALUES[i][1] as number;
-      }
+  public getDayValue(dayName: string): number {
+    if (!(dayName in DAY_VALUES)) {
+      return 0;
     }
-    return 0;
+    return DAY_VALUES[dayName];
   }
   public toBuffer() {
     return this._smartBuffer.toBuffer();
@@ -106,12 +107,12 @@ export class Inbound extends SLMessage {
 
     return retVal;
   }
-  decodeDayMask(dayMask: number): number[] {
+  decodeDayMask(dayMask: number): string[] {
     const days = [];
 
     for (let i = 0; i < 7; i++) {
       if (this.isBitSet(dayMask, i)) {
-        days.push(DAY_VALUES[i][0]);
+        days.push(Object.keys(DAY_VALUES)[i]);
       }
     }
     return days;

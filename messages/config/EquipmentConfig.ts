@@ -181,25 +181,25 @@ export class EquipmentConfigurationMessage {
     const remoteDataArray = msg.readSLArray();
     const heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
     const delayDataArray = msg.readSLArray(); // decodeDelayData()
-    const macroDataArray = msg.readSLArray();
+    /*const macroDataArray =*/ msg.readSLArray();
     const miscDataArray = msg.readSLArray(); // decodeMiscData()
     const lightDataArray = msg.readSLArray();
     const pumpDataArray = msg.readSLArray();
-    const spaFlowDataArray = msg.readSLArray();
-    const alarm = msg.readUInt8();
-    const rawData = {
-      highSpeedCircuitData: speedDataArray,
-      valveData: valveDataArray,
-      remoteData: remoteDataArray,
-      heaterConfigData: heaterConfigDataArray,
-      delayData: delayDataArray,
-      macroData: macroDataArray,
-      miscData: miscDataArray,
-      lightData: lightDataArray,
-      pumpData: pumpDataArray,
-      spaFlowData: spaFlowDataArray,
-      alarm
-    };
+    /*const spaFlowDataArray =*/ msg.readSLArray();
+    /*const alarm =*/ msg.readUInt8();
+    // const rawData = {
+    //   highSpeedCircuitData: speedDataArray,
+    //   valveData: valveDataArray,
+    //   remoteData: remoteDataArray,
+    //   heaterConfigData: heaterConfigDataArray,
+    //   delayData: delayDataArray,
+    //   macroData: macroDataArray,
+    //   miscData: miscDataArray,
+    //   lightData: lightDataArray,
+    //   pumpData: pumpDataArray,
+    //   spaFlowData: spaFlowDataArray,
+    //   alarm
+    // };
     const numPumps = this._getNumPumps(pumpDataArray);
 
     const pumps: Pump[] = [];
@@ -226,7 +226,7 @@ export class EquipmentConfigurationMessage {
       highSpeedCircuits,
       remotes,
       numPumps,
-      rawData
+      // rawData
     };
     return data;
 
@@ -375,7 +375,7 @@ export class EquipmentConfigurationMessage {
     ///// End heater config
   }
 
-  private static _loadValveData(valveDataArray, heaterConfig: HeaterConfig, controllerType: number, expansionsCount: number, msg: Inbound): Valves[] {
+  private static _loadValveData(valveDataArray: number[], heaterConfig: HeaterConfig, controllerType: number, expansionsCount: number, msg: Inbound): Valves[] {
     let bEnable1 = true;
     let bEnable2 = true;
     // let isSolarValve0 = false;
@@ -444,7 +444,7 @@ export class EquipmentConfigurationMessage {
     return valves as Valves[];
   }
 
-  private static _loadDelayData(delayDataArray, msg: Inbound): Delays {
+  private static _loadDelayData(delayDataArray: number[], msg: Inbound): Delays {
     const delays = {
       poolPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 0),
       spaPumpOnDuringHeaterCooldown: msg.isBitSet(delayDataArray[0], 1),
@@ -453,7 +453,7 @@ export class EquipmentConfigurationMessage {
     return delays;
   }
 
-  private static _loadMiscData(miscDataArray, msg: Inbound): Misc {
+  private static _loadMiscData(miscDataArray: number[], msg: Inbound): Misc {
     const misc = {
       intelliChem: msg.isBitSet(miscDataArray[3], 0),
       manualHeat: msg.isBitSet(miscDataArray[4], 0)
@@ -498,7 +498,7 @@ export class EquipmentConfigurationMessage {
       return result;
     } */
 
-  private static _loadSpeedData(speedDataArray, controllerType: number): number[] {
+  private static _loadSpeedData(speedDataArray: number[], controllerType: number): number[] {
 
     const getRange = function () {
       const ret = { min: 0, max: 0 };
@@ -538,7 +538,7 @@ export class EquipmentConfigurationMessage {
     return lights;
   }
 
-  private static _loadRemoteData(remoteDataArray, controllerType: number): SLRemoteData {
+  private static _loadRemoteData(remoteDataArray: number[], controllerType: number): SLRemoteData {
     const data: SLRemoteData = {
       fourButton: [],
       tenButton: [[]],
@@ -586,7 +586,7 @@ export class EquipmentConfigurationMessage {
     return data;
   }
 
-  private static _loadSpaFlowData(spaFlowDataArray): SpaFlow {
+  private static _loadSpaFlowData(spaFlowDataArray: number[]): SpaFlow {
     const spaFlow: SpaFlow = {
       isActive: spaFlowDataArray[1] === 1,
       pumpId: spaFlowDataArray[5],
@@ -951,12 +951,12 @@ export interface SLControllerConfigData extends SLData {
   minSetPoint: number[];
   maxSetPoint: number[];
   degC: boolean;
-  controllerType;
+  controllerType: number;
   circuitCount: number,
-  hwType;
-  controllerData;
+  hwType: number;
+  controllerData: number;
   equipment: Equipment;
-  genCircuitName;
+  genCircuitName: string;
   interfaceTabFlags: number;
   circuitArray: Circuit[];
   colorCount: number;
@@ -1019,7 +1019,7 @@ export interface SLSetEquipmentConfigurationData extends SLData {
   highSpeedCircuits: number[],
   remotes: SLRemoteData,
   numPumps: number,
-  rawData
+  // rawData
 }
 
 export interface SLEquipmentConfigurationData extends SLData {
@@ -1119,7 +1119,7 @@ export interface HeaterConfig {
 export interface Delays {
   poolPumpOnDuringHeaterCooldown: boolean,
   spaPumpOnDuringHeaterCooldown: boolean,
-  pumpOffDuringValveAction
+  pumpOffDuringValveAction: boolean
 }
 
 export interface Misc {

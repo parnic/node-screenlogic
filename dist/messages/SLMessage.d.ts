@@ -28,11 +28,11 @@ export declare class Inbound extends SLMessage {
     readFromBuffer(buf: Buffer): void;
     readMessage(buf: Buffer): void;
     readSLString(): string;
-    readSLArray(): any[];
+    readSLArray(): Array<number>;
     decode(): void;
     isBitSet(value: number, bit: number): boolean;
-    decodeTime(rawTime: number): any;
-    decodeDayMask(dayMask: number): number[];
+    decodeTime(rawTime: number): string;
+    decodeDayMask(dayMask: number): string[];
     readSLDateTime(): Date;
     readUInt8(): number;
     readUInt16BE(): number;
