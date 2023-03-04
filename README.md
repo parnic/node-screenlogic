@@ -25,22 +25,22 @@ Table of Contents:
     * [closeAsync](#closeasync)
   * [UnitConnection (screenlogic)](#unitconnection)
     * Base Methods
-      * [init](#initsystemname,-address,-port,-password,-senderid)
+      * [init](#initsystemname-address-port-password-senderid)
       * [initUnit](#initunitlocalunit)
-      * [initMock](#initMocksystemname,-address,-port,-password,-senderid)
+      * [initMock](#initsystemname-address-port-password-senderid)
       * [getVersionAsync](#getversionasyncsenderid)
       * [pingServerAsync](#pingserverasyncsenderid)
       * [connectAsync](#connectasync)
       * [reconnectAsync](#reconnectAsync)
-      * [closeAsync](#closeasync)
-      * [addClientAsync](#addclientasyncclientid?-senderid)
+      * [closeAsync](#closeasync-1)
+      * [addClientAsync](#addclientasyncclientid-senderid)
       * [removeClientAsync](#removeclientasyncclientid)
       * [status](#status)
     * [Body](#body)
       * [setHeatModeAsync](#bodysetheatmodeasyncbodyid-heatmode-senderid)
       * [setSetPointAsync](#bodysetsetpointasyncbodyid-temperature-senderid)
     * [Chem](#chem)
-      * [chemDataMessageAsync](#chemgetchemicaldataasyncsenderid)
+      * [getChemicalDataAsync](#chemgetchemicaldataasyncsenderid)
       * [getChemHistoryDataAsync](#chemgetchemhistorydataasyncfromtime-totime-senderid)
     * [Chlor](#chlor)
       * [getIntellichlorConfigAsync](#chlorgetintellichlorconfigasyncsenderid)
@@ -49,7 +49,7 @@ Table of Contents:
     * [Circuit](#circuit)
       * [setCircuitAsync](#circuitsetcircuitasynccircuitid-nameindex-circuitfunction-circuitinterface-freeze-colorpos-senderid)
       * [setCircuitRuntimeByIdAsync](#circuitsetcircuitruntimebyidcircuitid-runtime-senderid)
-      * [setCircuitStateMessageAsync](#circuitsetcircuitstateasynccircuitid-circuitstate-senderid)
+      * [setCircuitStateAsync](#circuitsetcircuitstateasynccircuitid-circuitstate-senderid)
       * [sendLightCommandAsync](#circuitsendlightcommandasynccommand-senderid)
     * [Equipment](#equipment)
       * [cancelDelayAsync](#equipmentcanceldelayasyncsenderid)
@@ -61,9 +61,9 @@ Table of Contents:
       * [getEquipmentConfigurationAsync](#equipmentgetequipmentconfigurationasyncsenderid)
       * [setEquipmentConfigurationAsync](#equipmentsetequipmentconfigurationasyncdata-senderid)
       * [getEquipmentStateAsync](#equipmentgetequipmentstateasyncsenderid)
-      * [getHistoryDataAsync](#equipmentgethistorydataasyncfromTime-toTime-senderid?)
+      * [getHistoryDataAsync](#equipmentgethistorydataasyncfromtime-totime-senderid)
       * [getSystemTimeAsync](#equipmentgetsystemtimeasyncsenderid)
-      * [setSystemTimeAsync](#equipmentsetsystemtimeasyncdate,-adjustfordst,-senderid)
+      * [setSystemTimeAsync](#equipmentsetsystemtimeasyncdate-adjustfordst-senderid)
       * [getWeatherForecastAsync](#equipmentgetweatherforecastasyncsenderid)
     * [Pump](#Pump)
       * [getPumpStatusAsync](#pumpgetpumpstatusasyncpumpid-senderid)  
@@ -156,8 +156,8 @@ var finder = new ScreenLogic.FindUnits();
 
 #### searchAsync()
 
-Issues one UDP broadcast search for available units. This is a stateless UDP query, but the connection will automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is a 5s timeout built in to this command.
-Returns a LocalUnit[] object containing:
+Issues one UDP broadcast search for available units. This is a stateless UDP query, but the connection will automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is a 5s timeout built in to this command, and no retry mechanism.
+Returns a LocalUnit[] array containing:
 ```
   address, // ip address
   type,
@@ -269,7 +269,7 @@ client.init('Pentair: 00-00-00', '10.0.0.85', 80, '1234', senderId?);
 
 #### initUnit(localUnit)
 
-Helper method for [init](#init).  Takes a `LocalUnit` remote login object and passes the appropriate values to `init`.
+Helper method for [init](#initsystemname-address-port-password-senderid).  Takes a `LocalUnit` remote login object and passes the appropriate values to `init`.
 
 #### initMock(systemName, address, port, password, senderId?)
 
@@ -386,7 +386,7 @@ Parameters:
 Sets the configuration for a specific circuit.  Resolves with `SLSimpleBoolData`.
 
 
-#### circuit.setCircuitRuntimebyId(circuitId, runTime, senderId?)
+#### circuit.setCircuitRuntimebyIdAsync(circuitId, runTime, senderId?)
 
 Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program. See [`SLSetCircuitRuntimeById`](#slsetcircuitruntimebyid) documentation for argument values.  Emits the `setCircuitRuntimeById` event when response is acknowledged.  Resolves with `SLSimpleBoolData`.
 
@@ -407,7 +407,7 @@ EasyTouch/Intellitouch only have a single light group and individual lights cann
 
 Cancels any delays on the system.  Resolves as a `SLSimpleBoolean` and emits the `cancelDelay` event when response is acknowledged.
 
-#### equipment.getCircuitDefinitions(senderId?)
+#### equipment.getCircuitDefinitionsAsync(senderId?)
 
 Returns an array of objects that represent the different circuit functions that a circuit can be assigned.
 
