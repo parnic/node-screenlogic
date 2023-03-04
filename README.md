@@ -4,11 +4,7 @@ This is a Node.JS module for interfacing with Pentair ScreenLogic systems over y
 
 Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Rel, 5.2 Build 738.0 Rel
 
-Breaking changes in 2.0:
-
-* Async functions are wrappers around the remote calls.  All of the previous events are still present and should still be added to the listeners if you want to account for changes being broadcast from the ScreenLogic unit.
-* All indexes are now 1 based.  Previously, indexes would refer to the internal Pentair numbering scheme (500 for circuits, 700 for schedules, 0 for bodies and pumps, etc).
-* Data that was previously in arrays (body temperatures, air temperatures, etc) are now returned as objects with the attributes associated to the pool equipment
+See the [Wiki](https://github.com/parnic/node-screenlogic/wiki/2.0) for information on migrating from v1 to v2.
 
 Table of Contents:
 
@@ -608,7 +604,7 @@ const DAY_VALUES = [
 #### Properties
 
 * `senderId` - an integer matching whatever was passed as the `senderId` argument when making the initial request (default 0)
-* `messageId` - an integer indicating the ScreenLogic ID for this message
+* `action` - an integer indicating the ScreenLogic ID for this message
 
 ### SLAddClient
 
@@ -622,9 +618,9 @@ Passed as an argument to the emitted `addNewScheduleEvent` event. Adds a new eve
 
 * `scheduleType` - 0 indicates recurring scheduled events, 1 indicates a run-once event
 
-### ~~SLCancelDelay~~
+### SLCancelDelay
 
-~~Passed as an argument to the emitted `cancelDelay` event.~~
+Passed as an argument to the emitted `cancelDelay` event.
 
 ### SLChemData
 
@@ -648,140 +644,87 @@ Passed as an argument to the emitted `chemicalData` event handler.
 * `corrosive` - boolean indicating whether the water balance is corrosive or not
 * `scaling` - boolean indicating whether the water balance is scaling or not
 * `error` - boolean indicating whether there's currently an error in the chem system or not
+* `balance` - bitmask containing the composite data that is broken out to `corrosive`, `scaling`, and `error` - generally you should prefer to use those properties instead
 
 ### SLControllerConfigData
 
 Passed as an argument to the emitted `controllerConfig` event handler.
 
-```
-export interface SLControllerConfigData {
-  controllerId: number;
-  minSetPoint: number[];
-  maxSetPoint: number[];
-  degC: boolean;
-  controllerType;
-  circuitCount: number,
-  hwType;
-  controllerData;
-  equipment: Equipment;
-  genCircuitName;
-  interfaceTabFlags: number;
-  circuitArray: Circuit[];
-  colorCount: number;
-  colorArray: any[];
-  pumpCircCount: number;
-  pumpCircArray: any[];
-  showAlarms: number;
-}
-```
-
-#### SLControllerStateData
-
-Passed as an argument to the `controllerConfig` event handler.
-
-```
-export interface SLControllerConfigData {
-  controllerId: number;
-  minSetPoint: number[];
-  maxSetPoint: number[];
-  degC: boolean;
-  controllerType;
-  circuitCount: number,
-  hwType;
-  controllerData;
-  equipment: Equipment;
-  genCircuitName;
-  interfaceTabFlags: number;
-  circuitArray: Circuit[];
-  colorCount: number;
-  colorArray: any[];
-  pumpCircCount: number;
-  pumpCircArray: any[];
-  showAlarms: number;
-}
-```
-
-#### hasSolar()
-
-Returns a bool indicating whether the system has solar present. (Helper method for interpreting the value in `equipFlags`.)
-
-#### hasSolarAsHeatpump()
-
-Returns a bool indicating whether the system has a solar heatpump (UltraTemp, ThermalFlo) present. (Helper method for interpreting the value in `equipFlags`.)
-
-#### hasChlorinator()
-
-Returns a bool indicating whether the system has a chlorinator present. (Helper method for interpreting the value in `equipFlags`.)
-
-#### hasCooling()
-
-Returns a bool indicating whether the system has a cooler present. (Helper method for interpreting the value in `equipFlags`.)
-
-#### hasIntellichem()
-
-Returns a bool indicating whether the system has an IntelliChem chemical management system present. (Helper method for interpreting the value in `equipFlags`.)
-
-#### isEasyTouch()
+#### static isEasyTouch(controllerType)
 
 Returns a bool indicating whether the system is an EasyTouch system or not. (Helper method for interpreting the value in `controllerType`.)
 
-#### isIntelliTouch()
+#### isIntelliTouch(controllerType)
 
 Returns a bool indicating whether the system is an IntelliTouch system or not. (Helper method for interpreting the value in `controllerType`.)
 
-#### isEasyTouchLite()
+#### isEasyTouchLite(controllerType)
 
 Returns a bool indicating whether the system is an EasyTouch Lite system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
 
-#### isDualBody()
+#### isDualBody(controllerType)
 
 Returns a bool indicating whether the system is dual-body or not. (Helper method for interpreting the value in `controllerType`.)
 
-#### isChem2()
+#### isChem2(controllerType)
 
 Returns a bool indicating whether the system is a Chem2 system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
 
-#### getCircuitByDeviceId(deviceId)
-
-Returns the `bodyArray` entry for the circuit matching the given device id. This is most useful with an [`SLGetPumpStatus`](#slgetpumpstatus) message.
-
 #### Properties
 
-* `controllerId` - integer indicating the controller's ID
+* `controllerId` - integer indicating the id of the controller
 * `minSetPoint` - array (size 2) indicating the minimum setpoint available for the pool (index 0) or spa (index 1)
 * `maxSetPoint` - array (size 2) indicating the maximum setpoint available for the pool (index 0) or spa (index 1)
 * `degC` - boolean indicating whether the system is using the centigrade scale for temperatures or not
-* `controllerType` - byte
-* `hwType` - byte
+* `controllerType` - byte that can be passed to static methods to interpret what type of controller this is
+* `circuitCount` - integer indicating the size of the circuitArray
+* `circuitArray` - array holding circuit data
+  * `circuitId` - number
+  * `name` - string
+  * `nameIndex` - number
+  * `function` - number
+  * `interface` - number
+  * `freeze` - number
+  * `colorSet` - number
+  * `colorPos` - number
+  * `colorStagger` - number
+  * `deviceId` - number
+  * `eggTimer` - number
+* `hwType` - byte passed to static methods to determine more info about the hardware
 * `controllerData` - byte
-* `equipFlags` - integer indicating the type(s) of equipment present in the system (see helper methods above for interpreting these values)
+* `equipment` - object containing booleans that provide additional data about available equipment
+  * `POOL_SOLARPRESENT` - boolean indicating if solar is present
+  * `POOL_SOLARHEATPUMP` - boolean indicating if a solar heat pump is present
+  * `POOL_CHLORPRESENT` - boolean indicating if a chlorinator is present
+  * `POOL_IBRITEPRESENT` - boolean indicating if IntelliBrite is present
+  * `POOL_IFLOWPRESENT0` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT1` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT2` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT3` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT4` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT5` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT6` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_IFLOWPRESENT7` - boolean indicating if IntelliFlow pumps are present
+  * `POOL_NO_SPECIAL_LIGHTS` - boolean indicating if there are no special lights present
+  * `POOL_HEATPUMPHASCOOL` - boolean indicating if the heat pump has a cooling feature
+  * `POOL_MAGICSTREAMPRESENT` - boolean indicating if MagicStream deck jets are present
+  * `POOL_ICHEMPRESENT` - boolean indicating if an IntelliChem is present
 * `genCircuitName` - string indicating the circuit name
-* `bodyArray` - array (size number-of-circuits) holding circuit data
-  * `circuitId` - integer indicating circuit ID (e.g.: 500 is spa, 505 is pool)
-  * `name` - string representing the name of the circuit
-  * `nameIndex` - byte
-  * `function` - byte
-  * `interface` - byte
-  * `flags` - byte
-  * `colorSet` - byte
-  * `colorPos` - byte
-  * `colorStagger` - byte
-  * `deviceId` - byte
-  * `dfaultRt` - short
-* `colorArray` - array (size number-of-colors) holding data about available light colors
-  * `name` - color name
-  * `color` - object containing `r`/`g`/`b` properties as bytes (values from 0-255) indicating the color
-* `pumpCircArray` - array (size 8) holding data about pumps attached to the system
 * `interfaceTabFlags` - integer
+* `colorCount` - integer indicating the size of the colorArray array
+* `colorArray` - array holding light color information
+  * `name` - string indicating the light name
+  * `color` - object containing color data
+    * `r` - byte indicating red value from 0-255
+    * `g` - byte indicating green value from 0-255
+    * `b` - byte indicating blue value from 0-255
+* `pumpCircCount` - integer indicating the size of the pumpCircArray array
+* `pumpCircArray` - array of numbers indicating ids of pump circuits
 * `showAlarms` - integer
 
 ### SLDeleteScheduleEventById
 
 Passed as an argument to the emitted `deleteScheduleEventById` event. Deletes a scheduled event with specified id.
-
-#### Properties
-
-* `scheduleId` - the scheduleId of the schedule to be deleted
 
 ### SLGetChemHistoryData
 
@@ -794,11 +737,13 @@ Passed as an argument to the emitted `getChemHistoryData` event. Contains inform
 * `phRuns` - array of objects containing the pH feed on/off times. Each object contains an `on` key containing a Javascript Date object for when the feed turned on, and an `off` key containing a Javascript Date object for when the feed turned off.
 * `orpRuns` - array of objects containing the ORP feed on/off times. Each object contains an `on` key containing a Javascript Date object for when the feed turned on, and an `off` key containing a Javascript Date object for when the feed turned off.
 
-### SLGetGatewayDataMessage
+### SLReceiveGatewayDataMessage
 
 Passed as an argument to the emitted `gatewayFound` event. Contains information about the remote unit's status and access properties.
 
 #### Properties
+
+Note: these properties are available on the object acquired by calling `.get()` on the given message.
 
 * `gatewayFound` - boolean indicating whether a unit was found
 * `licenseOK` - boolean indicating if the license is valid (I've never seen this be false)
@@ -807,7 +752,7 @@ Passed as an argument to the emitted `gatewayFound` event. Contains information 
 * `portOpen` - boolean indicating whether or not the port is open and able to be connected to
 * `relayOn` - boolean indicating whether the relay is on (unsure what exactly this indicates; it's always been false in my tests)
 
-### SLGetHistoryData
+### SLHistoryData
 
 Passed as an argument to the emitted `getHistoryData` event. Contains information about the remote unit's temperature and circuit on/off times over time.
 
@@ -824,7 +769,7 @@ Passed as an argument to the emitted `getHistoryData` event. Contains informatio
 * `heaterRuns` - array of objects containing the heater on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
 * `lightRuns` - array of objects containing the light on/off times over time. Each object contains an `on` key containing a Javascript Date object for when the circuit turned on, and an `off` key containing a Javascript Date object for when the circuit turned off.
 
-### SLGetPumpStatus
+### SLPumpStatusData
 
 Passed as an argument to the emitted `getPumpStatus` event. Gets information about the specified pump.
 
@@ -844,35 +789,33 @@ Passed as an argument to the emitted `getPumpStatus` event. Gets information abo
 * `pumpGPMs` - current GPMs of the pump
 * `pumpCircuits` - Array of 8 items each containing
   * `circuitId` - Circuit Id (CircuitId matched data returned by [`SLControllerConfig`](#SLControllerConfig)'s `getCircuitByDeviceIdAsync()`)
-  * `pumpSetPoint` - the set point for this pump/circuit combo (in either RPMs or GPMs depending on the value of `isRPMs`)
+  * `speed` - the set point for this pump/circuit combo (in either RPMs or GPMs depending on the value of `isRPMs`)
   * `isRPMs` - boolean indicating if the set point is in RPMs (false means it's in GPMs)
 * `pumpUnknown1` - unknown data; always 0
 * `pumpUnknown2` - unknown data; always 255
 
 ### SLScheduleData
 
-Passed as an argument to the emitted `getScheduleData` event. Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events.
+An array of these are passed as an argument to the emitted `getScheduleData` event. Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events.
 
 #### Properties
 
-* `eventCount` - the number of `events` returned
-* `events` - array containing:
-  * `scheduleId` - the associated scheduleId
-  * `circuitId` - the circuit this schedule affects
-  * `startTime` - the start time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
-  * `stopTime` - the stop time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
-  * `dayMask` - 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127 (see [conversion functions](#decodedaymaskmask))
-  * `flags`
-    * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
-    * bit 1 indicates whether heat setPoint should be changed
-  * `heatCmd` - integer indicating the desired heater mode. Valid values are:
-    * ScreenLogic.HEAT_MODE_OFF
-    * ScreenLogic.HEAT_MODE_SOLAR
-    * ScreenLogic.HEAT_MODE_SOLARPREFERRED
-    * ScreenLogic.HEAT_MODE_HEATPUMP
-    * ScreenLogic.HEAT_MODE_DONTCHANGE
-  * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
-  * `days` - which days this schedule is active for; this is just the `dayMask` property run through [`decodeDayMask()`](#decodedaymaskmask) for convenience
+* `scheduleId` - the associated scheduleId
+* `circuitId` - the circuit this schedule affects
+* `startTime` - the start time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
+* `stopTime` - the stop time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
+* `dayMask` - 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127 (see [conversion functions](#decodedaymaskmask))
+* `flags`
+  * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
+  * bit 1 indicates whether heat setPoint should be changed
+* `heatCmd` - integer indicating the desired heater mode. Valid values are:
+  * HeatModes.HEAT_MODE_OFF
+  * HeatModes.HEAT_MODE_SOLAR
+  * HeatModes.HEAT_MODE_SOLARPREFERRED
+  * HeatModes.HEAT_MODE_HEATPUMP
+  * HeatModes.HEAT_MODE_DONTCHANGE
+* `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
+* `days` - which days this schedule is active for; this is just the `dayMask` property run through [`decodeDayMask()`](#decodedaymaskmask) for convenience
 
 ### SLSystemTimeData
 
