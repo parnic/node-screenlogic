@@ -691,7 +691,7 @@ export class UnitConnection extends EventEmitter {
         break;
       case 12533:
         debugUnit('  it is controller configuration');
-        this.emit('equipmentConfig', EquipmentConfigurationMessage.decodeControllerConfig(msg));
+        this.emit('controllerConfig', EquipmentConfigurationMessage.decodeControllerConfig(msg));
         break;
       case 12505:
       case 12593:
