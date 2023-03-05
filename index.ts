@@ -1263,7 +1263,7 @@ export class Equipment {
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for controller config'));
       }, screenlogic.netTimeout);
-      screenlogic.once('equipmentConfig', (controller) => {
+      screenlogic.once('controllerConfig', (controller) => {
         clearTimeout(_timeout);
         debugUnit('received equipmentConfig event');
         resolve(controller);

@@ -43,7 +43,7 @@ describe('Unit', function() {
   });
 
   it('gets controller config', function(done) {
-    unit.once('equipmentConfig', config => {
+    unit.once('controllerConfig', config => {
       assert.equal(config.senderId, 42);
       done();
     });
