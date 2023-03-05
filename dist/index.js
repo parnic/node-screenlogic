@@ -2,9 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchedTypes = exports.BodyIndex = exports.PumpTypes = exports.HeatModes = exports.LightCommands = exports.Chlor = exports.Chem = exports.Schedule = exports.Pump = exports.Body = exports.Circuit = exports.Equipment = exports.screenlogic = exports.UnitConnection = exports.RemoteLogin = exports.FindUnits = void 0;
 require("source-map-support/register");
+const debug_1 = require("debug");
 const dgram = require("dgram");
-const net = require("net");
 const events_1 = require("events");
+const net = require("net");
+const timers_1 = require("timers");
 const SLGateway = require("./messages/SLGatewayDataMessage");
 const OutgoingMessages_1 = require("./messages/OutgoingMessages");
 const ConnectionMessage_1 = require("./messages/ConnectionMessage");
@@ -18,8 +20,6 @@ const HeaterMessage_1 = require("./messages/config/HeaterMessage");
 const SLMessage_1 = require("./messages/SLMessage");
 const EquipmentState_1 = require("./messages/state/EquipmentState");
 const PasswordEncoder_1 = require("./utils/PasswordEncoder");
-const debug_1 = require("debug");
-const timers_1 = require("timers");
 const debugFind = (0, debug_1.default)('sl:find');
 const debugRemote = (0, debug_1.default)('sl:remote');
 const debugUnit = (0, debug_1.default)('sl:unit');
@@ -60,8 +60,9 @@ class FindUnits extends events_1.EventEmitter {
                 const units = [];
                 debugFind('Screenlogic finder searching for local units...');
                 (0, timers_1.setTimeout)(() => {
-                    if (units.length === 0)
+                    if (units.length === 0) {
                         debugFind('No units found searching locally.');
+                    }
                     this.removeAllListeners();
                     resolve(units);
                 }, 5000);
@@ -112,13 +113,12 @@ class RemoteLogin extends events_1.EventEmitter {
         super();
         this.systemName = systemName;
         this._client = new net.Socket();
-        this._gateway = new OutgoingMessages_1.OutboundGateway(0, 0); // controllerid, senderid
+        this._gateway = new OutgoingMessages_1.OutboundGateway();
     }
     async connectAsync() {
         return new Promise((resolve, reject) => {
             debugRemote('connecting to dispatcher...');
             this._client.on('data', function (buf) {
-                // _this.onClientMessage(msg);
                 if (buf.length > 4) {
                     const message = new SLMessage_1.Inbound(this.unit.controllerId, this.unit.senderId);
                     message.readFromBuffer(buf);
@@ -131,8 +131,9 @@ class RemoteLogin extends events_1.EventEmitter {
                                 const unit = new SLGateway.SLReceiveGatewayDataMessage(buf).get();
                                 resolve(unit);
                             }
-                            else
+                            else {
                                 this.emit('gatewayFound', new SLGateway.SLReceiveGatewayDataMessage(buf));
+                            }
                             break;
                         default:
                             debugRemote('  it is unknown. type: ' + msgType);
@@ -159,8 +160,9 @@ class RemoteLogin extends events_1.EventEmitter {
                 if (typeof reject !== 'undefined') {
                     reject(e);
                 }
-                else
+                else {
                     this.emit('error', e);
+                }
             });
             this._client.connect(500, 'screenlogicserver.pentair.com', () => {
                 debugRemote('connected to dispatcher');
@@ -187,8 +189,6 @@ class UnitConnection extends events_1.EventEmitter {
         this._controllerId = 0;
         this._isMock = false;
         this._hasAddedClient = false;
-        // private _expectedMsgLen: number;
-        // private challengeString;
         this._senderId = 0;
         this.netTimeout = 2500; // set back to 1s after testing
         this._keepAliveDuration = 30 * 1000;
@@ -196,7 +196,6 @@ class UnitConnection extends events_1.EventEmitter {
             try {
                 debugUnit('Unit had an unexpected error/timeout/clientError - reconnecting.');
                 this.client.removeAllListeners();
-                // await setTimeout(1000);
                 await this.closeAsync();
                 await this.connectAsync();
             }
@@ -261,6 +260,7 @@ class UnitConnection extends events_1.EventEmitter {
     write(bytes) {
         if (this._isMock) {
             debugUnit('Skipping write because of mock port');
+            return;
         }
         try {
             if (!this.client.writable) {
@@ -286,10 +286,12 @@ class UnitConnection extends events_1.EventEmitter {
     }
     keepAliveAsync() {
         try {
-            if (!this.isConnected)
+            if (!this.isConnected) {
                 return;
-            if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer)
+            }
+            if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer) {
                 clearTimeout(this._keepAliveTimer);
+            }
             this._keepAliveTimer = null;
             this.pingServerAsync().catch(err => {
                 debugUnit(`Error pinging server: ${err.message}`);
@@ -337,8 +339,9 @@ class UnitConnection extends events_1.EventEmitter {
         }
     }
     toLogEmit(message, direction) {
-        if (this._isMock)
+        if (this._isMock) {
             return;
+        }
         const data = {
             systemName: this.systemName,
             action: message.action,
@@ -356,8 +359,9 @@ class UnitConnection extends events_1.EventEmitter {
     async closeAsync() {
         const p = new Promise((resolve) => {
             try {
-                if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer)
+                if (typeof this._keepAliveTimer !== 'undefined' || this._keepAliveTimer) {
                     clearTimeout(this._keepAliveTimer);
+                }
                 this._keepAliveTimer = null;
                 if (typeof this.client === 'undefined' || this.client.destroyed) {
                     resolve(true);
@@ -374,12 +378,6 @@ class UnitConnection extends events_1.EventEmitter {
                     this.removeAllListeners();
                     this.client = undefined;
                     resolve(true);
-                    // () => {
-                    //   debugUnit(`Client socket closed`);
-                    //   resolve(true);
-                    //   self.client.
-                    // });
-                    // resolve(true);
                 }
             }
             catch (error) {
@@ -390,8 +388,9 @@ class UnitConnection extends events_1.EventEmitter {
         return Promise.resolve(p);
     }
     async connectAsync() {
-        if (this._isMock)
+        if (this._isMock) {
             return Promise.resolve(true);
+        }
         const p = new Promise((resolve, reject) => {
             try {
                 const opts = {
@@ -404,31 +403,26 @@ class UnitConnection extends events_1.EventEmitter {
                 this.client.on('data', (msg) => {
                     this.emit('bytesRead', this.client.bytesRead);
                     this.processData(msg);
-                })
-                    .once('close', (had_error) => {
+                }).once('close', (had_error) => {
                     debugUnit(`closed.  any error? ${had_error}`);
                     this.emit('close', had_error);
-                })
-                    .once('end', () => {
+                }).once('end', () => {
                     // often, during debugging, the socket will timeout
                     debugUnit('end event for unit');
                     this.emit('end');
-                })
-                    .once('error', async (e) => {
+                }).once('error', async (e) => {
                     // often, during debugging, the socket will timeout
                     debugUnit(`error event for unit: ${typeof e !== 'undefined' ? e.message : 'unknown unit'}`);
-                    // this.emit('error', e);
                     await this.reconnectAsync();
-                })
-                    .once('timeout', async () => {
+                }).once('timeout', async () => {
                     // often, during debugging, the socket will timeout
                     debugUnit('timeout event for unit');
                     this.emit('timeout');
                     await this.reconnectAsync();
-                })
-                    .once('clientError', async (err, socket) => {
-                    if (err.code === 'ECONNRESET' || !socket.writable)
+                }).once('clientError', async (err, socket) => {
+                    if (err.code === 'ECONNRESET' || !socket.writable) {
                         socket.end('HTTP/2 400 Bad Request\n');
+                    }
                     debugUnit('client error\n', err);
                     await this.reconnectAsync();
                 });
@@ -438,8 +432,9 @@ class UnitConnection extends events_1.EventEmitter {
                     this.write('CONNECTSERVERHOST\r\n\r\n');
                     debugUnit('sending challenge message...');
                     const _timeout = (0, timers_1.setTimeout)(() => {
-                        if (typeof reject === 'function')
+                        if (typeof reject === 'function') {
                             reject(new Error('timeout'));
+                        }
                     }, this.netTimeout);
                     this.once('challengeString', async (challengeString) => {
                         debugUnit('   challenge string emit');
@@ -473,15 +468,15 @@ class UnitConnection extends events_1.EventEmitter {
                 reject(new Error('time out waiting for challenge string'));
             }, this.netTimeout);
             this.once('loggedIn', () => {
-                clearTimeout(_timeout);
                 debugUnit('received loggedIn event');
+                clearTimeout(_timeout);
                 this.isConnected = true;
                 resolve(true);
-                this.removeListener('loginFailed', () => { null; });
+                this.removeListener('loginFailed', () => { });
             }).once('loginFailed', () => {
+                debugUnit('loginFailed');
                 clearTimeout(_timeout);
                 this.isConnected = false;
-                debugUnit('loginFailed');
                 reject(new Error('Login Failed'));
             });
             const password = new PasswordEncoder_1.HLEncoder(this.password.toString()).getEncryptedPassword(challengeString);
@@ -520,8 +515,8 @@ class UnitConnection extends events_1.EventEmitter {
                 reject(new Error('time out waiting for version'));
             }, this.netTimeout);
             this.once('version', (version) => {
-                clearTimeout(_timeout);
                 debugUnit('received version event');
+                clearTimeout(_timeout);
                 resolve(version);
             });
             const msg = this.controller.connection.sendVersionMessage(senderId);
@@ -530,18 +525,20 @@ class UnitConnection extends events_1.EventEmitter {
         return Promise.resolve(p);
     }
     async addClientAsync(clientId, senderId) {
-        if (this._isMock)
+        if (this._isMock) {
             return Promise.resolve({ senderId: senderId !== null && senderId !== void 0 ? senderId : 0, val: true });
-        if (clientId)
+        }
+        if (clientId) {
             this.clientId = clientId;
+        }
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending add client command, clientId %d...', senderId !== null && senderId !== void 0 ? senderId : this.senderId, this.clientId);
             const _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for add client response'));
             }, this.netTimeout);
             this.once('addClient', (clientAck) => {
-                clearTimeout(_timeout);
                 debugUnit('received addClient event');
+                clearTimeout(_timeout);
                 this._hasAddedClient = true;
                 resolve(clientAck);
             });
@@ -551,8 +548,9 @@ class UnitConnection extends events_1.EventEmitter {
         return Promise.resolve(p);
     }
     async removeClientAsync(senderId) {
-        if (this._isMock)
+        if (this._isMock) {
             return Promise.resolve({ senderId: senderId !== null && senderId !== void 0 ? senderId : 0, val: true });
+        }
         const p = new Promise((resolve, reject) => {
             try {
                 debugUnit(`[${senderId !== null && senderId !== void 0 ? senderId : this.senderId}] sending remove client command, clientId ${this.clientId}...`);
@@ -560,8 +558,8 @@ class UnitConnection extends events_1.EventEmitter {
                     reject(new Error('time out waiting for remove client response'));
                 }, this.netTimeout);
                 this.once('removeClient', (clientAck) => {
-                    clearTimeout(_timeout);
                     debugUnit('received removeClient event');
+                    clearTimeout(_timeout);
                     this._hasAddedClient = false;
                     resolve(clientAck);
                 });
@@ -582,8 +580,8 @@ class UnitConnection extends events_1.EventEmitter {
                 reject(new Error('time out waiting for ping server response'));
             }, this.netTimeout);
             this.once('pong', (pong) => {
-                clearTimeout(_timeout);
                 debugUnit('received pong event');
+                clearTimeout(_timeout);
                 resolve(pong);
             });
             const msg = this.controller.connection.sendPingMessage(senderId);
@@ -594,41 +592,31 @@ class UnitConnection extends events_1.EventEmitter {
     onClientMessage(msg) {
         debugUnit(`received ${msg.action} message of length ${msg.length}`);
         switch (msg.action) {
-            case 15: {
+            case 15:
                 debugUnit('  it is a challenge response');
-                const challengeString = ConnectionMessage_1.ConnectionMessage.decodeChallengeResponse(msg);
-                this.emit('challengeString', challengeString);
+                this.emit('challengeString', ConnectionMessage_1.ConnectionMessage.decodeChallengeResponse(msg));
                 break;
-            }
-            case 28: {
+            case 28:
                 debugUnit('  it is a login response');
                 this.emit('loggedIn');
                 break;
-            }
-            case 13: {
+            case 13:
                 debugUnit('  it is a login failure');
                 this.emit('loginFailed');
                 break;
-            }
             case 12500:
-            case 12527: {
+            case 12527:
                 debugUnit('  it is pool status');
-                const equipmentState = EquipmentState_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg);
-                this.emit('equipmentState', equipmentState);
+                this.emit('equipmentState', EquipmentState_1.EquipmentStateMessage.decodeEquipmentStateResponse(msg));
                 break;
-            }
-            case 12521: {
+            case 12521:
                 debugUnit('  it is set circuit info');
-                const circuit = CircuitMessage_1.CircuitMessage.decodeSetCircuit(msg);
-                this.emit('circuit', circuit);
+                this.emit('circuit', CircuitMessage_1.CircuitMessage.decodeSetCircuit(msg));
                 break;
-            }
-            case 8121: {
+            case 8121:
                 debugUnit('  it is version');
-                const ver = ConnectionMessage_1.ConnectionMessage.decodeVersionResponse(msg);
-                this.emit('version', ver);
+                this.emit('version', ConnectionMessage_1.ConnectionMessage.decodeVersionResponse(msg));
                 break;
-            }
             case 12573:
                 debugUnit('  it is salt cell config');
                 this.emit('intellichlorConfig', ChlorMessage_1.ChlorMessage.decodeIntellichlorConfig(msg));
@@ -780,6 +768,7 @@ class UnitConnection extends events_1.EventEmitter {
                 debugUnit('  it is a chem history data payload');
                 this.emit('getChemHistoryData', ChemMessage_1.ChemMessage.decodecChemHistoryMessage(msg));
                 break;
+            // misc
             case 9806:
                 debugUnit('  it is a \'weather forecast changed\' notification');
                 this.emit('weatherForecastChanged');
@@ -846,8 +835,8 @@ class Equipment {
                 reject(new Error('time out waiting for weather forecast response'));
             }, this.unit.netTimeout);
             this.unit.once('weatherForecast', (equipment) => {
-                clearTimeout(_timeout);
                 debugUnit('received weatherForecast event');
+                clearTimeout(_timeout);
                 resolve(equipment);
             });
             const msg = this.unit.controller.equipment.sendGetWeatherMessage(senderId);
@@ -861,8 +850,8 @@ class Equipment {
                 reject(new Error('time out waiting for get history response'));
             }, this.unit.netTimeout);
             this.unit.once('getHistoryData', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received getHistoryData event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const now = new Date();
@@ -886,8 +875,8 @@ class Equipment {
                 reject(new Error('time out waiting for get n circuit names response'));
             }, this.unit.netTimeout);
             this.unit.once('nCircuitNames', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received n circuit names event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.equipment.sendGetNumCircuitNamesMessage(senderId);
@@ -902,8 +891,8 @@ class Equipment {
                 reject(new Error('time out waiting for get circuit names response'));
             }, this.unit.netTimeout * 3);
             this.unit.once('circuitNames', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received n circuit names event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.equipment.sendGetCircuitNamesMessage(0, 101, senderId);
@@ -942,8 +931,8 @@ class Equipment {
                 reject(new Error('time out waiting for get circuit definitions response'));
             }, this.unit.netTimeout);
             this.unit.once('circuitDefinitions', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received circuit definitions event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.equipment.sendGetCircuitDefinitionsMessage(senderId);
@@ -958,8 +947,8 @@ class Equipment {
                 reject(new Error('time out waiting for equipment configuration response'));
             }, this.unit.netTimeout);
             this.unit.once('equipmentConfiguration', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received equipmentConfiguration event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.equipment.sendGetEquipmentConfigurationMessage(senderId);
@@ -1153,7 +1142,7 @@ class Equipment {
     //       null;
     //     }
     //     const ready = false;
-    //     function dec2bin(dec) {
+    //     function dec2bin(dec: number): string {
     //       return (dec >>> 0).toString(2).padStart(8, '0');
     //     }
     //     if (ready) {
@@ -1180,8 +1169,8 @@ class Equipment {
                 reject(new Error('time out waiting to cancel delays'));
             }, this.unit.netTimeout);
             this.unit.once('cancelDelay', (delay) => {
-                clearTimeout(_timeout);
                 debugUnit('received cancelDelay event');
+                clearTimeout(_timeout);
                 resolve(delay);
             });
             const msg = this.unit.controller.equipment.sendCancelDelayMessage(senderId);
@@ -1196,8 +1185,8 @@ class Equipment {
                 reject(new Error('time out waiting for chemical config'));
             }, this.unit.netTimeout);
             this.unit.once('getSystemTime', (systemTime) => {
-                clearTimeout(_timeout);
                 debugUnit('received getSystemTime event');
+                clearTimeout(_timeout);
                 resolve(systemTime);
             });
             const msg = this.unit.controller.equipment.sendGetSystemTimeMessage(senderId);
@@ -1212,8 +1201,8 @@ class Equipment {
                 reject(new Error('time out waiting for controller config'));
             }, this.unit.netTimeout);
             this.unit.once('controllerConfig', (controller) => {
-                clearTimeout(_timeout);
                 debugUnit('received equipmentConfig event');
+                clearTimeout(_timeout);
                 resolve(controller);
             });
             const msg = this.unit.controller.equipment.sendGetControllerConfigMessage(senderId);
@@ -1228,8 +1217,8 @@ class Equipment {
                 reject(new Error('time out waiting for pool status'));
             }, this.unit.netTimeout);
             this.unit.once('equipmentState', (equipmentState) => {
-                clearTimeout(_timeout);
                 debugUnit('received equipmentState event');
+                clearTimeout(_timeout);
                 resolve(equipmentState);
             });
             const msg = this.unit.controller.equipment.sendGetEquipmentStateMessage(senderId);
@@ -1244,8 +1233,8 @@ class Equipment {
                 reject(new Error('time out waiting for custom names'));
             }, this.unit.netTimeout);
             this.unit.once('getCustomNames', (customNames) => {
-                clearTimeout(_timeout);
                 debugUnit('received getCustomNames event');
+                clearTimeout(_timeout);
                 resolve(customNames);
             });
             const msg = this.unit.controller.equipment.sendGetCustomNamesMessage(senderId);
@@ -1256,14 +1245,15 @@ class Equipment {
     async setCustomNameAsync(idx, name, senderId) {
         const p = new Promise((resolve, reject) => {
             debugUnit('[%d] sending set custom names: %d...', senderId !== null && senderId !== void 0 ? senderId : this.unit.senderId);
-            if (name.length > 11)
+            if (name.length > 11) {
                 reject(`Name (${name}) must be less than 12 characters`);
+            }
             const _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for set custom name'));
             }, this.unit.netTimeout);
             this.unit.once('setCustomName', (customNames) => {
-                clearTimeout(_timeout);
                 debugUnit('received setCustomName event');
+                clearTimeout(_timeout);
                 resolve(customNames);
             });
             const msg = this.unit.controller.equipment.sendSetCustomNameMessage(idx, name, senderId);
@@ -1284,8 +1274,8 @@ class Circuit {
                 reject(new Error('time out waiting for light command response'));
             }, this.unit.netTimeout);
             this.unit.once('sentLightCommand', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received sentLightCommand event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.circuits.sendIntellibriteMessage(command, senderId);
@@ -1300,8 +1290,8 @@ class Circuit {
                 reject(new Error('time out waiting for set circuit run time response'));
             }, this.unit.netTimeout);
             this.unit.once('setCircuitRuntimebyId', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received setCircuitRuntimebyId event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.circuits.sendSetCircuitRuntimeMessage(circuitId, runTime, senderId);
@@ -1316,8 +1306,8 @@ class Circuit {
                 reject(new Error('time out waiting for set circuit state response'));
             }, this.unit.netTimeout);
             this.unit.once('circuit', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received circuit event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.circuits.sendSetCircuitMessage(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId);
@@ -1332,8 +1322,8 @@ class Circuit {
                 reject(new Error('time out waiting for set circuit state response'));
             }, this.unit.netTimeout);
             this.unit.once('circuitStateChanged', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received circuitStateChanged event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.circuits.sendSetCircuitStateMessage(circuitId, circuitState, senderId);
@@ -1354,8 +1344,8 @@ class Body {
                 reject(new Error('time out waiting for body setpoint response'));
             }, this.unit.netTimeout);
             this.unit.once('setPointChanged', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received setPointChanged event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.bodies.sendSetPointMessage(bodyIndex, temperature, senderId);
@@ -1370,8 +1360,8 @@ class Body {
                 reject(new Error('time out waiting for body coolSetpoint response'));
             }, this.unit.netTimeout);
             this.unit.once('coolSetPointChanged', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received coolSetPointChanged event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.bodies.sendCoolSetPointMessage(bodyIndex, temperature, senderId);
@@ -1386,8 +1376,8 @@ class Body {
                 reject(new Error('time out waiting for body heat mode response'));
             }, this.unit.netTimeout);
             this.unit.once('heatModeChanged', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received heatModeChanged event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.bodies.sendHeatModeMessage(bodyIndex, heatMode, senderId);
@@ -1409,8 +1399,8 @@ class Pump {
                 this.unit.removeListener('setPumpSpeed', function () { null; });
             }, this.unit.netTimeout);
             this.unit.once('setPumpSpeed', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received setPumpSpeed event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.pumps.sendSetPumpSpeed(pumpId, circuitId, speed, isRPMs, senderId);
@@ -1427,8 +1417,8 @@ class Pump {
                     this.unit.removeListener('getPumpStatus', function () { null; });
                 }, this.unit.netTimeout);
                 this.unit.once('getPumpStatus', (data) => {
-                    clearTimeout(_timeout);
                     debugUnit('received getPumpStatus event');
+                    clearTimeout(_timeout);
                     resolve(data);
                 });
                 const msg = this.unit.controller.pumps.sendGetPumpStatusMessage(pumpId, senderId);
@@ -1454,8 +1444,8 @@ class Schedule {
                 reject(new Error('time out waiting for set schedule response'));
             }, this.unit.netTimeout);
             this.unit.once('setScheduleEventById', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received setScheduleEventById event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.schedules.sendSetScheduleEventMessage(scheduleId, circuitId, startTime, stopTime, dayMask, flags, heatCmd, heatSetPoint, senderId);
@@ -1470,8 +1460,8 @@ class Schedule {
                 reject(new Error('time out waiting for add new schedule response'));
             }, this.unit.netTimeout);
             this.unit.once('addNewScheduleEvent', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received addNewScheduleEvent event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.schedules.sendAddScheduleEventMessage(scheduleType, senderId);
@@ -1486,8 +1476,8 @@ class Schedule {
                 reject(new Error('time out waiting for delete schedule response'));
             }, this.unit.netTimeout);
             this.unit.once('deleteScheduleEventById', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received deleteScheduleEventById event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const msg = this.unit.controller.schedules.sendDeleteScheduleEventMessage(scheduleId, senderId);
@@ -1502,8 +1492,8 @@ class Schedule {
                 reject(new Error('time out waiting for schedule data'));
             }, this.unit.netTimeout);
             this.unit.once('getScheduleData', (schedule) => {
-                clearTimeout(_timeout);
                 debugUnit('received getScheduleData event');
+                clearTimeout(_timeout);
                 resolve(schedule);
             });
             const msg = this.unit.controller.schedules.sendGetSchedulesMessage(scheduleType, senderId);
@@ -1523,8 +1513,8 @@ class Chem {
                 reject(new Error('time out waiting for get chem history response'));
             }, this.unit.netTimeout);
             this.unit.once('getChemHistoryData', (data) => {
-                clearTimeout(_timeout);
                 debugUnit('received getChemHistoryData event');
+                clearTimeout(_timeout);
                 resolve(data);
             });
             const now = new Date();
@@ -1543,8 +1533,8 @@ class Chem {
                 reject(new Error('time out waiting for chemical config'));
             }, this.unit.netTimeout);
             this.unit.once('chemicalData', (chemical) => {
-                clearTimeout(_timeout);
                 debugUnit('received chemicalData event');
+                clearTimeout(_timeout);
                 resolve(chemical);
             });
             const msg = this.unit.controller.chem.sendGetChemStatusMessage(senderId);
@@ -1565,8 +1555,8 @@ class Chlor {
                 reject(new Error('time out waiting for set intellichlor response'));
             }, this.unit.netTimeout);
             this.unit.once('setIntellichlorConfig', (equipment) => {
-                clearTimeout(_timeout);
                 debugUnit('received setIntellichlorConfig event');
+                clearTimeout(_timeout);
                 resolve(equipment);
             });
             const msg = this.unit.controller.chlor.sendSetChlorOutputMessage(poolOutput, spaOutput, senderId);
@@ -1581,8 +1571,8 @@ class Chlor {
                 reject(new Error('time out waiting for intellichlor config'));
             }, this.unit.netTimeout);
             this.unit.once('intellichlorConfig', (intellichlor) => {
-                clearTimeout(_timeout);
                 debugUnit('received intellichlorConfig event');
+                clearTimeout(_timeout);
                 resolve(intellichlor);
             });
             const msg = this.unit.controller.chlor.sendGetSaltCellConfigMessage(senderId);
@@ -1597,8 +1587,8 @@ class Chlor {
                 reject(new Error('time out waiting for intellichlor enable'));
             }, this.unit.netTimeout);
             this.unit.once('intellichlorIsActive', (intellichlor) => {
-                clearTimeout(_timeout);
                 debugUnit('received intellichlorIsActive event');
+                clearTimeout(_timeout);
                 resolve(intellichlor);
             });
             const msg = this.unit.controller.chlor.sendSetSaltCellEnableMessage(isActive, senderId);

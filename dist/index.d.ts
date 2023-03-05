@@ -4,8 +4,8 @@
 /// <reference types="node" />
 import 'source-map-support/register';
 import * as dgram from 'dgram';
-import * as net from 'net';
 import { EventEmitter } from 'events';
+import * as net from 'net';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { SLVersionData } from './messages/ConnectionMessage';
@@ -33,7 +33,7 @@ export declare class RemoteLogin extends EventEmitter {
     private _client;
     private _gateway;
     connectAsync(): Promise<SLGateway.SLGateWayData>;
-    closeAsync(): Promise<unknown>;
+    closeAsync(): Promise<boolean>;
 }
 export declare class UnitConnection extends EventEmitter {
     constructor();
