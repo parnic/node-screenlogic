@@ -5,12 +5,13 @@ var assert = require('assert');
 
 // you'll need a ScreenLogic-enabled device on your network for this to succeed
 describe('Unit', function() {
-  let unit = ScreenLogic.screenlogic;
+  let unit;
   before(function(done) {
     let finder = new ScreenLogic.FindUnits();
     finder.on('serverFound', async server => {
       finder.close();
 
+      unit = new ScreenLogic.UnitConnection();
       unit.initUnit(server);
       unit.once('loggedIn', () => {
         done();

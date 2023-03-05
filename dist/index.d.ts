@@ -104,6 +104,8 @@ export declare class UnitConnection extends EventEmitter {
 }
 export declare const screenlogic: UnitConnection;
 export declare class Equipment {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     setSystemTimeAsync(date: Date, shouldAdjustForDST: boolean, senderId?: number): Promise<SLSystemTimeData>;
     getWeatherForecastAsync(senderId?: number): Promise<SLWeatherForecastData>;
     getHistoryDataAsync(fromTime?: Date, toTime?: Date, senderId?: number): Promise<SLHistoryData>;
@@ -119,32 +121,44 @@ export declare class Equipment {
     getCustomNamesAsync(senderId?: number): Promise<string[]>;
     setCustomNameAsync(idx: number, name: string, senderId?: number): Promise<string[]>;
 }
-export declare class Circuit extends UnitConnection {
+export declare class Circuit {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     sendLightCommandAsync(command: LightCommands, senderId?: number): Promise<SLSimpleBoolData>;
     setCircuitRuntimebyIdAsync(circuitId: number, runTime?: number, senderId?: number): Promise<SLSimpleBoolData>;
     setCircuitAsync(circuitId: number, nameIndex: number, circuitFunction: number, circuitInterface: number, freeze: boolean, colorPos: number, senderId?: number): Promise<SLSimpleBoolData>;
     setCircuitStateAsync(circuitId: number, circuitState: boolean, senderId?: number): Promise<SLSimpleBoolData>;
 }
-export declare class Body extends UnitConnection {
+export declare class Body {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     setSetPointAsync(bodyIndex: BodyIndex, temperature: number, senderId?: number): Promise<SLSimpleBoolData>;
     setCoolSetPointAsync(bodyIndex: BodyIndex, temperature: number, senderId?: number): Promise<SLSimpleBoolData>;
     setHeatModeAsync(bodyIndex: BodyIndex, heatMode: HeatModes, senderId?: number): Promise<SLSimpleBoolData>;
 }
-export declare class Pump extends UnitConnection {
+export declare class Pump {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     setPumpSpeedAsync(pumpId: number, circuitId: number, speed: number, isRPMs?: boolean, senderId?: number): Promise<SLSimpleBoolData>;
     getPumpStatusAsync(pumpId: number, senderId?: number): Promise<SLPumpStatusData>;
 }
-export declare class Schedule extends UnitConnection {
+export declare class Schedule {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     setScheduleEventByIdAsync(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number, senderId?: number): Promise<SLSimpleBoolData>;
     addNewScheduleEventAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLSimpleNumberData>;
     deleteScheduleEventByIdAsync(scheduleId: number, senderId?: number): Promise<SLSimpleBoolData>;
     getScheduleDataAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLScheduleData[]>;
 }
-export declare class Chem extends UnitConnection {
+export declare class Chem {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     getChemHistoryDataAsync(fromTime?: Date, toTime?: Date, senderId?: number): Promise<SLChemHistory>;
     getChemicalDataAsync(senderId?: number): Promise<SLChemData>;
 }
-export declare class Chlor extends UnitConnection {
+export declare class Chlor {
+    protected unit: UnitConnection;
+    constructor(parent: UnitConnection);
     setIntellichlorOutputAsync(poolOutput: number, spaOutput: number, senderId?: number): Promise<SLSimpleBoolData>;
     getIntellichlorConfigAsync(senderId?: number): Promise<SLIntellichlorData>;
     setIntellichlorIsActiveAsync(isActive: boolean, senderId?: number): Promise<SLSimpleBoolData>;
