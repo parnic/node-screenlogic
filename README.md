@@ -385,7 +385,7 @@ Returns an array of objects with circuit names and IDs. Internally, this calls e
 
 #### equipment.getControllerConfigAsync(senderId?)
 
-Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back. Resolves with [SLControllerConfigData](#slcontrollerconfigdata).
+Requests controller configuration from the connected unit. Emits the `controllerConfig` event when the response comes back. Resolves with [EquipmentConfigurationMessage](#equipmentconfigurationmessage).
 
 #### equipment.getCustomNamesAsync(senderId?)
 
@@ -479,7 +479,7 @@ Configures a schedule event. See [SLSetScheduleEventById](#slsetscheduleeventbyi
 * `chemicalData` - Indicates that a response to `getChemicalDataAsync()` has been received. Event handler receives a [SLChemData](#slchemdata) object.
 * `circuitStateChanged` - Indicates that a response to `setCircuitStateAsync()` has been received. Event handler receives a [SLSetCircuitStateMessage](#slsetcircuitstatemessage) object.
 * `close` - Indicates that the connection to the unit has been closed. Event handler receives a bool indicating whether there was a transmission error.
-* `controllerConfig` - Indicates that a response to `getControllerConfigAsync()` has been received. Event handler receives a [SLControllerConfigData](#slcontrollerconfigdata) object.
+* `controllerConfig` - Indicates that a response to `getControllerConfigAsync()` has been received. Event handler receives a [EquipmentConfigurationMessage](#equipmentconfigurationmessage) object.
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleByIdAsync()` has been received. Event handler receives a [SLDeleteScheduleEventById](#sldeletescheduleeventbyid) object.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 * `equipmentConfiguration` - Indicates a response to `getEquipmentConfigurationAsync()`. Receives a [SLEquipmentConfigurationData](#slequipmentconfigurationdata) object.
@@ -536,13 +536,13 @@ Converts a day mask from, for example, `SLGetScheduleData`'s events[idx].days pr
 
 #### encodeDayMask(days)
 
-Converts an array of `DAY_VALUES` into a mask used by, for example, `SLGetScheduleData`'s events[idx].days property.
+Converts an array of `DAY_VALUES` keys (`['Mon', 'Tue']`, etc.) into a mask used by, for example, `SLGetScheduleData`'s events[idx].days property.
 
 #### getDayValue(dayName)
 
 Returns the value of a given `DAY_VALUES` day name.
 
-`DAY_VALUES` is defined as the following array for simplicity of checking whether a specific day is set in a mask:
+`DAY_VALUES` is defined as the following map for simplicity of checking whether a specific day is set in a mask:
 
 ```javascript
 const DAY_VALUES = {
@@ -615,7 +615,7 @@ Passed as an argument to the emitted `chemicalData` event handler.
 
 TBD
 
-### SLControllerConfigData
+### EquipmentConfigurationMessage
 
 Passed as an argument to the emitted `controllerConfig` event handler.
 
@@ -623,19 +623,19 @@ Passed as an argument to the emitted `controllerConfig` event handler.
 
 Returns a bool indicating whether the system is an EasyTouch system or not. (Helper method for interpreting the value in `controllerType`.)
 
-#### isIntelliTouch(controllerType)
+#### static isIntelliTouch(controllerType)
 
 Returns a bool indicating whether the system is an IntelliTouch system or not. (Helper method for interpreting the value in `controllerType`.)
 
-#### isEasyTouchLite(controllerType)
+#### static isEasyTouchLite(controllerType)
 
 Returns a bool indicating whether the system is an EasyTouch Lite system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
 
-#### isDualBody(controllerType)
+#### static isDualBody(controllerType)
 
 Returns a bool indicating whether the system is dual-body or not. (Helper method for interpreting the value in `controllerType`.)
 
-#### isChem2(controllerType)
+#### static isChem2(controllerType)
 
 Returns a bool indicating whether the system is a Chem2 system or not. (Helper method for interpreting the value in `controllerType` and `hwType`.)
 
@@ -697,25 +697,84 @@ Passed as an argument to the emitted `deleteScheduleEventById` event. Deletes a 
 
 ### SLEquipmentConfigurationData
 
-```
-export interface SLEquipmentConfigurationData extends SLData {
-  controllerType: number;
-  hardwareType: number;
-  expansionsCount: number;
-  version: number;
-  pumps: Pump[];
-  heaterConfig: HeaterConfig;
-  valves: Valves[];
-  delays: Delays;
-  misc: Misc;
-  remotes: SLRemoteData;
-  highSpeedCircuits: number[],
-  lights: Lights,
-  spaFlow: SpaFlow
-  numPumps: number;
-  rawData: rawData;
-}
-```
+This is largely undocumented at this time, but we are making progress toward figuring it out.
+
+* `controllerType` - byte that can be passed to EquipmentConfigurationMessage static methods to interpret what type of controller this is
+* `hwType` - byte passed to EquipmentConfigurationMessage static methods to determine more info about the hardware
+* `expansionsCount` - number
+* `version` - number
+* `pumps` - Pump[]
+  * `id` - number
+  * `type` - number
+  * `pentairType` - PumpTypes
+  * `name` - string
+  * `address` - number
+  * `circuits` - PumpCircuit[]
+  * `primingSpeed` - number
+  * `primingTime` - number
+  * `minSpeed` - number
+  * `maxSpeed` - number
+  * `speedStepSize` - number
+  * `backgroundCircuit` - number
+  * `filterSize` - number
+  * `turnovers` - number
+  * `manualFilterGPM` - number
+  * `minFlow` - number
+  * `maxFlow` - number
+  * `flowStepSize` - number
+  * `maxSystemTime` - number
+  * `maxPressureIncrease` - number
+  * `backwashFlow` - number
+  * `backwashTime` - number
+  * `rinseTime` - number
+  * `vacuumFlow` - number
+  * `vacuumTime` - number
+* `heaterConfig` - HeaterConfig
+  * `body1SolarPresent` - boolean
+  * `body2SolarPresent` - boolean
+  * `thermaFloCoolPresent` - boolean
+  * `solarHeatPumpPresent` - boolean
+  * `thermaFloPresent` - boolean
+  * `units` - number
+* `valves` - Valves[]
+  * `loadCenterIndex` - number
+  * `valveIndex` - number
+  * `valveName` - string
+  * `loadCenterName` - string
+  * `deviceId` - number
+  * `sCircuit` -  string
+* `delays` - Delays
+  * `poolPumpOnDuringHeaterCooldown` - boolean
+  * `spaPumpOnDuringHeaterCooldown` - boolean
+  * `pumpOffDuringValveAction` - boolean
+* `misc` - Misc
+  * `intelliChem` - boolean
+  * `manualHeat` - boolean
+* `remotes` - SLRemoteData
+  * `fourButton` - number[]
+  * `tenButton` - number[][]
+  * `quickTouch` - number[]
+* `highSpeedCircuits` - number[]
+* `lights` - Lights
+  * `allOnAllOff` - number[]
+* `spaFlow` - SpaFlow
+  * `isActive` - boolean
+  * `pumpId` - number
+  * `stepSize` - number
+* `numPumps` - number
+* `rawData` - rawData
+  * `versionData` - number[]
+  * `highSpeedCircuitData` - number[]
+  * `valveData` - number[]
+  * `remoteData` - number[]
+  * `heaterConfigData` - number[]
+  * `delayData` - number[]
+  * `macroData` - number[]
+  * `miscData` - number[]
+  * `lightData` - number[]
+  * `pumpData` - number[]
+  * `sgData` - number[]
+  * `spaFlowData` - number[]
 
 ### SLGetChemHistoryData
 
@@ -779,7 +838,7 @@ Passed as an argument to the emitted `getPumpStatus` event. Gets information abo
 * `pumpRPMs` - current RPMs of the pump
 * `pumpGPMs` - current GPMs of the pump
 * `pumpCircuits` - Array of 8 items each containing
-  * `circuitId` - Circuit Id (CircuitId matched data returned by [SLControllerConfigData](#slcontrollerconfigdata)'s `getCircuitByDeviceIdAsync()`)
+  * `circuitId` - Circuit Id (CircuitId matched data returned by [EquipmentConfigurationMessage](#equipmentconfigurationmessage)'s `getCircuitByDeviceIdAsync()`)
   * `speed` - the set point for this pump/circuit combo (in either RPMs or GPMs depending on the value of `isRPMs`)
   * `isRPMs` - boolean indicating if the set point is in RPMs (false means it's in GPMs)
 * `pumpUnknown1` - unknown data; always 0
@@ -817,28 +876,13 @@ TBD
 Contains information about the system's current time and date. Passed as a return object/
 an argument to the emitted `getSystemTimeAsync` event.
 
-```
-export interface SLSystemTimeData {
-  date: Date;
-  year: any;
-  month: any;
-  dayOfWeek: any;
-  day: any;
-  hour: any;
-  minute: any;
-  second: any;
-  millisecond: any;
-  adjustForDST: boolean;
-}
-```
-
 #### Properties
 
 * `date` - `Date` instance representing the current system datetime (preferred, the other properties are derived from this one and provided for backward compatibility purposes)
 * `year` - short representing current system year
 * `month` - short representing current system month (where 1 is January, 2 is February, etc.)
-* `day` - short representing current system day of the month
 * `dayOfWeek` - short representing current system day of the week (where 1 is Sunday and 7 is Saturday)
+* `day` - short representing current system day of the month
 * `hour` - short representing current system hour (24-hour time where 0 is midnight, 13 is 1PM, etc.)
 * `minute` - short representing current system minute
 * `second` - short representing current system second
@@ -847,54 +891,31 @@ export interface SLSystemTimeData {
 
 ### SLLightControlMessage
 
-Passed as an argument to `sentLightCommandAsync`. Can be one of:
-
-```
-export enum LightCommands {
-  LIGHT_CMD_LIGHTS_OFF = 0,
-  LIGHT_CMD_LIGHTS_ON = 1,
-  LIGHT_CMD_COLOR_SET = 2,
-  LIGHT_CMD_COLOR_SYNC = 3,
-  LIGHT_CMD_COLOR_SWIM = 4,
-  LIGHT_CMD_COLOR_MODE_PARTY = 5,
-  LIGHT_CMD_COLOR_MODE_ROMANCE = 6,
-  LIGHT_CMD_COLOR_MODE_CARIBBEAN = 7,
-  LIGHT_CMD_COLOR_MODE_AMERICAN = 8,
-  LIGHT_CMD_COLOR_MODE_SUNSET = 9,
-  LIGHT_CMD_COLOR_MODE_ROYAL = 10,
-  LIGHT_CMD_COLOR_SET_SAVE = 11,
-  LIGHT_CMD_COLOR_SET_RECALL = 12,
-  LIGHT_CMD_COLOR_BLUE = 13,
-  LIGHT_CMD_COLOR_GREEN = 14,
-  LIGHT_CMD_COLOR_RED = 15,
-  LIGHT_CMD_COLOR_WHITE = 16,
-  LIGHT_CMD_COLOR_PURPLE = 17
-}
-```
+Passed as an argument to `sentLightCommandAsync`.
 
 #### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfig` includes a controllerId, this ID, in my experience, should always be 0.
 * `command` - integer indicating which command to send to the lights. Valid values are:
-  * ScreenLogic.LIGHT_CMD_LIGHTS_OFF
-  * ScreenLogic.LIGHT_CMD_LIGHTS_ON
-  * ScreenLogic.LIGHT_CMD_COLOR_SET
-  * ScreenLogic.LIGHT_CMD_COLOR_SYNC
-  * ScreenLogic.LIGHT_CMD_COLOR_SWIM
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_PARTY
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_ROMANCE
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_CARIBBEAN
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_AMERICAN
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_SUNSET
-  * ScreenLogic.LIGHT_CMD_COLOR_MODE_ROYAL
-  * ScreenLogic.LIGHT_CMD_COLOR_SET_SAVE
-  * ScreenLogic.LIGHT_CMD_COLOR_SET_RECALL
-  * ScreenLogic.LIGHT_CMD_COLOR_BLUE
-  * ScreenLogic.LIGHT_CMD_COLOR_GREEN
-  * ScreenLogic.LIGHT_CMD_COLOR_RED
-  * ScreenLogic.LIGHT_CMD_COLOR_WHITE
-  * ScreenLogic.LIGHT_CMD_COLOR_PURPLE
+  * LightCommands.LIGHT_CMD_LIGHTS_OFF
+  * LightCommands.LIGHT_CMD_LIGHTS_ON
+  * LightCommands.LIGHT_CMD_COLOR_SET
+  * LightCommands.LIGHT_CMD_COLOR_SYNC
+  * LightCommands.LIGHT_CMD_COLOR_SWIM
+  * LightCommands.LIGHT_CMD_COLOR_MODE_PARTY
+  * LightCommands.LIGHT_CMD_COLOR_MODE_ROMANCE
+  * LightCommands.LIGHT_CMD_COLOR_MODE_CARIBBEAN
+  * LightCommands.LIGHT_CMD_COLOR_MODE_AMERICAN
+  * LightCommands.LIGHT_CMD_COLOR_MODE_SUNSET
+  * LightCommands.LIGHT_CMD_COLOR_MODE_ROYAL
+  * LightCommands.LIGHT_CMD_COLOR_SET_SAVE
+  * LightCommands.LIGHT_CMD_COLOR_SET_RECALL
+  * LightCommands.LIGHT_CMD_COLOR_BLUE
+  * LightCommands.LIGHT_CMD_COLOR_GREEN
+  * LightCommands.LIGHT_CMD_COLOR_RED
+  * LightCommands.LIGHT_CMD_COLOR_WHITE
+  * LightCommands.LIGHT_CMD_COLOR_PURPLE
 
 ### SLPingServerMessage
 
@@ -994,28 +1015,17 @@ Passed as an argument to the emitted `circuitStateChanged` event.
 
 Passed as an argument, returned to the emitted `heatModeChanged` event. Valid values depend on installed equipment.
 
-```
-export enum HeatModes {
-  HEAT_MODE_OFF = 0,
-  HEAT_MODE_SOLAR = 1,
-  HEAT_MODE_SOLARPREFERRED = 2,
-  HEAT_MODE_HEATPUMP = 3,
-  HEAT_MODE_HEATER = 3,
-  HEAT_MODE_DONTCHANGE = 4
-}
-```
-
 #### Properties
 
 * `controllerId` - integer indicating the ID of the controller to send this command to.
   * Note that while `SLControllerConfig` includes a controllerId, this ID, in my experience, should always be 0.
 * `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
 * `heatMode` - integer indicating the desired heater mode. Valid values are:
-  * ScreenLogic.HEAT_MODE_OFF
-  * ScreenLogic.HEAT_MODE_SOLAR
-  * ScreenLogic.HEAT_MODE_SOLARPREFERRED
-  * ScreenLogic.HEAT_MODE_HEATPUMP
-  * ScreenLogic.HEAT_MODE_DONTCHANGE
+  * HeatModes.HEAT_MODE_OFF
+  * HeatModes.HEAT_MODE_SOLAR
+  * HeatModes.HEAT_MODE_SOLARPREFERRED
+  * HeatModes.HEAT_MODE_HEATPUMP
+  * HeatModes.HEAT_MODE_DONTCHANGE
 
 ### SLSetHeatSetPointMessage
 
