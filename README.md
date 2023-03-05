@@ -835,9 +835,9 @@ Passed as an argument to the emitted `getPumpStatus` event. Gets information abo
 
 * `isRunning` - boolean that says if pump is running
 * `pumpType` - 0 if not installed or one of the IntelliFlo constants:
-  * ScreenLogic.PUMP_TYPE_INTELLIFLOVF
-  * ScreenLogic.PUMP_TYPE_INTELLIFLOVS
-  * ScreenLogic.PUMP_TYPE_INTELLIFLOVSF
+  * PumpTypes.PUMP_TYPE_INTELLIFLOVF
+  * PumpTypes.PUMP_TYPE_INTELLIFLOVS
+  * PumpTypes.PUMP_TYPE_INTELLIFLOVSF
 * `pumpWatts` - current Watts usage of the pump
 * `pumpRPMs` - current RPMs of the pump
 * `pumpGPMs` - current GPMs of the pump
@@ -1127,11 +1127,11 @@ Passed as an argument to the emitted `setScheduleEventById` event. Configures an
   * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
   * bit 1 indicates whether heat setPoint should be changed
 * `heatCmd` - integer indicating the desired heater mode. Valid values are:
-  * ScreenLogic.HEAT_MODE_OFF
-  * ScreenLogic.HEAT_MODE_SOLAR
-  * ScreenLogic.HEAT_MODE_SOLARPREFERRED
-  * ScreenLogic.HEAT_MODE_HEATPUMP
-  * ScreenLogic.HEAT_MODE_DONTCHANGE
+  * HeatModes.HEAT_MODE_OFF
+  * HeatModes.HEAT_MODE_SOLAR
+  * HeatModes.HEAT_MODE_SOLARPREFERRED
+  * HeatModes.HEAT_MODE_HEATPUMP
+  * HeatModes.HEAT_MODE_DONTCHANGE
 * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
 
 ### SLSetSystemTime
