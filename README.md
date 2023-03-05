@@ -613,7 +613,11 @@ Passed as an argument to the emitted `chemicalData` event handler.
 
 ### SLCircuitNamesData
 
-TBD
+#### Properties
+
+* `circuits` - an array of circuit ids to names
+  * `id` - number indicating the id of the circuit
+  * `circuitName` - string indicating the circuit's name
 
 ### EquipmentConfigurationMessage
 
@@ -869,7 +873,63 @@ An array of these are passed as an argument to the emitted `getScheduleData` eve
 
 ### SLSetEquipmentConfigurationData
 
-TBD
+#### Properties
+
+* `pumps` - Pump[]
+  * `id` - number
+  * `type` - number
+  * `pentairType` - PumpTypes
+  * `name` - string
+  * `address` - number
+  * `circuits` - PumpCircuit[]
+  * `primingSpeed` - number
+  * `primingTime` - number
+  * `minSpeed` - number
+  * `maxSpeed` - number
+  * `speedStepSize` - number
+  * `backgroundCircuit` - number
+  * `filterSize` - number
+  * `turnovers` - number
+  * `manualFilterGPM` - number
+  * `minFlow` - number
+  * `maxFlow` - number
+  * `flowStepSize` - number
+  * `maxSystemTime` - number
+  * `maxPressureIncrease` - number
+  * `backwashFlow` - number
+  * `backwashTime` - number
+  * `rinseTime` - number
+  * `vacuumFlow` - number
+  * `vacuumTime` - number
+* `heaterConfig` - HeaterConfig
+  * `body1SolarPresent` - boolean
+  * `body2SolarPresent` - boolean
+  * `thermaFloCoolPresent` - boolean
+  * `solarHeatPumpPresent` - boolean
+  * `thermaFloPresent` - boolean
+  * `units` - number
+* `valves` - Valves[]
+  * `loadCenterIndex` - number
+  * `valveIndex` - number
+  * `valveName` - string
+  * `loadCenterName` - string
+  * `deviceId` - number
+  * `sCircuit` -  string
+* `delays` - Delays
+  * `poolPumpOnDuringHeaterCooldown` - boolean
+  * `spaPumpOnDuringHeaterCooldown` - boolean
+  * `pumpOffDuringValveAction` - boolean
+* `misc` - Misc
+  * `intelliChem` - boolean
+  * `manualHeat` - boolean
+* `remotes` - SLRemoteData
+  * `fourButton` - number[]
+  * `tenButton` - number[][]
+  * `quickTouch` - number[]
+* `highSpeedCircuits` - number[]
+* `lights` - Lights
+  * `allOnAllOff` - number[]
+* `numPumps` - number
 
 ### SLSystemTimeData
 
@@ -1088,4 +1148,25 @@ Passed as an argument to the emitted `version` event handler.
 
 ### SLWeatherForecastData
 
-TBD
+#### Properties
+
+* `version` - number
+* `zip` - string
+* `lastUpdate` - Date
+* `lastRequest` - Date
+* `dateText` - string
+* `text` - string
+* `currentTemperature` - number
+* `humidity` - number
+* `wind` - string
+* `pressure` - number
+* `dewPoint` - number
+* `windChill` - number
+* `visibility` - number
+* `dayData` - SLWeatherForecastDayData[]
+  * `dayTime` - Date
+  * `highTemp` - number
+  * `lowTemp` - number
+  * `text` - string
+* `sunrise` - number
+* `sunset` - number
