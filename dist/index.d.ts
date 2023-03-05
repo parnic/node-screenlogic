@@ -33,7 +33,7 @@ export declare class RemoteLogin extends EventEmitter {
     private _client;
     private _gateway;
     connectAsync(): Promise<SLGateway.SLGateWayData>;
-    closeAsync(): Promise<boolean>;
+    closeAsync(): Promise<unknown>;
 }
 export declare class UnitConnection extends EventEmitter {
     constructor();

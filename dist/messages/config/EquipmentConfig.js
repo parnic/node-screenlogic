@@ -164,12 +164,12 @@ class EquipmentConfigurationMessage {
         const remoteDataArray = msg.readSLArray();
         const heaterConfigDataArray = msg.readSLArray(); // decodeSensorData()
         const delayDataArray = msg.readSLArray(); // decodeDelayData()
-        const macroDataArray = msg.readSLArray();
+        /*const macroDataArray =*/ msg.readSLArray();
         const miscDataArray = msg.readSLArray(); // decodeMiscData()
         const lightDataArray = msg.readSLArray();
         const pumpDataArray = msg.readSLArray();
-        const spaFlowDataArray = msg.readSLArray();
-        const alarm = msg.readUInt8();
+        /*const spaFlowDataArray =*/ msg.readSLArray();
+        /*const alarm =*/ msg.readUInt8();
         // const rawData = {
         //   highSpeedCircuitData: speedDataArray,
         //   valveData: valveDataArray,

@@ -172,7 +172,7 @@ class EquipmentCommands extends Commands {
         this.writeInt32LE(this.controllerId);
         this.writeSLDateTime(fromTime);
         this.writeSLDateTime(toTime);
-        this.writeInt32LE(this.senderId);
+        this.writeInt32LE(senderId !== null && senderId !== void 0 ? senderId : this.senderId);
         this.unit.write(this.toBuffer());
         return this;
     }
@@ -269,7 +269,7 @@ class ChemCommands extends Commands {
         this.writeInt32LE(0);
         this.writeSLDateTime(fromTime);
         this.writeSLDateTime(toTime);
-        this.writeInt32LE(this.senderId || 0);
+        this.writeInt32LE(senderId !== null && senderId !== void 0 ? senderId : this.senderId);
         this.unit.write(this.toBuffer());
         return this;
     }
