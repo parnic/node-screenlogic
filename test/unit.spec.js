@@ -82,7 +82,7 @@ describe('Unit', function() {
   it('can add and remove a client', function(done) {
     unit.once('addClient', response => {
       assert.equal(response.senderId, 4321);
-      unit.removeClientAsync(5432);
+      unit.removeClientAsync(1234, 5432);
     }).once('removeClient', response => {
       assert.equal(response.senderId, 5432);
       done();
@@ -94,7 +94,7 @@ describe('Unit', function() {
   it('can add and remove a client with async/await', async function() {
     const addClientResponse = await unit.addClientAsync(1234, 4321);
     assert.equal(addClientResponse.senderId, 4321);
-    const removeClientResponse = await unit.removeClientAsync(5432);
+    const removeClientResponse = await unit.removeClientAsync(1234, 5432);
     assert.equal(removeClientResponse.senderId, 5432);
   });
 

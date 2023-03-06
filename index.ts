@@ -662,12 +662,8 @@ export class UnitConnection extends EventEmitter {
       return Promise.resolve({ senderId: senderId ?? 0, val: true });
     }
 
-    if (clientId) {
-      this.clientId = clientId;
-    }
-
     const p = new Promise((resolve, reject) => {
-      debugUnit('[%d] sending add client command, clientId %d...', senderId ?? this.senderId, this.clientId);
+      debugUnit('[%d] sending add client command, clientId %d...', senderId ?? this.senderId, clientId ?? this.clientId);
 
       const _timeout = setTimeoutSync(() => {
         reject(new Error('time out waiting for add client response'));
@@ -682,21 +678,21 @@ export class UnitConnection extends EventEmitter {
         resolve(clientAck);
       });
 
-      const msg = this.controller.connection.sendAddClientMessage(senderId);
+      const msg = this.controller.connection.sendAddClientMessage(clientId, senderId);
       this.toLogEmit(msg, 'out');
     });
 
     return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
-  async removeClientAsync(senderId?: number): Promise<SLSimpleBoolData> {
+  async removeClientAsync(clientId?: number, senderId?: number): Promise<SLSimpleBoolData> {
     if (this._isMock) {
       return Promise.resolve({ senderId: senderId ?? 0, val: true });
     }
 
     const p = new Promise((resolve, reject) => {
       try {
-        debugUnit(`[${senderId ?? this.senderId}] sending remove client command, clientId ${this.clientId}...`,);
+        debugUnit(`[${senderId ?? this.senderId}] sending remove client command, clientId ${clientId ?? this.clientId}...`,);
 
         const _timeout = setTimeoutSync(() => {
           reject(new Error('time out waiting for remove client response'));
@@ -711,7 +707,7 @@ export class UnitConnection extends EventEmitter {
           resolve(clientAck);
         });
 
-        const msg = this.controller.connection.sendRemoveClientMessage(senderId);
+        const msg = this.controller.connection.sendRemoveClientMessage(clientId, senderId);
         this.toLogEmit(msg, 'out');
       } catch (error) {
         debugUnit(`caught remove client error ${error.message}, rethrowing...`);

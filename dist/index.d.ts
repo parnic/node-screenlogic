@@ -98,7 +98,7 @@ export declare class UnitConnection extends EventEmitter {
     };
     getVersionAsync(senderId?: number): Promise<SLVersionData>;
     addClientAsync(clientId?: number, senderId?: number): Promise<SLSimpleBoolData>;
-    removeClientAsync(senderId?: number): Promise<SLSimpleBoolData>;
+    removeClientAsync(clientId?: number, senderId?: number): Promise<SLSimpleBoolData>;
     pingServerAsync(senderId?: number): Promise<SLSimpleBoolData>;
     onClientMessage(msg: Inbound): void;
 }

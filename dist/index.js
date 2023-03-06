@@ -528,11 +528,8 @@ class UnitConnection extends events_1.EventEmitter {
         if (this._isMock) {
             return Promise.resolve({ senderId: senderId !== null && senderId !== void 0 ? senderId : 0, val: true });
         }
-        if (clientId) {
-            this.clientId = clientId;
-        }
         const p = new Promise((resolve, reject) => {
-            debugUnit('[%d] sending add client command, clientId %d...', senderId !== null && senderId !== void 0 ? senderId : this.senderId, this.clientId);
+            debugUnit('[%d] sending add client command, clientId %d...', senderId !== null && senderId !== void 0 ? senderId : this.senderId, clientId !== null && clientId !== void 0 ? clientId : this.clientId);
             const _timeout = (0, timers_1.setTimeout)(() => {
                 reject(new Error('time out waiting for add client response'));
             }, this.netTimeout);
@@ -542,18 +539,18 @@ class UnitConnection extends events_1.EventEmitter {
                 this._hasAddedClient = true;
                 resolve(clientAck);
             });
-            const msg = this.controller.connection.sendAddClientMessage(senderId);
+            const msg = this.controller.connection.sendAddClientMessage(clientId, senderId);
             this.toLogEmit(msg, 'out');
         });
         return Promise.resolve(p);
     }
-    async removeClientAsync(senderId) {
+    async removeClientAsync(clientId, senderId) {
         if (this._isMock) {
             return Promise.resolve({ senderId: senderId !== null && senderId !== void 0 ? senderId : 0, val: true });
         }
         const p = new Promise((resolve, reject) => {
             try {
-                debugUnit(`[${senderId !== null && senderId !== void 0 ? senderId : this.senderId}] sending remove client command, clientId ${this.clientId}...`);
+                debugUnit(`[${senderId !== null && senderId !== void 0 ? senderId : this.senderId}] sending remove client command, clientId ${clientId !== null && clientId !== void 0 ? clientId : this.clientId}...`);
                 const _timeout = (0, timers_1.setTimeout)(() => {
                     reject(new Error('time out waiting for remove client response'));
                 }, this.netTimeout);
@@ -563,7 +560,7 @@ class UnitConnection extends events_1.EventEmitter {
                     this._hasAddedClient = false;
                     resolve(clientAck);
                 });
-                const msg = this.controller.connection.sendRemoveClientMessage(senderId);
+                const msg = this.controller.connection.sendRemoveClientMessage(clientId, senderId);
                 this.toLogEmit(msg, 'out');
             }
             catch (error) {

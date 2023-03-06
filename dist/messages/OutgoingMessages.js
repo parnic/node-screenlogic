@@ -40,19 +40,19 @@ class ConnectionCommands extends Commands {
         this.unit.write(this.toBuffer());
         return this;
     }
-    sendAddClientMessage(senderId) {
+    sendAddClientMessage(clientId, senderId) {
         this.action = 12522;
         this.createBaseMessage(senderId);
         this.writeInt32LE(this.unit.controllerId);
-        this.writeInt32LE(this.unit.clientId);
+        this.writeInt32LE(clientId !== null && clientId !== void 0 ? clientId : this.unit.clientId);
         this.unit.write(this.toBuffer());
         return this;
     }
-    sendRemoveClientMessage(senderId) {
+    sendRemoveClientMessage(clientId, senderId) {
         this.action = 12524;
         this.createBaseMessage(senderId);
         this.writeInt32LE(this.unit.controllerId);
-        this.writeInt32LE(this.unit.clientId);
+        this.writeInt32LE(clientId !== null && clientId !== void 0 ? clientId : this.unit.clientId);
         this.unit.write(this.toBuffer());
         return this;
     }

@@ -10,8 +10,8 @@ export declare class ConnectionCommands extends Commands {
     sendLoginMessage(password?: Buffer, senderId?: number): ConnectionCommands;
     sendChallengeMessage(senderId?: number): ConnectionCommands;
     sendVersionMessage(senderId?: number): ConnectionCommands;
-    sendAddClientMessage(senderId?: number): ConnectionCommands;
-    sendRemoveClientMessage(senderId?: number): ConnectionCommands;
+    sendAddClientMessage(clientId?: number, senderId?: number): ConnectionCommands;
+    sendRemoveClientMessage(clientId?: number, senderId?: number): ConnectionCommands;
     sendPingMessage(senderId?: number): ConnectionCommands;
 }
 export declare class EquipmentCommands extends Commands {

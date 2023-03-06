@@ -44,19 +44,19 @@ export class ConnectionCommands extends Commands {
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendAddClientMessage(senderId?: number): ConnectionCommands {
+  public sendAddClientMessage(clientId?: number, senderId?: number): ConnectionCommands {
     this.action = 12522;
     this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
-    this.writeInt32LE(this.unit.clientId);
+    this.writeInt32LE(clientId ?? this.unit.clientId);
     this.unit.write(this.toBuffer());
     return this;
   }
-  public sendRemoveClientMessage(senderId?: number): ConnectionCommands {
+  public sendRemoveClientMessage(clientId?: number, senderId?: number): ConnectionCommands {
     this.action = 12524;
     this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
-    this.writeInt32LE(this.unit.clientId);
+    this.writeInt32LE(clientId ?? this.unit.clientId);
     this.unit.write(this.toBuffer());
     return this;
   }
