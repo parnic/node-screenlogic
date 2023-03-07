@@ -164,7 +164,7 @@ Issues one UDP broadcast search for available units. Since this is a stateless U
 
 Issues one UDP broadcast search for available units. This is a stateless UDP query, but the connection will automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is a 5s timeout built in to this command, and no retry mechanism.
 
-Optionally accepts a number of milliseconds to wait for units; defaults to 5000 if not specific. Returns a LocalUnit[] array with each object containing:
+Optionally accepts a number of milliseconds to wait for units; defaults to 5000 if not specified. Returns a LocalUnit[] array with each object containing:
 
 * `address` - ip address string
 * `type` - integer
