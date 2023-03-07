@@ -65,7 +65,7 @@ export class FindUnits extends EventEmitter {
     }
   }
 
-  public async searchAsync(): Promise<LocalUnit[]> {
+  public async searchAsync(searchTimeMs?: number): Promise<LocalUnit[]> {
     const p = new Promise((resolve) => {
       try {
         const units: LocalUnit[] = [];
@@ -78,7 +78,7 @@ export class FindUnits extends EventEmitter {
 
           this.removeAllListeners();
           resolve(units);
-        }, 5000);
+        }, searchTimeMs ?? 5000);
 
         this.on('serverFound', (unit) => {
           debugFind(`Screenlogic found unit ${JSON.stringify(unit)}`);

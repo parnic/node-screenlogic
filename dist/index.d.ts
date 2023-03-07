@@ -22,7 +22,7 @@ export declare class FindUnits extends EventEmitter {
     private bound;
     private message;
     search(): void;
-    searchAsync(): Promise<LocalUnit[]>;
+    searchAsync(searchTimeMs?: number): Promise<LocalUnit[]>;
     foundServer(msg: Buffer, remote: dgram.RemoteInfo): void;
     sendServerBroadcast(): void;
     close(): void;
