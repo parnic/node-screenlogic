@@ -499,7 +499,7 @@ Configures a schedule event. See [SLSetScheduleEventById](#slsetscheduleeventbyi
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleByIdAsync()` has been received. Event handler receives a [SLDeleteScheduleEventById](#sldeletescheduleeventbyid) object.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 * `equipmentConfiguration` - Indicates a response to `getEquipmentConfigurationAsync()`. Receives a [SLEquipmentConfigurationData](#slequipmentconfigurationdata) object.
-* `equipmentState` - Indicates a response to `getEquipmentStateAsync()`. Receives a [EquipmentStateMessage](#slequipmentstatemessage) object.
+* `equipmentState` - Indicates that a response to `getEquipmentStateAsync()` has been received. Event handler receives a [SLEquipmentStateMessage](#slequipmentstatemessage) object.
 * `getChemHistoryData` - Indicates that chemical history data for the requested timeframe is ready. Event handler receives a [SLGetChemHistoryData](#slgetchemhistorydata) object.
 * `getChemHistoryDataPending` - Indicates that the `getChemHistoryDataAsync()` request has been received and is being processed.
 * `getHistoryData` - Indicates that history data for the requested timeframe is ready. Event handler receives a [SLHistoryData](#slhistorydata) object.
@@ -508,18 +508,19 @@ Configures a schedule event. See [SLSetScheduleEventById](#slsetscheduleeventbyi
 * `getScheduleData` - Indicates that a response to `getScheduleDataAsync()` has been received. Event handler receives a [SLGetScheduleData](#slscheduledata) object.
 * `getSystemTime` - Indicates that a response to `getSystemTimeAsync()` has been received. Event handler receives a [SLSystemTimeData](#slsystemtimedata) object.
 * `heatModeChanged` - Indicates that a response to `setHeatModeAsync()` has been received. Event handler receives a [SLSetHeatModeMessage](#slsetheatmodemessage) object.
+* `intellichlorConfig` - Indicates that a response to `getIntellichlorConfigAsync()` has been received. Event handler receives a [SLIntellichlorConfigMessage](#slintellichlordata) object.
 * `loggedIn` - Indicates that a connection to the server has been established and the login process completed. `get` methods can be called once this event has been emitted.
 * `loginFailed` - Indicates that a remote login attempt via supplying a system address and password to `UnitConnection` has failed likely due to the incorrect password being used.
 * `pong` - Indicates that a response to `pingServerAsync()` has been received. Event handler receives a [SLPingServerMessage](#slpingservermessage) object.
-* `equipmentState` - Indicates that a response to `getEquipmentStateAsync()` has been received. Event handler receives a [slequipmentstatemessage](#slequipmentstatemessage) object.
 * `removeClient` - Indicates that a response to `removeClientAsync()` has been received. Event handler receives a [SLRemoveClient](#slremoveclient) object.
-* `intellichlorConfig` - Indicates that a response to `getIntellichlorConfigAsync()` has been received. Event handler receives a [SLIntellichlorConfigMessage](#slintellichlordata) object.
 * `scheduleChanged` - Indicates that a response to adding, deleting, or setting a schedule has been received. Event handler receives nothing. This seems to be arbitrarily returned sometimes instead of a normal ack by the system.
 * `sentLightCommand` - Indicates that a response to `sendLightCommandAsync()` has been received. Event handler receives a [SLLightControlMessage](#sllightcontrolmessage) object.
 * `setCircuitRuntimeById` - Indicates that a response to `setCircuitRuntimeByIdAsync()` has been received. Event handler receives a [SLSetCircuitRuntimeById](#slsetcircuitruntimebyid) object.
+* `setEquipmentConfiguration` - Indicates that the last call to `setEquipmentConfigurationAsync()` has been applied. Event handler receives a [SLSetEquipmentConfigurationData](#slsetequipmentconfigurationdata) object.
+* `setEquipmentConfigurationAck` - Indicates that the request to `setEquipmentConfigurationAsync()` has been received. Event handler receives a [BoolData](#booldata) object.
+* `setIntellichlorConfig` - Indicates that a response to `setIntellichlorOutputAsync()` has been received. Event handler receives a [SLSetIntellichlorConfigMessage](#slsetintellichlorconfigmessage) object.
 * `setPumpSpeed` - Indicates that a response to `setPumpFlowAsync()` has been received. Event handler receives a [BoolData](#booldata) object.
 * `setPointChanged` - Indicates that a response to `setSetPointAsync()` has been received. Event handler receives a [SLSetHeatSetPointMessage](#slsetheatsetpointmessage) object.
-* `setIntellichlorConfig` - Indicates that a response to `setIntellichlorOutputAsync()` has been received. Event handler receives a [SLSetIntellichlorConfigMessage](#slsetintellichlorconfigmessage) object.
 * `setScheduleEventById` - Indicates that a response to `setScheduleEventByIdAsync()` has been received. Event handler receives a [SLSetScheduleEventById](#slsetscheduleeventbyid) object.
 * `setSystemTime` - Indicates that a response to `setSystemTimeAsync()` has been received. Event handler receives a [BoolData](#booldata) object if the request was valid, or `null`/rejected promise if the request was invalid (input parameters were not of the required types).
 * `unknownCommand` - Indicates that an unknown command was issued to ScreenLogic (should not be possible to trigger when using the supplied `UnitConnection` methods).
