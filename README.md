@@ -13,8 +13,8 @@ Table of Contents:
 * [Packet format](#packet-format)
 * [API reference](#api-reference)
   * [FindUnits](#findunits)
-    * [searchAsync](#searchasync)
     * [search](#search)
+    * [searchAsync](#searchasync)
     * [close](#close)
   * [RemoteLogin](#remotelogin)
     * [connectAsync](#connectasync)
@@ -23,13 +23,12 @@ Table of Contents:
     * Base Methods
       * [init](#initsystemname-address-port-password-senderid)
       * [initUnit](#initunitlocalunit)
-      * [initMock](#initsystemname-address-port-password-senderid)
-      * [getVersionAsync](#getversionasyncsenderid)
-      * [pingServerAsync](#pingserverasyncsenderid)
       * [connectAsync](#connectasync)
-      * [reconnectAsync](#reconnectasync)
       * [closeAsync](#closeasync-1)
       * [addClientAsync](#addclientasyncclientid-senderid)
+      * [getVersionAsync](#getversionasyncsenderid)
+      * [pingServerAsync](#pingserverasyncsenderid)
+      * [reconnectAsync](#reconnectasync)
       * [removeClientAsync](#removeclientasyncclientid)
       * [status](#status)
     * [Body](#body)
@@ -37,31 +36,31 @@ Table of Contents:
       * [setHeatModeAsync](#bodysetheatmodeasyncbodyid-heatmode-senderid)
       * [setSetPointAsync](#bodysetsetpointasyncbodyid-temperature-senderid)
     * [Chemistry](#chemistry)
-      * [getChemicalDataAsync](#chemgetchemicaldataasyncsenderid)
       * [getChemHistoryDataAsync](#chemgetchemhistorydataasyncfromtime-totime-senderid)
+      * [getChemicalDataAsync](#chemgetchemicaldataasyncsenderid)
     * [Chlorinator](#chlorinator)
       * [getIntellichlorConfigAsync](#chlorgetintellichlorconfigasyncsenderid)
-      * [setIntellichlorOutputAsync](#chlorsetintellichloroutputasyncpooloutput-spaoutput-senderid)
       * [setIntellichlorIsActiveAsync](#chlorsetintellichlorisactiveasyncisactive-senderid)
+      * [setIntellichlorOutputAsync](#chlorsetintellichloroutputasyncpooloutput-spaoutput-senderid)
     * [Circuit](#circuit)
+      * [sendLightCommandAsync](#circuitsendlightcommandasynccommand-senderid)
       * [setCircuitAsync](#circuitsetcircuitasynccircuitid-nameindex-circuitfunction-circuitinterface-freeze-colorpos-senderid)
       * [setCircuitRuntimeByIdAsync](#circuitsetcircuitruntimebyidasynccircuitid-runtime-senderid)
       * [setCircuitStateAsync](#circuitsetcircuitstateasynccircuitid-circuitstate-senderid)
-      * [sendLightCommandAsync](#circuitsendlightcommandasynccommand-senderid)
     * [Equipment](#equipment)
       * [cancelDelayAsync](#equipmentcanceldelayasyncsenderid)
       * [getCircuitDefinitionsAsync](#equipmentgetcircuitdefinitionsasyncsenderid)
       * [getCircuitNamesAsync](#equipmentgetcircuitnamesasyncsize-senderid)
       * [getControllerConfigAsync](#equipmentgetcontrollerconfigasyncsenderid)
       * [getCustomNamesAsync](#equipmentgetcustomnamesasyncsenderid)
-      * [setCustomNameAsync](#equipmentsetcustomnameasyncidx-name-senderid)
       * [getEquipmentConfigurationAsync](#equipmentgetequipmentconfigurationasyncsenderid)
-      * [setEquipmentConfigurationAsync](#equipmentsetequipmentconfigurationasyncdata-senderid)
       * [getEquipmentStateAsync](#equipmentgetequipmentstateasyncsenderid)
       * [getHistoryDataAsync](#equipmentgethistorydataasyncfromtime-totime-senderid)
       * [getSystemTimeAsync](#equipmentgetsystemtimeasyncsenderid)
-      * [setSystemTimeAsync](#equipmentsetsystemtimeasyncdate-adjustfordst-senderid)
       * [getWeatherForecastAsync](#equipmentgetweatherforecastasyncsenderid)
+      * [setCustomNameAsync](#equipmentsetcustomnameasyncidx-name-senderid)
+      * [setEquipmentConfigurationAsync](#equipmentsetequipmentconfigurationasyncdata-senderid)
+      * [setSystemTimeAsync](#equipmentsetsystemtimeasyncdate-adjustfordst-senderid)
     * [Pump](#pump)
       * [getPumpStatusAsync](#pumpgetpumpstatusasyncpumpid-senderid)  
       * [setPumpSpeedAsync](#pumpsetpumpspeedasyncpumpid-circuitid-speed-isrpms-senderid)
@@ -150,6 +149,17 @@ const ScreenLogic = require('node-screenlogic');
 var finder = new ScreenLogic.FindUnits();
 ```
 
+#### search()
+
+Issues one UDP broadcast search for available units. Since this is a stateless UDP query, the connection will not automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is no automatic timeout built in to this command. This call does not return any found units directly, but does emit the `serverFound` message which contains each LocalUnit object that is found:
+
+* `address` - ip address string
+* `type` - integer
+* `port` - integer, the port to connect to
+* `gatewayType` - integer
+* `gatewaySubtype` - integer
+* `gatewayName` - the gateway/unit name as a string
+
 #### searchAsync()
 
 Issues one UDP broadcast search for available units. This is a stateless UDP query, but the connection will automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is a 5s timeout built in to this command, and no retry mechanism.
@@ -163,17 +173,6 @@ Returns a LocalUnit[] array with each object containing:
 * `gatewayName` - the gateway/unit name as a string
 
 This async call will also emit the `serverFound` message.
-
-#### search()
-
-Issues one UDP broadcast search for available units. Since this is a stateless UDP query, the connection will not automatically be closed, so you may need to issue another search if the first one doesn't work, if your network connection is not established, etc. There is no automatic timeout built in to this command. This call does not return any found units directly, but does emit the `serverFound` message which contains each LocalUnit object that is found:
-
-* `address` - ip address string
-* `type` - integer
-* `port` - integer, the port to connect to
-* `gatewayType` - integer
-* `gatewaySubtype` - integer
-* `gatewayName` - the gateway/unit name as a string
 
 #### close()
 
@@ -264,14 +263,6 @@ client.init('Pentair: 00-00-00', '10.0.0.85', 80, '1234', senderId?);
 
 Helper method for [init](#initsystemname-address-port-password-senderid). Takes a `LocalUnit` remote login object and passes the appropriate values to `init`.
 
-#### getVersionAsync(senderId?)
-
-Requests the system version string from the connected unit. Resolves/emits the `version` event when the response comes back.
-
-#### pingServerAsync(senderId?)
-
-Sends a ping to the server to keep the connection alive. Resolves/emits the `pong` event when the response comes back.
-
 #### connectAsync()
 
 Connects to the server after `init` parameters are set.
@@ -282,10 +273,6 @@ Examples:
 await client.connectAsync();
 ```
 
-#### reconnectAsync()
-
-Will be automatically called if node-screenlogic detects an error in communications, but can also be called manually to re-establish communications.
-
 #### closeAsync()
 
 Closes the connection and removes all listeners.
@@ -293,6 +280,18 @@ Closes the connection and removes all listeners.
 #### addClientAsync(clientId?, senderid?)
 
 Registers to receive updates from controller when something changes. Takes a random number `clientId` (if passed, or will be randomly assigned) to identify the client. Resolves/emits the `addClient` event when the request to add a client is acknowledged. As long as this client is connected, various events will be emitted when something changes on the controller, such as `equipmentState` or `chemicalData`.
+
+#### getVersionAsync(senderId?)
+
+Requests the system version string from the connected unit. Resolves/emits the `version` event when the response comes back.
+
+#### pingServerAsync(senderId?)
+
+Sends a ping to the server to keep the connection alive. Resolves/emits the `pong` event when the response comes back.
+
+#### reconnectAsync()
+
+Will be automatically called if node-screenlogic detects an error in communications, but can also be called manually to re-establish communications.
 
 #### removeClientAsync(clientId)
 
@@ -333,13 +332,13 @@ Parameters:
 
 ### Chemistry
 
-#### chem.getChemicalDataAsync(senderId?)
-
-Requests chemical data from the connected unit (may require an IntelliChem or similar). Emits the `chemicalData` event when the response comes back. Resolves with [SLChemData](#slchemdata).
-
 #### chem.getChemHistoryDataAsync(fromTime?, toTime?, senderId?)
 
 Requests chemical history data from the connected unit. This is information about the pH and ORP readings over time and when pH and ORP feeds were turned on and off. `fromTime` is the time (as a Javascript Date object) that you want to get events from and `toTime` is the time (as a Javascript Date object) that you want to get events until. If omitted, data will be resolved for the past 24 hours. Emits the `getChemHistoryDataPending` event when the request to get data is confirmed, then the `getChemHistoryData` event when the chemical history data is actually ready to be handled. Resolves with [SLChemHistory](#slgetchemhistorydata).
+
+#### chem.getChemicalDataAsync(senderId?)
+
+Requests chemical data from the connected unit (may require an IntelliChem or similar). Emits the `chemicalData` event when the response comes back. Resolves with [SLChemData](#slchemdata).
 
 ### Chlorinator
 
@@ -347,15 +346,21 @@ Requests chemical history data from the connected unit. This is information abou
 
 Requests salt cell status/configuration from the connected unit (requires an IntelliChlor or compatible salt cell). Emits the `intellichlorConfig` event when the response comes back. Resolves with [SLIntellichlorData](#slintellichlordata).
 
-#### chlor.setIntellichlorOutputAsync(poolOutput, spaOutput, senderId?)
-
-Sets the salt cell's output levels. See [SLSetIntellichlorConfigMessage](#slsetintellichlorconfigmessage) documentation for argument values. Emits the `setIntellichlorConfig` event when response is acknowledged. Resolves with [BoolData](#booldata).
-
 #### chlor.setIntellichlorIsActiveAsync(isActive, senderId?)
 
 Tells the OCP if a chlorinator is present. `isActive` is a boolean. Emits the `intellichlorIsActive` event. Resolves with [BoolData](#booldata).
 
+#### chlor.setIntellichlorOutputAsync(poolOutput, spaOutput, senderId?)
+
+Sets the salt cell's output levels. See [SLSetIntellichlorConfigMessage](#slsetintellichlorconfigmessage) documentation for argument values. Emits the `setIntellichlorConfig` event when response is acknowledged. Resolves with [BoolData](#booldata).
+
 ### Circuit
+
+#### circuit.sendLightCommandAsync(command, senderId?)
+
+Sends a lighting command. See [SLLightControlMessage](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged. Resolves with [BoolData](#booldata).
+
+EasyTouch/Intellitouch only have a single light group and individual lights cannot be address. Pentair's Intellicenter offers this capability.
 
 #### circuit.setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId?)
 
@@ -377,12 +382,6 @@ Configures default run-time of a circuit, usually referred to as the 'egg timer'
 #### circuit.setCircuitStateAsync(circuitId, circuitState, senderId?)
 
 Activates or deactivates a circuit. See [SLSetCircuitStateMessage](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
-
-#### circuit.sendLightCommandAsync(command, senderId?)
-
-Sends a lighting command. See [SLLightControlMessage](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged. Resolves with [BoolData](#booldata).
-
-EasyTouch/Intellitouch only have a single light group and individual lights cannot be address. Pentair's Intellicenter offers this capability.
 
 ### Equipment
 
@@ -406,17 +405,9 @@ Requests controller configuration from the connected unit. Emits the `controller
 
 Requests all custom names from the OCP. An array of 20 names will be returned, but some OCP's only support 10. Emits the `getCustomNames` event. Resolves with [SLGetCustomNamesData](#slgetcustomnamesdata).
 
-#### equipment.setCustomNameAsync(idx, name, senderId?)
-
-Sets an individual custom name on the OCP. `idx` is the index of the custom name, `name` is the custom name to be set, `senderId` is the optional unique identifier. Emits the `setCustomName` event. Resolves with [BoolData](#booldata).
-
 #### equipment.getEquipmentConfigurationAsync(senderId?)
 
 Resolves/emits the `equipmentConfiguration` event when the response comes back. This is the basic configuration of what equipment is installed on the controller. Resolves with [SLEquipmentConfigurationData](#slequipmentconfigurationdata).
-
-#### equipment.setEquipmentConfigurationAsync(data, senderId?)
-
-This method allows you to set the configuration of the controller. `data` is in the format of `SLEquipmentConfigurationData` but will take any individual component, or all components. Emits the `setEquipmentConfiguration` event which resolves with [SLSetEquipmentConfigurationData](#slsetequipmentconfigurationdata).
 
 #### equipment.getEquipmentStateAsync(senderid?)
 
@@ -430,13 +421,21 @@ Requests history data from the connected unit. This is information like what var
 
 Retrieves the current time the system is set to. Emits the `getSystemTime` event when response is received. Resolves with [SLSystemTimeData](#slsystemtimedata).
 
-#### equipment.setSystemTimeAsync(date, adjustForDST, senderid?)
-
-Sets the current date and time of the ScreenLogic system. Resolves/emits the `setSystemTime` event when request is acknowledged. `date` must be a `Date` instance holding the date/time to set, and `adjustForDST` must be a boolean indicating whether the system should adjust for daylight saving time or not. Resolves with [SLSystemTimeData](#slsystemtimedata).
-
 #### equipment.getWeatherForecastAsync(senderId?)
 
 Requests the system version string from the connected unit. Emits the `weatherForecast` event when the response comes back. Resolves with [SLWeatherForecastData](#slweatherforecastdata).
+
+#### equipment.setCustomNameAsync(idx, name, senderId?)
+
+Sets an individual custom name on the OCP. `idx` is the index of the custom name, `name` is the custom name to be set, `senderId` is the optional unique identifier. Emits the `setCustomName` event. Resolves with [BoolData](#booldata).
+
+#### equipment.setEquipmentConfigurationAsync(data, senderId?)
+
+This method allows you to set the configuration of the controller. `data` is in the format of `SLEquipmentConfigurationData` but will take any individual component, or all components. Emits the `setEquipmentConfiguration` event which resolves with [SLSetEquipmentConfigurationData](#slsetequipmentconfigurationdata).
+
+#### equipment.setSystemTimeAsync(date, adjustForDST, senderid?)
+
+Sets the current date and time of the ScreenLogic system. Resolves/emits the `setSystemTime` event when request is acknowledged. `date` must be a `Date` instance holding the date/time to set, and `adjustForDST` must be a boolean indicating whether the system should adjust for daylight saving time or not. Resolves with [SLSystemTimeData](#slsystemtimedata).
 
 ### Pump
 
