@@ -868,7 +868,7 @@ export class EquipmentConfigurationMessage {
     }
     return (circuitIndex <= 0 || circuitIndex >= 5) ? EquipmentConfigurationMessage.isEasyTouch(poolConfig.controllerType) ? circuitIndex <= 9 ? `Aux ${circuitIndex - 1}` : circuitIndex <= 17 ? `Feature ${circuitIndex - 9}` : circuitIndex == 19 ? 'Aux Extra' : `error ${circuitIndex}` : circuitIndex < 40 ? `Aux ${circuitIndex - 1}` : `Feature ${circuitIndex - 39}` : `Aux ${circuitIndex}`;
   }
-  public static decodeCustomNames(msg: Inbound): string[] {
+  public static decodeCustomNames(msg: Inbound): SLGetCustomNamesData {
     const nameCount = msg.readInt32LE();
     // msg.incrementReadOffset(0);
     const customNames: string[] = [];
@@ -877,8 +877,11 @@ export class EquipmentConfigurationMessage {
       const n = msg.readSLString();
       customNames.push(n);
     }
-    return customNames;
-
+    const data: SLGetCustomNamesData = {
+      senderId: msg.senderId,
+      names: customNames
+    };
+    return data;
   }
   public static decodeSetCustomNameAck(msg: Inbound): SLSimpleBoolData {
     // ack
@@ -1190,4 +1193,8 @@ export interface SLCircuitIdName {
 
 export interface SLCircuitNamesData extends SLData {
   circuits: SLCircuitIdName[]
+}
+
+export interface SLGetCustomNamesData extends SLData {
+  names: string[]
 }

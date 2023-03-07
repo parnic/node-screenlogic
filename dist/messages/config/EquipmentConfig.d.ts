@@ -27,7 +27,7 @@ export declare class EquipmentConfigurationMessage {
     static decodeWeatherMessage(msg: Inbound): SLWeatherForecastData;
     static decodeGetHistory(msg: Inbound): SLHistoryData;
     getCircuitName(poolConfig: SLEquipmentConfigurationData, circuitIndex: number): string;
-    static decodeCustomNames(msg: Inbound): string[];
+    static decodeCustomNames(msg: Inbound): SLGetCustomNamesData;
     static decodeSetCustomNameAck(msg: Inbound): SLSimpleBoolData;
 }
 export interface SLControllerConfigData extends SLData {
@@ -253,4 +253,7 @@ export interface SLCircuitIdName {
 }
 export interface SLCircuitNamesData extends SLData {
     circuits: SLCircuitIdName[];
+}
+export interface SLGetCustomNamesData extends SLData {
+    names: string[];
 }

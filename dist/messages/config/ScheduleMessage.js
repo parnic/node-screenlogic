@@ -16,7 +16,6 @@ class ScheduleMessage {
             const heatSetPoint = msg.readUInt32LE();
             const days = msg.decodeDayMask(dayMask);
             const event = {
-                senderId: msg.senderId,
                 scheduleId,
                 circuitId,
                 startTime,
@@ -29,7 +28,11 @@ class ScheduleMessage {
             };
             data.push(event);
         }
-        return data;
+        const result = {
+            senderId: msg.senderId,
+            data
+        };
+        return result;
     }
     static decodeAddSchedule(msg) {
         const response = {

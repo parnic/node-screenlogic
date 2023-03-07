@@ -2,9 +2,9 @@ import { Inbound, SLData, SLSimpleBoolData, SLSimpleNumberData } from '../SLMess
 
 
 export class ScheduleMessage {
-  public static decodeGetScheduleMessage(msg: Inbound): SLScheduleData[] {
+  public static decodeGetScheduleMessage(msg: Inbound): SLScheduleData {
     const eventCount = msg.readUInt32LE();
-    const data: SLScheduleData[] = [];
+    const data: SLScheduleDatum[] = [];
     for (let i = 0; i < eventCount; i++) {
       const scheduleId = msg.readUInt32LE() - 699;
       const circuitId = msg.readUInt32LE() - 499;
@@ -15,8 +15,7 @@ export class ScheduleMessage {
       const heatCmd = msg.readUInt32LE();
       const heatSetPoint = msg.readUInt32LE();
       const days = msg.decodeDayMask(dayMask);
-      const event: SLScheduleData = {
-        senderId: msg.senderId,
+      const event: SLScheduleDatum = {
         scheduleId,
         circuitId,
         startTime,
@@ -29,7 +28,11 @@ export class ScheduleMessage {
       };
       data.push(event);
     }
-    return data;
+    const result: SLScheduleData = {
+      senderId: msg.senderId,
+      data
+    };
+    return result;
   }
   public static decodeAddSchedule(msg: Inbound): SLSimpleNumberData {
     const response: SLSimpleNumberData = {
@@ -57,7 +60,7 @@ export class ScheduleMessage {
 }
 
 
-export interface SLScheduleData extends SLData {
+export interface SLScheduleDatum {
   scheduleId: number;
   circuitId: number;
   startTime: string;
@@ -67,4 +70,8 @@ export interface SLScheduleData extends SLData {
   heatCmd: number;
   heatSetPoint: number;
   days: string[];
+}
+
+export interface SLScheduleData extends SLData {
+  data: SLScheduleDatum[]
 }

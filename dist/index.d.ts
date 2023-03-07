@@ -9,7 +9,7 @@ import * as net from 'net';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { SLVersionData } from './messages/ConnectionMessage';
-import { SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
+import { SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLGetCustomNamesData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { SLIntellichlorData } from './messages/state/ChlorMessage';
 import { SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { SLScheduleData } from './messages/config/ScheduleMessage';
@@ -118,8 +118,8 @@ export declare class Equipment {
     getSystemTimeAsync(senderId?: number): Promise<SLSystemTimeData>;
     getControllerConfigAsync(senderId?: number): Promise<SLControllerConfigData>;
     getEquipmentStateAsync(senderId?: number): Promise<SLEquipmentStateData>;
-    getCustomNamesAsync(senderId?: number): Promise<string[]>;
-    setCustomNameAsync(idx: number, name: string, senderId?: number): Promise<string[]>;
+    getCustomNamesAsync(senderId?: number): Promise<SLGetCustomNamesData>;
+    setCustomNameAsync(idx: number, name: string, senderId?: number): Promise<SLSimpleBoolData>;
 }
 export declare class Circuit {
     protected unit: UnitConnection;
@@ -148,7 +148,7 @@ export declare class Schedule {
     setScheduleEventByIdAsync(scheduleId: number, circuitId: number, startTime: number, stopTime: number, dayMask: number, flags: number, heatCmd: number, heatSetPoint: number, senderId?: number): Promise<SLSimpleBoolData>;
     addNewScheduleEventAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLSimpleNumberData>;
     deleteScheduleEventByIdAsync(scheduleId: number, senderId?: number): Promise<SLSimpleBoolData>;
-    getScheduleDataAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLScheduleData[]>;
+    getScheduleDataAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLScheduleData>;
 }
 export declare class Chem {
     protected unit: UnitConnection;

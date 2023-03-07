@@ -11,7 +11,7 @@ import { setTimeout as setTimeoutSync } from 'timers';
 import * as SLGateway from './messages/SLGatewayDataMessage';
 import { BodyCommands, ChemCommands, ChlorCommands, CircuitCommands, ConnectionCommands, EquipmentCommands, OutboundGateway, PumpCommands, ScheduleCommands } from './messages/OutgoingMessages';
 import { ConnectionMessage, SLVersionData } from './messages/ConnectionMessage';
-import { EquipmentConfigurationMessage, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
+import { EquipmentConfigurationMessage, SLCircuitNamesData, SLControllerConfigData, SLEquipmentConfigurationData, SLGetCustomNamesData, SLHistoryData, SLWeatherForecastData } from './messages/config/EquipmentConfig';
 import { ChlorMessage, SLIntellichlorData } from './messages/state/ChlorMessage';
 import { ChemMessage, SLChemData, SLChemHistory } from './messages/state/ChemMessage';
 import { ScheduleMessage, SLScheduleData } from './messages/config/ScheduleMessage';
@@ -1510,7 +1510,7 @@ export class Equipment {
     return Promise.resolve(p) as Promise<SLEquipmentStateData>;
   }
 
-  async getCustomNamesAsync(senderId?: number): Promise<string[]> {
+  async getCustomNamesAsync(senderId?: number): Promise<SLGetCustomNamesData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get custom names: %d...', senderId ?? this.unit.senderId);
 
@@ -1518,7 +1518,7 @@ export class Equipment {
         reject(new Error('time out waiting for custom names'));
       }, this.unit.netTimeout);
 
-      this.unit.once('getCustomNames', (customNames) => {
+      this.unit.once('getCustomNames', (customNames: SLGetCustomNamesData) => {
         debugUnit('received getCustomNames event');
 
         clearTimeout(_timeout);
@@ -1529,10 +1529,10 @@ export class Equipment {
       this.unit.toLogEmit(msg, 'out');
     });
 
-    return Promise.resolve(p) as Promise<string[]>;
+    return Promise.resolve(p) as Promise<SLGetCustomNamesData>;
   }
 
-  async setCustomNameAsync(idx: number, name: string, senderId?: number): Promise<string[]> {
+  async setCustomNameAsync(idx: number, name: string, senderId?: number): Promise<SLSimpleBoolData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending set custom names: %d...', senderId ?? this.unit.senderId);
 
@@ -1544,7 +1544,7 @@ export class Equipment {
         reject(new Error('time out waiting for set custom name'));
       }, this.unit.netTimeout);
 
-      this.unit.once('setCustomName', (customNames) => {
+      this.unit.once('setCustomName', (customNames: SLSimpleBoolData) => {
         debugUnit('received setCustomName event');
 
         clearTimeout(_timeout);
@@ -1555,7 +1555,7 @@ export class Equipment {
       this.unit.toLogEmit(msg, 'out');
     });
 
-    return Promise.resolve(p) as Promise<string[]>;
+    return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 }
 
@@ -1862,7 +1862,7 @@ export class Schedule {
     return Promise.resolve(p) as Promise<SLSimpleBoolData>;
   }
 
-  async getScheduleDataAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLScheduleData[]> {
+  async getScheduleDataAsync(scheduleType: SchedTypes, senderId?: number): Promise<SLScheduleData> {
     const p = new Promise((resolve, reject) => {
       debugUnit('[%d] sending get schedule data query for scheduleType: %d...', senderId ?? this.unit.senderId, scheduleType);
 
@@ -1870,7 +1870,7 @@ export class Schedule {
         reject(new Error('time out waiting for schedule data'));
       }, this.unit.netTimeout);
 
-      this.unit.once('getScheduleData', (schedule) => {
+      this.unit.once('getScheduleData', (schedule: SLScheduleData) => {
         debugUnit('received getScheduleData event');
 
         clearTimeout(_timeout);
@@ -1881,7 +1881,7 @@ export class Schedule {
       this.unit.toLogEmit(msg, 'out');
     });
 
-    return Promise.resolve(p) as Promise<SLScheduleData[]>;
+    return Promise.resolve(p) as Promise<SLScheduleData>;
   }
 }
 

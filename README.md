@@ -404,7 +404,7 @@ Requests controller configuration from the connected unit. Emits the `controller
 
 #### equipment.getCustomNamesAsync(senderId?)
 
-Requests all custom names from the OCP. An array of 20 names will be returned, but some OCP's only support 10. Emits the `getCustomNames` event. Resolves with `string[]`.
+Requests all custom names from the OCP. An array of 20 names will be returned, but some OCP's only support 10. Emits the `getCustomNames` event. Resolves with [SLGetCustomNamesData](#slgetcustomnamesdata).
 
 #### equipment.setCustomNameAsync(idx, name, senderId?)
 
@@ -807,6 +807,14 @@ Passed as an argument to the emitted `getChemHistoryData` event. Contains inform
 * `phRuns` - array of objects containing the pH feed on/off times. Each object contains an `on` key containing a Javascript Date object for when the feed turned on, and an `off` key containing a Javascript Date object for when the feed turned off.
 * `orpRuns` - array of objects containing the ORP feed on/off times. Each object contains an `on` key containing a Javascript Date object for when the feed turned on, and an `off` key containing a Javascript Date object for when the feed turned off.
 
+### SLGetCustomNamesData
+
+Passed as an argument to the emitted `setCustomNames` event.
+
+#### Properties
+
+* `names` - array of strings containing all custom names
+
 ### SLReceiveGatewayDataMessage
 
 Passed as an argument to the emitted `gatewayFound` event. Contains information about the remote unit's status and access properties.
@@ -866,26 +874,27 @@ Passed as an argument to the emitted `getPumpStatus` event. Gets information abo
 
 ### SLScheduleData
 
-An array of these are passed as an argument to the emitted `getScheduleData` event. Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events.
+Passed as an argument to the emitted `getScheduleData` event. Retrieves a list of schedule events of the specified type, either 0 for regular events or 1 for one-time events.
 
 #### Properties
 
-* `scheduleId` - the associated scheduleId
-* `circuitId` - the circuit this schedule affects
-* `startTime` - the start time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
-* `stopTime` - the stop time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
-* `dayMask` - 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127 (see [conversion functions](#decodedaymaskmask))
-* `flags`
-  * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
-  * bit 1 indicates whether heat setPoint should be changed
-* `heatCmd` - integer indicating the desired heater mode. Valid values are:
-  * HeatModes.HEAT_MODE_OFF
-  * HeatModes.HEAT_MODE_SOLAR
-  * HeatModes.HEAT_MODE_SOLARPREFERRED
-  * HeatModes.HEAT_MODE_HEATPUMP
-  * HeatModes.HEAT_MODE_DONTCHANGE
-* `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
-* `days` - which days this schedule is active for; this is just the `dayMask` property run through [decodeDayMask)`](#decodedaymaskmask) for convenience
+* `data` - array of schedule datum
+  * `scheduleId` - the associated scheduleId
+  * `circuitId` - the circuit this schedule affects
+  * `startTime` - the start time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
+  * `stopTime` - the stop time of the event, specified as a string in 24-hour time, so, for example, 6:00AM would be '0600' (see [conversion functions](#decodetimetime))
+  * `dayMask` - 7-bit mask that determines which days the schedule is active for, MSB is always 0, valid numbers 1-127 (see [conversion functions](#decodedaymaskmask))
+  * `flags`
+    * bit 0 is the schedule type, if 0 then regular event, if 1 its a run-once
+    * bit 1 indicates whether heat setPoint should be changed
+  * `heatCmd` - integer indicating the desired heater mode. Valid values are:
+    * HeatModes.HEAT_MODE_OFF
+    * HeatModes.HEAT_MODE_SOLAR
+    * HeatModes.HEAT_MODE_SOLARPREFERRED
+    * HeatModes.HEAT_MODE_HEATPUMP
+    * HeatModes.HEAT_MODE_DONTCHANGE
+  * `heatSetPoint` - the temperature set point if heat is to be changed (ignored if bit 1 of flags is 0)
+  * `days` - which days this schedule is active for; this is just the `dayMask` property run through [decodeDayMask)`](#decodedaymaskmask) for convenience
 
 ### SLSetEquipmentConfigurationData
 

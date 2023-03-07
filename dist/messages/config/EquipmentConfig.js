@@ -825,7 +825,11 @@ class EquipmentConfigurationMessage {
             const n = msg.readSLString();
             customNames.push(n);
         }
-        return customNames;
+        const data = {
+            senderId: msg.senderId,
+            names: customNames
+        };
+        return data;
     }
     static decodeSetCustomNameAck(msg) {
         // ack
