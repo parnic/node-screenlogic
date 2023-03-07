@@ -33,6 +33,7 @@ Table of Contents:
       * [removeClientAsync](#removeclientasyncclientid)
       * [status](#status)
     * [Body](#body)
+      * [setCoolSetPointAsync](#bodysetcoolsetpointasyncbodyid-temperature-senderid)
       * [setHeatModeAsync](#bodysetheatmodeasyncbodyid-heatmode-senderid)
       * [setSetPointAsync](#bodysetsetpointasyncbodyid-temperature-senderid)
     * [Chemistry](#chemistry)
@@ -308,13 +309,27 @@ Returns an object with the socket state:
 
 ### Body
 
+#### body.setCoolSetPointAsync(bodyId, temperature, senderId?)
+
+Sets the cooling setpoint for any body. Emits the `coolSetPointChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
+
+Parameters:
+
+* `bodyId` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
+* `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
+
 #### body.setHeatModeAsync(bodyId, heatMode, senderId?)
 
 Sets the preferred heat mode. See [SLSetHeatModeMessage](#slsetheatmodemessage) documentation for argument values. Emits the `heatModeChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
 #### body.setSetPointAsync(bodyId, temperature, senderId?)
 
-Sets the heating setpoint for any body. See [SLSetHeatSetPointMessage](#slsetheatsetpointmessage) documentation for argument values. Emits the `setPointChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
+Sets the heating setpoint for any body. Emits the `setPointChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
+
+Parameters:
+
+* `bodyId` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
+* `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
 
 ### Chemistry
 
@@ -480,6 +495,7 @@ Configures a schedule event. See [SLSetScheduleEventById](#slsetscheduleeventbyi
 * `circuitStateChanged` - Indicates that a response to `setCircuitStateAsync()` has been received. Event handler receives a [SLSetCircuitStateMessage](#slsetcircuitstatemessage) object.
 * `close` - Indicates that the connection to the unit has been closed. Event handler receives a bool indicating whether there was a transmission error.
 * `controllerConfig` - Indicates that a response to `getControllerConfigAsync()` has been received. Event handler receives a [EquipmentConfigurationMessage](#equipmentconfigurationmessage) object.
+* `coolSetPointChanged` - Indicates that a response to `setCoolSetPointAsync()` has been received. Event handler receives a [BoolData](#booldata) object.
 * `deleteScheduleById` - Indicates that a response to `deleteScheduleByIdAsync()` has been received. Event handler receives a [SLDeleteScheduleEventById](#sldeletescheduleeventbyid) object.
 * `error` - Indicates that an unhandled error was caught (such as the connection timing out)
 * `equipmentConfiguration` - Indicates a response to `getEquipmentConfigurationAsync()`. Receives a [SLEquipmentConfigurationData](#slequipmentconfigurationdata) object.
@@ -1089,14 +1105,7 @@ Passed as an argument, returned to the emitted `heatModeChanged` event. Valid va
 
 ### SLSetHeatSetPointMessage
 
-Passed as an argument to the emitted `setPointChanged` event. Body 0 = pool/lo-temp, Body 1 = spa/high-temp.
-
-#### Properties
-
-* `controllerId` - integer indicating the ID of the controller to send this command to.
-  * Note that while `SLControllerConfig` includes a controllerId, this ID, in my experience, should always be 0.
-* `bodyType` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
-* `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
+Passed as an argument to the emitted `setPointChanged` event. Receives a [BoolData](#booldata) object.
 
 ### SLSetIntellichlorConfigMessage
 
