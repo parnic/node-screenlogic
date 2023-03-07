@@ -99,12 +99,12 @@ Alternatively, to find a unit remotely, create a new ScreenLogic remote login wi
 
 ```javascript
 let gateway = new ScreenLogic.RemoteLogin(systemName);  // systemName in the format "Pentair: xx-xx-xx"
-let unit = await this._gateway.connectAsync();
+let unit = await gateway.connectAsync();
 if (!unit || !unit.gatewayFound || unit.ipAddr === '') {
   logger.error(`Screenlogic: No unit found called ${systemName}`);
   return;
 }
-await this._gateway.closeAsync();
+await gateway.closeAsync();
 ```
 
 and call it via `connectAsync()`. This opens a TCP connection to screenlogicserver.pentair.com, port 500.
