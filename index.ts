@@ -297,11 +297,11 @@ export class UnitConnection extends EventEmitter {
     this._isMock = true;
   }
 
-  public init(systemName: string, address: string, port: number, password: string, senderId?: number) {
+  public init(systemName: string, address: string, port: number, password?: string, senderId?: number) {
     this.systemName = systemName;
     this.serverPort = port;
     this.serverAddress = address;
-    this.password = password;
+    this.password = password ?? '';
     this.senderId = senderId ?? 0;
     this.clientId = Math.round(Math.random() * 100000);
 
@@ -313,7 +313,7 @@ export class UnitConnection extends EventEmitter {
   }
 
   public initUnit(server: LocalUnit) {
-    this.init(server.gatewayName, server.address, server.port, '');
+    this.init(server.gatewayName, server.address, server.port);
   }
 
   private _initCommands() {

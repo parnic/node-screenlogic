@@ -72,7 +72,7 @@ export declare class UnitConnection extends EventEmitter {
     pump: Pump;
     reconnectAsync: () => Promise<void>;
     initMock(systemName: string, address: string, port: number, password: string, senderId?: number): void;
-    init(systemName: string, address: string, port: number, password: string, senderId?: number): void;
+    init(systemName: string, address: string, port: number, password?: string, senderId?: number): void;
     initUnit(server: LocalUnit): void;
     private _initCommands;
     write(bytes: Buffer | string): void;

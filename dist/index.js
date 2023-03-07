@@ -226,7 +226,7 @@ class UnitConnection extends events_1.EventEmitter {
         this.systemName = systemName;
         this.serverPort = port;
         this.serverAddress = address;
-        this.password = password;
+        this.password = password !== null && password !== void 0 ? password : '';
         this.senderId = senderId !== null && senderId !== void 0 ? senderId : 0;
         this.clientId = Math.round(Math.random() * 100000);
         this._initCommands();
@@ -236,7 +236,7 @@ class UnitConnection extends events_1.EventEmitter {
         }, this._keepAliveDuration || 30000);
     }
     initUnit(server) {
-        this.init(server.gatewayName, server.address, server.port, '');
+        this.init(server.gatewayName, server.address, server.port);
     }
     _initCommands() {
         this.controller = {
