@@ -118,9 +118,9 @@ class RemoteLogin extends events_1.EventEmitter {
     async connectAsync() {
         return new Promise((resolve, reject) => {
             debugRemote('connecting to dispatcher...');
-            this._client.on('data', function (buf) {
+            this._client.on('data', (buf) => {
                 if (buf.length > 4) {
-                    const message = new SLMessage_1.Inbound(this.unit.controllerId, this.unit.senderId);
+                    const message = new SLMessage_1.Inbound();
                     message.readFromBuffer(buf);
                     const msgType = buf.readInt16LE(2);
                     debugRemote(`received message of length ${buf.length} and messageId ${message.action}`);

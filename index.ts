@@ -145,9 +145,9 @@ export class RemoteLogin extends EventEmitter {
     return new Promise((resolve, reject) => {
       debugRemote('connecting to dispatcher...');
 
-      this._client.on('data', function (buf) {
+      this._client.on('data', (buf) => {
         if (buf.length > 4) {
-          const message = new Inbound(this.unit.controllerId, this.unit.senderId);
+          const message = new Inbound();
           message.readFromBuffer(buf);
 
           const msgType = buf.readInt16LE(2);
