@@ -103,12 +103,16 @@ describe('Unit', function() {
     assert.equal(pong.senderId, 1122);
   });
 
-  /* uncomment this and the `circuit` stuff above to test setting state
-  it('sets circuit state', function(done) {
-    unit.once('circuitStateChanged', () => {
-      done();
-    });
-    unit.setCircuitState(0, circuit.id, circuit.state);
-  });
-  */
+  /* uncomment this to test setting state */
+  // it('sets circuit state', function(done) {
+  //   let circuit;
+  //   unit.once('equipmentState', (status) => {
+  //     circuit = status.circuitArray[0];
+  //     unit.circuits.setCircuitStateAsync(circuit.id, circuit.state === 0 ? 1 : 0);
+  //   }).on('circuitStateChanged', (data) => {
+  //     done();
+  //   });
+
+  //   unit.equipment.getEquipmentStateAsync();
+  // });
 });
