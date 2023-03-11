@@ -253,8 +253,7 @@ export class EquipmentConfigurationMessage {
     if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
       return null;
     }
-    let pump: Pump;
-    let id = pumpIndex + 1;
+    const id = pumpIndex + 1;
     const type = pumpDataArray[pumpIndexByte];
     let pentairType: PumpTypes;
     let name;
@@ -275,8 +274,8 @@ export class EquipmentConfigurationMessage {
       name = 'Intelliflo VF';
     }
 
-    let address = pumpIndex + 95;
-    let circuits: PumpCircuit[] = [];
+    const address = pumpIndex + 95;
+    const circuits: PumpCircuit[] = [];
     let primingSpeed, primingTime, minSpeed, maxSpeed, speedStepSize;
     let backgroundCircuit,filterSize,turnovers,manualFilterGPM,minFlow,maxFlow,flowStepSize, maxSystemTime,maxPressureIncrease,backwashFlow,backwashTime,rinseTime,vacuumFlow,vacuumTime;
     if (pentairType === PumpTypes.PUMP_TYPE_INTELLIFLOVS) {
@@ -350,7 +349,7 @@ export class EquipmentConfigurationMessage {
       minSpeed = 450;
       maxSpeed = 3450;
     }
-    pump = {
+    const pump: Pump = {
       id,
       type,
       pentairType,
@@ -376,8 +375,7 @@ export class EquipmentConfigurationMessage {
       rinseTime,
       vacuumFlow,
       vacuumTime
-
-    }
+    };
     return pump;
   }
 
