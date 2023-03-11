@@ -16,6 +16,18 @@ import { SLScheduleData } from './messages/config/ScheduleMessage';
 import { SLPumpStatusData } from './messages/state/PumpMessage';
 import { Inbound, SLMessage, SLSimpleBoolData, SLSimpleNumberData } from './messages/SLMessage';
 import { SLEquipmentStateData, SLSystemTimeData } from './messages/state/EquipmentState';
+export * from './messages/config/ScheduleMessage';
+export * from './messages/config/EquipmentConfig';
+export * from './messages/config/CircuitMessage';
+export * from './messages/config/HeaterMessage';
+export * from './messages/state/ChemMessage';
+export * from './messages/state/ChlorMessage';
+export * from './messages/state/PumpMessage';
+export * from './messages/state/EquipmentState';
+export * from './messages/ConnectionMessage';
+export * from './messages/OutgoingMessages';
+export * from './messages/SLGatewayDataMessage';
+export * from './messages/SLMessage';
 export declare class FindUnits extends EventEmitter {
     constructor();
     private finder;

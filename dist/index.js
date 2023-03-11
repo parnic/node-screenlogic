@@ -1,4 +1,18 @@
 'use strict';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchedTypes = exports.BodyIndex = exports.PumpTypes = exports.HeatModes = exports.LightCommands = exports.Chlor = exports.Chem = exports.Schedule = exports.Pump = exports.Body = exports.Circuit = exports.Equipment = exports.screenlogic = exports.UnitConnection = exports.RemoteLogin = exports.FindUnits = void 0;
 require("source-map-support/register");
@@ -20,6 +34,18 @@ const HeaterMessage_1 = require("./messages/config/HeaterMessage");
 const SLMessage_1 = require("./messages/SLMessage");
 const EquipmentState_1 = require("./messages/state/EquipmentState");
 const PasswordEncoder_1 = require("./utils/PasswordEncoder");
+__exportStar(require("./messages/config/ScheduleMessage"), exports);
+__exportStar(require("./messages/config/EquipmentConfig"), exports);
+__exportStar(require("./messages/config/CircuitMessage"), exports);
+__exportStar(require("./messages/config/HeaterMessage"), exports);
+__exportStar(require("./messages/state/ChemMessage"), exports);
+__exportStar(require("./messages/state/ChlorMessage"), exports);
+__exportStar(require("./messages/state/PumpMessage"), exports);
+__exportStar(require("./messages/state/EquipmentState"), exports);
+__exportStar(require("./messages/ConnectionMessage"), exports);
+__exportStar(require("./messages/OutgoingMessages"), exports);
+__exportStar(require("./messages/SLGatewayDataMessage"), exports);
+__exportStar(require("./messages/SLMessage"), exports);
 const debugFind = (0, debug_1.default)('sl:find');
 const debugRemote = (0, debug_1.default)('sl:remote');
 const debugUnit = (0, debug_1.default)('sl:unit');

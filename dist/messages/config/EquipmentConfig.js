@@ -228,33 +228,35 @@ class EquipmentConfigurationMessage {
         if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
             return null;
         }
-        let pump;
-        pump.id = pumpIndex + 1;
+        const id = pumpIndex + 1;
         const type = pumpDataArray[pumpIndexByte];
-        pump.type = type;
+        let pentairType;
+        let name;
         if ((type & 128) === 128) {
-            pump.pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
-            pump.name = 'Intelliflo VS';
+            pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
+            name = 'Intelliflo VS';
         }
         else if ((type & 134) === 134) {
-            pump.pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
-            pump.name = 'Intelliflo VS Ultra Efficiency';
+            pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
+            name = 'Intelliflo VS Ultra Efficiency';
         }
         else if ((type & 169) === 169) {
-            pump.pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
-            pump.name = 'Intelliflo VS+SVRS';
+            pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS;
+            name = 'Intelliflo VS+SVRS';
         }
         else if ((type & 64) === 64) {
-            pump.pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVSF;
-            pump.name = 'Intelliflo VSF';
+            pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVSF;
+            name = 'Intelliflo VSF';
         }
         else {
-            pump.pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVF;
-            pump.name = 'Intelliflo VF';
+            pentairType = index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVF;
+            name = 'Intelliflo VF';
         }
-        pump.address = pumpIndex + 95;
-        pump.circuits = [];
-        if (pump.pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS) {
+        const address = pumpIndex + 95;
+        const circuits = [];
+        let primingSpeed, primingTime, minSpeed, maxSpeed, speedStepSize;
+        let backgroundCircuit, filterSize, turnovers, manualFilterGPM, minFlow, maxFlow, flowStepSize, maxSystemTime, maxPressureIncrease, backwashFlow, backwashTime, rinseTime, vacuumFlow, vacuumTime;
+        if (pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVS) {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
                 const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
@@ -264,16 +266,16 @@ class EquipmentConfigurationMessage {
                         speed: pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)],
                         units: 0
                     };
-                    pump.circuits.push(circuit);
+                    circuits.push(circuit);
                 }
             }
-            pump.primingSpeed = pumpDataArray[pumpIndexByte + 20] * 256 + pumpDataArray[pumpIndexByte + 29];
-            pump.primingTime = pumpDataArray[pumpIndexByte + 1];
-            pump.minSpeed = 450;
-            pump.maxSpeed = 3450;
-            pump.speedStepSize = 10;
+            primingSpeed = pumpDataArray[pumpIndexByte + 20] * 256 + pumpDataArray[pumpIndexByte + 29];
+            primingTime = pumpDataArray[pumpIndexByte + 1];
+            minSpeed = 450;
+            maxSpeed = 3450;
+            speedStepSize = 10;
         }
-        else if (pump.pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVF) {
+        else if (pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVF) {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
                 const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
@@ -283,27 +285,27 @@ class EquipmentConfigurationMessage {
                         flow: pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)],
                         units: 1
                     };
-                    pump.circuits.push(circuit);
+                    circuits.push(circuit);
                 }
             }
-            pump.backgroundCircuit = pumpDataArray[pumpIndexByte];
-            pump.filterSize = pumpDataArray[pumpIndexByte + 1] * 1000;
-            pump.turnovers = pumpDataArray[pumpIndexByte + 2];
-            pump.manualFilterGPM = pumpDataArray[pumpIndexByte + 20];
-            pump.primingSpeed = pumpDataArray[pumpIndexByte + 21];
-            pump.primingTime = (pumpDataArray[pumpIndexByte + 22] & 0xf);
-            pump.minFlow = 15;
-            pump.maxFlow = 130;
-            pump.flowStepSize = 1;
-            pump.maxSystemTime = pumpDataArray[pumpIndexByte + 22] >> 4;
-            pump.maxPressureIncrease = pumpDataArray[pumpIndexByte + 23];
-            pump.backwashFlow = pumpDataArray[pumpIndexByte + 24];
-            pump.backwashTime = pumpDataArray[pumpIndexByte + 25];
-            pump.rinseTime = pumpDataArray[pumpIndexByte + 26];
-            pump.vacuumFlow = pumpDataArray[pumpIndexByte + 27];
-            pump.vacuumTime = pumpDataArray[pumpIndexByte + 29];
+            backgroundCircuit = pumpDataArray[pumpIndexByte];
+            filterSize = pumpDataArray[pumpIndexByte + 1] * 1000;
+            turnovers = pumpDataArray[pumpIndexByte + 2];
+            manualFilterGPM = pumpDataArray[pumpIndexByte + 20];
+            primingSpeed = pumpDataArray[pumpIndexByte + 21];
+            primingTime = (pumpDataArray[pumpIndexByte + 22] & 0xf);
+            minFlow = 15;
+            maxFlow = 130;
+            flowStepSize = 1;
+            maxSystemTime = pumpDataArray[pumpIndexByte + 22] >> 4;
+            maxPressureIncrease = pumpDataArray[pumpIndexByte + 23];
+            backwashFlow = pumpDataArray[pumpIndexByte + 24];
+            backwashTime = pumpDataArray[pumpIndexByte + 25];
+            rinseTime = pumpDataArray[pumpIndexByte + 26];
+            vacuumFlow = pumpDataArray[pumpIndexByte + 27];
+            vacuumTime = pumpDataArray[pumpIndexByte + 29];
         }
-        else if (pump.pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVSF) {
+        else if (pentairType === index_1.PumpTypes.PUMP_TYPE_INTELLIFLOVSF) {
             for (let circuitId = 1; circuitId <= 8; circuitId++) {
                 const _circuit = pumpDataArray[pumpIndexByte + (circuitId * 2 + 2)];
                 if (_circuit !== 0) {
@@ -318,16 +320,43 @@ class EquipmentConfigurationMessage {
                     else {
                         circuit.speed = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)];
                     }
-                    pump.circuits.push(circuit);
+                    circuits.push(circuit);
                 }
             }
-            pump.speedStepSize = 10;
-            pump.flowStepSize = 1;
-            pump.minFlow = 15;
-            pump.maxFlow = 130;
-            pump.minSpeed = 450;
-            pump.maxSpeed = 3450;
+            speedStepSize = 10;
+            flowStepSize = 1;
+            minFlow = 15;
+            maxFlow = 130;
+            minSpeed = 450;
+            maxSpeed = 3450;
         }
+        const pump = {
+            id,
+            type,
+            pentairType,
+            name,
+            address,
+            circuits,
+            primingSpeed,
+            primingTime,
+            minSpeed,
+            maxSpeed,
+            speedStepSize,
+            backgroundCircuit,
+            filterSize,
+            turnovers,
+            manualFilterGPM,
+            minFlow,
+            maxFlow,
+            flowStepSize,
+            maxSystemTime,
+            maxPressureIncrease,
+            backwashFlow,
+            backwashTime,
+            rinseTime,
+            vacuumFlow,
+            vacuumTime
+        };
         return pump;
     }
     static _isValvePresent(valveIndex, loadCenterValveData, msg) {
