@@ -309,7 +309,7 @@ Returns an object with the socket state:
 
 ### Body
 
-#### body.setCoolSetPointAsync(bodyId, temperature, senderId?)
+#### bodies.setCoolSetPointAsync(bodyId, temperature, senderId?)
 
 Sets the cooling setpoint for any body. Emits the `coolSetPointChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
@@ -318,11 +318,11 @@ Parameters:
 * `bodyId` - integer indicating the type of body to set the setpoint of. The pool is body `0` and the spa is body `1`.
 * `temperature` - integer indicating the desired setpoint. This is presumably in whatever units your system is set to (celsius or fahrenheit).
 
-#### body.setHeatModeAsync(bodyId, heatMode, senderId?)
+#### bodies.setHeatModeAsync(bodyId, heatMode, senderId?)
 
 Sets the preferred heat mode. See [SLSetHeatModeMessage](#slsetheatmodemessage) documentation for argument values. Emits the `heatModeChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
-#### body.setSetPointAsync(bodyId, temperature, senderId?)
+#### bodies.setSetPointAsync(bodyId, temperature, senderId?)
 
 Sets the heating setpoint for any body. Emits the `setPointChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
@@ -357,13 +357,13 @@ Sets the salt cell's output levels. See [SLSetIntellichlorConfigMessage](#slseti
 
 ### Circuit
 
-#### circuit.sendLightCommandAsync(command, senderId?)
+#### circuits.sendLightCommandAsync(command, senderId?)
 
 Sends a lighting command. See [SLLightControlMessage](#sllightcontrolmessage) documentation for argument values. Emits the `sentLightCommand` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
 EasyTouch/Intellitouch only have a single light group and individual lights cannot be address. Pentair's Intellicenter offers this capability.
 
-#### circuit.setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId?)
+#### circuits.setCircuitAsync(circuitId, nameIndex, circuitFunction, circuitInterface, freeze, colorPos, senderId?)
 
 Parameters:
 
@@ -376,11 +376,11 @@ Parameters:
 
 Sets the configuration for a specific circuit. Emits the `circuit` event when completed. Resolves with [BoolData](#booldata).
 
-#### circuit.setCircuitRuntimebyIdAsync(circuitId, runTime, senderId?)
+#### circuits.setCircuitRuntimebyIdAsync(circuitId, runTime, senderId?)
 
 Configures default run-time of a circuit, usually referred to as the 'egg timer'. This also applies to 'run-once' programs as this will set the length of the program. See [SLSetCircuitRuntimeById](#slsetcircuitruntimebyid) documentation for argument values. Emits the `setCircuitRuntimeById` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
-#### circuit.setCircuitStateAsync(circuitId, circuitState, senderId?)
+#### circuits.setCircuitStateAsync(circuitId, circuitState, senderId?)
 
 Activates or deactivates a circuit. See [SLSetCircuitStateMessage](#slsetcircuitstatemessage) documentation for argument values. Emits the `circuitStateChanged` event when response is acknowledged. Resolves with [BoolData](#booldata).
 
