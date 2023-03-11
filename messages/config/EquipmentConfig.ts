@@ -339,7 +339,7 @@ export class EquipmentConfigurationMessage {
           } else {
             circuit.speed = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)];
           }
-          pump.circuits.push(circuit);
+          circuits.push(circuit);
         }
       }
       speedStepSize = 10;

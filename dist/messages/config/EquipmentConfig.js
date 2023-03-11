@@ -228,7 +228,6 @@ class EquipmentConfigurationMessage {
         if (pumpDataArray === null || pumpDataArray.length < (pumpIndex + 1) * 45) {
             return null;
         }
-        let pump;
         const id = pumpIndex + 1;
         const type = pumpDataArray[pumpIndexByte];
         let pentairType;
@@ -321,7 +320,7 @@ class EquipmentConfigurationMessage {
                     else {
                         circuit.speed = pumpDataArray[pumpIndexByte + (circuitId * 2 + 3)] * 256 + pumpDataArray[pumpIndexByte + (circuitId + 20)];
                     }
-                    pump.circuits.push(circuit);
+                    circuits.push(circuit);
                 }
             }
             speedStepSize = 10;
@@ -331,7 +330,7 @@ class EquipmentConfigurationMessage {
             minSpeed = 450;
             maxSpeed = 3450;
         }
-        pump = {
+        const pump = {
             id,
             type,
             pentairType,
