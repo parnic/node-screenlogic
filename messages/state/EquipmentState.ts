@@ -141,14 +141,14 @@ export class EquipmentStateMessage {
     };
     const getPumpType = function (pumpIndex: number): PumpTypes {
       if (flowDataArray === null || flowDataArray.length < (pumpIndex + 1) * 45) {
-        return 0;
+        return PumpTypes.Invalid;
       }
 
       const pumpType = flowDataArray[(45 * pumpIndex) + 2];
       if (pumpType <= 3) {
         return pumpType as PumpTypes;
       }
-      return 0;
+      return PumpTypes.Invalid;
     };
     const isValvePresent = function (valveIndex: number, loadCenterValveData: number): boolean {
       if (valveIndex < 2) {

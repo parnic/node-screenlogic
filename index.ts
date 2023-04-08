@@ -2061,6 +2061,7 @@ export enum HeatModes {
 }
 
 export enum PumpTypes {
+  Invalid = 0,
   PUMP_TYPE_INTELLIFLOVF = 5,
   PUMP_TYPE_INTELLIFLOVS = 3,
   PUMP_TYPE_INTELLIFLOVSF = 4
