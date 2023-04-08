@@ -32,6 +32,15 @@ export class ChlorMessage {
     return response;
   }
 }
+
+export namespace ChlorMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    GetIntellichlorConfig = 12573,
+    SetIntellichlorEnabled = 12575,
+    SetIntellichlorConfig = 12577,
+  }
+}
+
 export interface SLIntellichlorData extends SLData {
   installed: boolean;
   status: number;

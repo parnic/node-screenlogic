@@ -521,6 +521,16 @@ export class EquipmentStateMessage {
   }
 }
 
+export namespace EquipmentStateMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    SystemTime = 8111,
+    SetSystemTime = 8113,
+    AsyncEquipmentState = 12500,
+    EquipmentState = 12527,
+    CancelDelay = 12581,
+  }
+}
+
 export interface SLEquipmentStateData extends SLData {
   panelMode: number;
   freezeMode: number;

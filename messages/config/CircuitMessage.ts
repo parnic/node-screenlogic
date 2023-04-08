@@ -35,3 +35,13 @@ export class CircuitMessage {
     return response;
   }
 }
+
+export namespace CircuitMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    LightSequence = 12504,
+    SetCircuitInfo = 12521,
+    SetCircuitState = 12531,
+    SetCircuitRunTime = 12551,
+    SetLightState = 12557,
+  }
+}

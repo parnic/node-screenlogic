@@ -130,6 +130,15 @@ export class ChemMessage {
   }
 }
 
+export namespace ChemMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    AsyncChemicalData = 12505,
+    ChemicalHistoryData = 12506,
+    HistoryDataPending = 12597,
+    GetChemicalData = 12593,
+  }
+}
+
 export interface SLChemData extends SLData {
   isValid: boolean;
   pH: number;

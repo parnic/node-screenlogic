@@ -26,3 +26,11 @@ export class HeaterMessage {
     return response;
   }
 }
+
+export namespace HeaterMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    SetHeatSetPoint = 12529,
+    SetHeatMode = 12539,
+    SetCoolSetPoint = 12591,
+  }
+}

@@ -50,6 +50,13 @@ export class PumpMessage {
   }
 }
 
+export namespace PumpMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    PumpStatus = 12585,
+    SetPumpSpeed = 12587,
+  }
+}
+
 export interface SLPumpStatusData extends SLData {
   pumpCircuits: SLPumpCircuitData[];
   pumpType: PumpTypes;

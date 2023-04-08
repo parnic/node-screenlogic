@@ -165,7 +165,7 @@ export class RemoteLogin extends EventEmitter {
           debugRemote(`received message of length ${buf.length} and messageId ${message.action}`);
 
           switch (message.action) {
-            case 18004: // SLGatewayDataMessage.getResponseId():
+            case ConnectionMessage.ResponseIDs.GatewayResponse:
               debugRemote('  it is a gateway response');
 
               if (typeof resolve !== 'undefined') {
@@ -756,242 +756,242 @@ export class UnitConnection extends EventEmitter {
     debugUnit(`received ${msg.action} message of length ${msg.length}`);
 
     switch (msg.action) {
-      case 15:
+      case ConnectionMessage.ResponseIDs.Challenge:
         debugUnit('  it is a challenge response');
         this.emit('challengeString', ConnectionMessage.decodeChallengeResponse(msg));
         break;
 
-      case 28:
+      case ConnectionMessage.ResponseIDs.Login:
         debugUnit('  it is a login response');
         this.emit('loggedIn');
         break;
 
-      case 13:
+      case ConnectionMessage.ResponseIDs.LoginFailure:
         debugUnit('  it is a login failure');
         this.emit('loginFailed');
         break;
 
-      case 12500:
-      case 12527:
+      case EquipmentStateMessage.ResponseIDs.AsyncEquipmentState:
+      case EquipmentStateMessage.ResponseIDs.EquipmentState:
         debugUnit('  it is pool status');
         this.emit('equipmentState', EquipmentStateMessage.decodeEquipmentStateResponse(msg));
         break;
 
-      case 12521:
+      case CircuitMessage.ResponseIDs.SetCircuitInfo:
         debugUnit('  it is set circuit info');
         this.emit('circuit', CircuitMessage.decodeSetCircuit(msg));
         break;
 
-      case 8121:
+      case ConnectionMessage.ResponseIDs.Version:
         debugUnit('  it is version');
         this.emit('version', ConnectionMessage.decodeVersionResponse(msg));
         break;
 
-      case 12573:
+      case ChlorMessage.ResponseIDs.GetIntellichlorConfig:
         debugUnit('  it is salt cell config');
         this.emit('intellichlorConfig', ChlorMessage.decodeIntellichlorConfig(msg));
         break;
 
-      case 12511:
+      case EquipmentConfigurationMessage.ResponseIDs.GetCircuitDefinitions:
         debugUnit('  it is a get circuit definitions answer');
         this.emit('circuitDefinitions', EquipmentConfigurationMessage.decodeCircuitDefinitions(msg));
         break;
 
-      case 12559:
+      case EquipmentConfigurationMessage.ResponseIDs.NumCircuitNames:
         debugUnit('  it is get circuit names answer');
         this.emit('nCircuitNames', EquipmentConfigurationMessage.decodeNCircuitNames(msg));
         break;
 
-      case 12560:
-      case 12562:
+      case EquipmentConfigurationMessage.ResponseIDs.AsyncCircuitNames:
+      case EquipmentConfigurationMessage.ResponseIDs.GetCircuitNames:
         debugUnit('  it is get circuit names answer');
         this.emit('circuitNames', EquipmentConfigurationMessage.decodeCircuitNames(msg));
         break;
 
-      case 12533:
+      case EquipmentConfigurationMessage.ResponseIDs.GetControllerConfig:
         debugUnit('  it is controller configuration');
         this.emit('controllerConfig', EquipmentConfigurationMessage.decodeControllerConfig(msg));
         break;
 
-      case 12505:
-      case 12593:
+      case ChemMessage.ResponseIDs.AsyncChemicalData:
+      case ChemMessage.ResponseIDs.GetChemicalData:
         debugUnit('  it is chem data');
         this.emit('chemicalData', ChemMessage.decodeChemDataMessage(msg));
         break;
 
-      case 8111:
+      case EquipmentStateMessage.ResponseIDs.SystemTime:
         debugUnit('  it is system time');
         this.emit('getSystemTime', EquipmentStateMessage.decodeSystemTime(msg));
         break;
 
-      case 12543:
+      case ScheduleMessage.ResponseIDs.GetSchedule:
         debugUnit('  it is schedule data');
         this.emit('getScheduleData', ScheduleMessage.decodeGetScheduleMessage(msg));
         break;
 
-      case 12581:
+      case EquipmentStateMessage.ResponseIDs.CancelDelay:
         debugUnit('  it is a cancel delay ack');
         this.emit('cancelDelay', EquipmentStateMessage.decodeCancelDelay(msg));
         break;
 
-      case 12523:
+      case ConnectionMessage.ResponseIDs.AddClient:
         debugUnit('  it is an add client ack');
         this.emit('addClient', ConnectionMessage.decodeAddClient(msg));
         break;
 
-      case 12525:
+      case ConnectionMessage.ResponseIDs.RemoveClient:
         debugUnit('  it is a remove client ack');
         this.emit('removeClient', ConnectionMessage.decodeRemoveClient(msg));
         break;
 
-      case 17:
+      case ConnectionMessage.ResponseIDs.Ping:
         debugUnit('  it is a pong');
         this.emit('pong', ConnectionMessage.decodePingClient(msg));
         break;
 
-      case 12567:
+      case EquipmentConfigurationMessage.ResponseIDs.GetEquipmentConfiguration:
         debugUnit('  it is a get equipment configuration');
         this.emit('equipmentConfiguration', EquipmentConfigurationMessage.decodeGetEquipmentConfiguration(msg));
         break;
 
-      case 12568:
+      case EquipmentConfigurationMessage.ResponseIDs.SetEquipmentConfiguration:
         debugUnit('  it is a SET equipment configuration');
         this.emit('setEquipmentConfiguration', EquipmentConfigurationMessage.decodeSetEquipmentConfiguration(msg));
         break;
 
-      case 12569:
+      case EquipmentConfigurationMessage.ResponseIDs.SetEquipmentConfigurationAck:
         debugUnit('  it is a SET equipment configuration ack');
         this.emit('setEquipmentConfigurationAck', EquipmentConfigurationMessage.decodeSetEquipmentConfigurationAck(msg));
         break;
 
-      case 12585:
+      case PumpMessage.ResponseIDs.PumpStatus:
         debugUnit('  it is pump status');
         this.emit('getPumpStatus', PumpMessage.decodePumpStatus(msg));
         break;
 
-      case 9808:
+      case EquipmentConfigurationMessage.ResponseIDs.WeatherForecastAck:
         debugUnit('  it is a weather forecast ack');
         this.emit('weatherForecast', EquipmentConfigurationMessage.decodeWeatherMessage(msg));
         break;
 
-      case 12531:
+      case CircuitMessage.ResponseIDs.SetCircuitState:
         debugUnit('  it is circuit toggle ack');
         this.emit('circuitStateChanged', CircuitMessage.decodeSetCircuitState(msg));
         break;
 
-      case 12529:
+      case HeaterMessage.ResponseIDs.SetHeatSetPoint:
         debugUnit('  it is a setpoint ack');
         this.emit('setPointChanged', HeaterMessage.decodeSetHeatSetPoint(msg));
         break;
 
-      case 12591:
+      case HeaterMessage.ResponseIDs.SetCoolSetPoint:
         debugUnit('  it is a cool setpoint ack');
         this.emit('coolSetPointChanged', HeaterMessage.decodeCoolSetHeatSetPoint(msg));
         break;
 
-      case 12539:
+      case HeaterMessage.ResponseIDs.SetHeatMode:
         debugUnit('  it is a heater mode ack');
         this.emit('heatModeChanged', HeaterMessage.decodeSetHeatModePoint(msg));
         break;
 
-      case 12557:
+      case CircuitMessage.ResponseIDs.SetLightState:
         debugUnit('  it is a light control ack');
         this.emit('sentLightCommand', CircuitMessage.decodeSetLight(msg));
         break;
 
-      case 12504: // ~16-20s sequence intellibrite light theme
+      case CircuitMessage.ResponseIDs.LightSequence: // ~16-20s sequence intellibrite light theme
         debugUnit('  it is a light sequence delay packet');
         this.emit('intellibriteDelay', 1);
         break;
 
-      case 12575:
+      case ChlorMessage.ResponseIDs.SetIntellichlorEnabled:
         debugUnit('  it is a set salt cell isActive ack');
         this.emit('intellichlorIsActive', ChlorMessage.decodeSetEnableIntellichlorConfig(msg));
         break;
 
-      case 12577:
+      case ChlorMessage.ResponseIDs.SetIntellichlorConfig:
         debugUnit('  it is a set salt cell config ack');
         this.emit('setIntellichlorConfig', ChlorMessage.decodeSetIntellichlorConfig(msg));
         break;
 
-      case 12545:
+      case ScheduleMessage.ResponseIDs.AddSchedule:
         debugUnit('  it is a new schedule event ack');
         this.emit('addNewScheduleEvent', ScheduleMessage.decodeAddSchedule(msg));
         break;
 
-      case 12547:
+      case ScheduleMessage.ResponseIDs.DeleteSchedule:
         debugUnit('  it is a delete schedule event ack');
         this.emit('deleteScheduleEventById', ScheduleMessage.decodeDeleteSchedule(msg));
         break;
 
-      case 12549:
+      case ScheduleMessage.ResponseIDs.SetSchedule:
         debugUnit('  it is a set schedule event ack');
         this.emit('setScheduleEventById', ScheduleMessage.decodeSetSchedule(msg));
         break;
 
-      case 12551:
+      case CircuitMessage.ResponseIDs.SetCircuitRunTime:
         debugUnit('  it is a set circuit runtime ack');
         this.emit('setCircuitRuntimebyId', CircuitMessage.decodeSetCircuitRunTime(msg));
         break;
 
-      case 12563:
+      case EquipmentConfigurationMessage.ResponseIDs.GetCustomNamesAck:
         debugUnit('  it is a get custom names packet');
         this.emit('getCustomNames', EquipmentConfigurationMessage.decodeCustomNames(msg));
         break;
 
-      case 12565:
+      case EquipmentConfigurationMessage.ResponseIDs.SetCustomNameAck:
         debugUnit('  it is a set custom names packet');
         this.emit('setCustomName', EquipmentConfigurationMessage.decodeSetCustomNameAck(msg));
         break;
 
-      case 12587:
+      case PumpMessage.ResponseIDs.SetPumpSpeed:
         debugUnit('  it is a set pump flow ack');
         this.emit('setPumpSpeed', PumpMessage.decodeSetPumpSpeed(msg));
         break;
 
       // ------------  ASYNC MESSAGES --------------- //
-      case 8113:
+      case EquipmentStateMessage.ResponseIDs.SetSystemTime:
         debugUnit('  it is a set system time ack');
         this.emit('setSystemTime', EquipmentStateMessage.decodeSetSystemTime(msg));
         break;
 
-      case 12535:
+      case EquipmentConfigurationMessage.ResponseIDs.HistoryDataPending:
         debugUnit('  it is a history data query ack');
         this.emit('getHistoryDataPending');
         break;
 
-      case 12502:
+      case EquipmentConfigurationMessage.ResponseIDs.GetHistoryData:
         debugUnit('  it is a history data payload');
         this.emit('getHistoryData', EquipmentConfigurationMessage.decodeGetHistory(msg));
         break;
 
-      case 12597:
+      case ChemMessage.ResponseIDs.HistoryDataPending:
         debugUnit('  it is a chem history data query ack');
         this.emit('getChemHistoryDataPending');
         break;
 
-      case 12506:
+      case ChemMessage.ResponseIDs.ChemicalHistoryData:
         debugUnit('  it is a chem history data payload');
         this.emit('getChemHistoryData', ChemMessage.decodecChemHistoryMessage(msg));
         break;
 
       // misc
-      case 9806:
+      case EquipmentConfigurationMessage.ResponseIDs.WeatherForecastChanged:
         debugUnit('  it is a \'weather forecast changed\' notification');
         this.emit('weatherForecastChanged');
         break;
 
-      case 12501:
+      case ScheduleMessage.ResponseIDs.ScheduleChanged:
         debugUnit('  it is a schedule changed notification');
         this.emit('scheduleChanged');
         break;
 
-      case 30:
+      case ConnectionMessage.ResponseIDs.UnknownCommand:
         debugUnit('  it is an unknown command.');
         this.emit('unknownCommand');
         break;
 
-      case 31:
+      case ConnectionMessage.ResponseIDs.BadParameter:
         debugUnit('  it is a parameter failure.');
         this.emit('badParameter');
         break;

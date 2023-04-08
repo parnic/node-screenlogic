@@ -59,6 +59,15 @@ export class ScheduleMessage {
   }
 }
 
+export namespace ScheduleMessage { // eslint-disable-line @typescript-eslint/no-namespace
+  export enum ResponseIDs {
+    ScheduleChanged = 12501,
+    GetSchedule = 12543,
+    AddSchedule = 12545,
+    DeleteSchedule = 12547,
+    SetSchedule = 12549,
+  }
+}
 
 export interface SLScheduleDatum {
   scheduleId: number;
