@@ -1094,7 +1094,7 @@ Passed as an argument to the emitted `circuitStateChanged` event.
 #### Properties
 
 * `circuitId` - integer indicating the ID of the circuit to set the state of.
-  * This ID can be retrieved from `SLControllerConfig`'s `bodyArray` property.
+  * This ID can be retrieved from `SLControllerConfigData`'s `circuitArray` property.
 * `circuitState` - integer indicating whether to switch the circuit on (`1`) or off (`0`).
 
 ### SLSetHeatModeMessage
