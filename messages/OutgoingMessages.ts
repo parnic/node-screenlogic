@@ -300,7 +300,7 @@ export class BodyCommands extends Commands {
     this.action = HeaterMessage.ResponseIDs.SetHeatMode - 1;
     this.createBaseMessage(senderId);
     this.writeInt32LE(this.unit.controllerId);
-    this.writeInt32LE((bodyType - 1) || 0);
+    this.writeInt32LE(bodyType || 0);
     this.writeInt32LE(heatMode || 0);
     this.unit.write(this.toBuffer());
     return this;

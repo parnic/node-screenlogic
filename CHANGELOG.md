@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+* Fixed bodies.setHeatModeAsync incorrectly subtracting one from the given body index. This is a breaking change if you were correcting for the offset already.
+
 ## v2.0.0 - 2023-03-10
 
 This major version number increase comes with many changes under the hood, including a rename of most every method in the library. This adds Promises and Typescript support. See the [Migration guide](https://github.com/parnic/node-screenlogic/wiki/Migration-guide) and [Breaking changes](https://github.com/parnic/node-screenlogic/wiki/Breaking-changes) wiki pages for detailed information.
