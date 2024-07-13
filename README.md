@@ -977,7 +977,7 @@ an argument to the emitted `getSystemTimeAsync` event.
 
 ### SLLightControlMessage
 
-Passed as an argument to `sentLightCommandAsync`.
+Passed as an argument to `sendLightCommandAsync`.
 
 #### Properties
 
