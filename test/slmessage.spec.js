@@ -54,16 +54,6 @@ describe('SLMessage utilities', function() {
       assert.strictEqual(decodedMsg.action, 0);
       assert.strictEqual(decodedMsg.dataLength, 0);
     }
-
-    {
-      let msg = new SLMessage.Outbound();
-      msg.createBaseMessage();
-      let decodedMsg = new SLMessage.Inbound();
-      decodedMsg.readFromBuffer(msg.toBuffer());
-      assert.strictEqual(decodedMsg.senderId, 0);
-      assert.strictEqual(decodedMsg.action, 0);
-      assert.strictEqual(decodedMsg.dataLength, 0);
-    }
   });
 
   it('encodes and decodes SLStrings', function() {
