@@ -1134,7 +1134,7 @@ export class Equipment {
         reject(new Error('time out waiting for get circuit names response'));
       }, this.unit.netTimeout * 3);
 
-      this.unit.once('circuitNames', (data) => {
+      this.unit.once('getCustomNames', (data) => {
         debugUnit('received n circuit names event');
 
         clearTimeout(_timeout);
