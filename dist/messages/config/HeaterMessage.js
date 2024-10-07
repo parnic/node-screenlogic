@@ -28,4 +28,12 @@ class HeaterMessage {
     }
 }
 exports.HeaterMessage = HeaterMessage;
+(function (HeaterMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["SetHeatSetPoint"] = 12529] = "SetHeatSetPoint";
+        ResponseIDs[ResponseIDs["SetHeatMode"] = 12539] = "SetHeatMode";
+        ResponseIDs[ResponseIDs["SetCoolSetPoint"] = 12591] = "SetCoolSetPoint";
+    })(ResponseIDs = HeaterMessage.ResponseIDs || (HeaterMessage.ResponseIDs = {}));
+})(HeaterMessage = exports.HeaterMessage || (exports.HeaterMessage = {}));
 //# sourceMappingURL=HeaterMessage.js.map

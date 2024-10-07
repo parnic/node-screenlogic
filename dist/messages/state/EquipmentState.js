@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EquipmentStateMessage = void 0;
+const index_1 = require("../../index");
 class EquipmentStateMessage {
     static decodeEquipmentStateResponse(msg) {
         const panelMode = msg.readInt32LE();
@@ -131,13 +132,13 @@ class EquipmentStateMessage {
         };
         const getPumpType = function (pumpIndex) {
             if (flowDataArray === null || flowDataArray.length < (pumpIndex + 1) * 45) {
-                return 0;
+                return index_1.PumpTypes.Invalid;
             }
             const pumpType = flowDataArray[(45 * pumpIndex) + 2];
             if (pumpType <= 3) {
                 return pumpType;
             }
-            return 0;
+            return index_1.PumpTypes.Invalid;
         };
         const isValvePresent = function (valveIndex, loadCenterValveData) {
             if (valveIndex < 2) {
@@ -491,4 +492,14 @@ class EquipmentStateMessage {
     }
 }
 exports.EquipmentStateMessage = EquipmentStateMessage;
+(function (EquipmentStateMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["SystemTime"] = 8111] = "SystemTime";
+        ResponseIDs[ResponseIDs["SetSystemTime"] = 8113] = "SetSystemTime";
+        ResponseIDs[ResponseIDs["AsyncEquipmentState"] = 12500] = "AsyncEquipmentState";
+        ResponseIDs[ResponseIDs["EquipmentState"] = 12527] = "EquipmentState";
+        ResponseIDs[ResponseIDs["CancelDelay"] = 12581] = "CancelDelay";
+    })(ResponseIDs = EquipmentStateMessage.ResponseIDs || (EquipmentStateMessage.ResponseIDs = {}));
+})(EquipmentStateMessage = exports.EquipmentStateMessage || (exports.EquipmentStateMessage = {}));
 //# sourceMappingURL=EquipmentState.js.map

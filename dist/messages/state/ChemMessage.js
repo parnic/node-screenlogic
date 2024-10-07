@@ -124,4 +124,13 @@ class ChemMessage {
     }
 }
 exports.ChemMessage = ChemMessage;
+(function (ChemMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["AsyncChemicalData"] = 12505] = "AsyncChemicalData";
+        ResponseIDs[ResponseIDs["ChemicalHistoryData"] = 12506] = "ChemicalHistoryData";
+        ResponseIDs[ResponseIDs["HistoryDataPending"] = 12597] = "HistoryDataPending";
+        ResponseIDs[ResponseIDs["GetChemicalData"] = 12593] = "GetChemicalData";
+    })(ResponseIDs = ChemMessage.ResponseIDs || (ChemMessage.ResponseIDs = {}));
+})(ChemMessage = exports.ChemMessage || (exports.ChemMessage = {}));
 //# sourceMappingURL=ChemMessage.js.map

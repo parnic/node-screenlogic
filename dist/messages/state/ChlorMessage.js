@@ -33,4 +33,12 @@ class ChlorMessage {
     }
 }
 exports.ChlorMessage = ChlorMessage;
+(function (ChlorMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["GetIntellichlorConfig"] = 12573] = "GetIntellichlorConfig";
+        ResponseIDs[ResponseIDs["SetIntellichlorEnabled"] = 12575] = "SetIntellichlorEnabled";
+        ResponseIDs[ResponseIDs["SetIntellichlorConfig"] = 12577] = "SetIntellichlorConfig";
+    })(ResponseIDs = ChlorMessage.ResponseIDs || (ChlorMessage.ResponseIDs = {}));
+})(ChlorMessage = exports.ChlorMessage || (exports.ChlorMessage = {}));
 //# sourceMappingURL=ChlorMessage.js.map

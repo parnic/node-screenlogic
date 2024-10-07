@@ -49,4 +49,11 @@ class PumpMessage {
     }
 }
 exports.PumpMessage = PumpMessage;
+(function (PumpMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["PumpStatus"] = 12585] = "PumpStatus";
+        ResponseIDs[ResponseIDs["SetPumpSpeed"] = 12587] = "SetPumpSpeed";
+    })(ResponseIDs = PumpMessage.ResponseIDs || (PumpMessage.ResponseIDs = {}));
+})(PumpMessage = exports.PumpMessage || (exports.PumpMessage = {}));
 //# sourceMappingURL=PumpMessage.js.map

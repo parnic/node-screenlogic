@@ -59,4 +59,14 @@ class ScheduleMessage {
     }
 }
 exports.ScheduleMessage = ScheduleMessage;
+(function (ScheduleMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["ScheduleChanged"] = 12501] = "ScheduleChanged";
+        ResponseIDs[ResponseIDs["GetSchedule"] = 12543] = "GetSchedule";
+        ResponseIDs[ResponseIDs["AddSchedule"] = 12545] = "AddSchedule";
+        ResponseIDs[ResponseIDs["DeleteSchedule"] = 12547] = "DeleteSchedule";
+        ResponseIDs[ResponseIDs["SetSchedule"] = 12549] = "SetSchedule";
+    })(ResponseIDs = ScheduleMessage.ResponseIDs || (ScheduleMessage.ResponseIDs = {}));
+})(ScheduleMessage = exports.ScheduleMessage || (exports.ScheduleMessage = {}));
 //# sourceMappingURL=ScheduleMessage.js.map

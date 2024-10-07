@@ -35,4 +35,14 @@ class CircuitMessage {
     }
 }
 exports.CircuitMessage = CircuitMessage;
+(function (CircuitMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["LightSequence"] = 12504] = "LightSequence";
+        ResponseIDs[ResponseIDs["SetCircuitInfo"] = 12521] = "SetCircuitInfo";
+        ResponseIDs[ResponseIDs["SetCircuitState"] = 12531] = "SetCircuitState";
+        ResponseIDs[ResponseIDs["SetCircuitRunTime"] = 12551] = "SetCircuitRunTime";
+        ResponseIDs[ResponseIDs["SetLightState"] = 12557] = "SetLightState";
+    })(ResponseIDs = CircuitMessage.ResponseIDs || (CircuitMessage.ResponseIDs = {}));
+})(CircuitMessage = exports.CircuitMessage || (exports.CircuitMessage = {}));
 //# sourceMappingURL=CircuitMessage.js.map

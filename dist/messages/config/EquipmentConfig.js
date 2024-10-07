@@ -870,4 +870,23 @@ class EquipmentConfigurationMessage {
     }
 }
 exports.EquipmentConfigurationMessage = EquipmentConfigurationMessage;
+(function (EquipmentConfigurationMessage) {
+    let ResponseIDs;
+    (function (ResponseIDs) {
+        ResponseIDs[ResponseIDs["WeatherForecastChanged"] = 9806] = "WeatherForecastChanged";
+        ResponseIDs[ResponseIDs["WeatherForecastAck"] = 9808] = "WeatherForecastAck";
+        ResponseIDs[ResponseIDs["GetHistoryData"] = 12502] = "GetHistoryData";
+        ResponseIDs[ResponseIDs["GetCircuitDefinitions"] = 12511] = "GetCircuitDefinitions";
+        ResponseIDs[ResponseIDs["GetControllerConfig"] = 12533] = "GetControllerConfig";
+        ResponseIDs[ResponseIDs["HistoryDataPending"] = 12535] = "HistoryDataPending";
+        ResponseIDs[ResponseIDs["NumCircuitNames"] = 12559] = "NumCircuitNames";
+        ResponseIDs[ResponseIDs["AsyncCircuitNames"] = 12560] = "AsyncCircuitNames";
+        ResponseIDs[ResponseIDs["GetCircuitNames"] = 12562] = "GetCircuitNames";
+        ResponseIDs[ResponseIDs["GetCustomNamesAck"] = 12563] = "GetCustomNamesAck";
+        ResponseIDs[ResponseIDs["SetCustomNameAck"] = 12565] = "SetCustomNameAck";
+        ResponseIDs[ResponseIDs["GetEquipmentConfiguration"] = 12567] = "GetEquipmentConfiguration";
+        ResponseIDs[ResponseIDs["SetEquipmentConfiguration"] = 12568] = "SetEquipmentConfiguration";
+        ResponseIDs[ResponseIDs["SetEquipmentConfigurationAck"] = 12569] = "SetEquipmentConfigurationAck";
+    })(ResponseIDs = EquipmentConfigurationMessage.ResponseIDs || (EquipmentConfigurationMessage.ResponseIDs = {}));
+})(EquipmentConfigurationMessage = exports.EquipmentConfigurationMessage || (exports.EquipmentConfigurationMessage = {}));
 //# sourceMappingURL=EquipmentConfig.js.map

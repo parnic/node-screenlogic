@@ -4,6 +4,12 @@ export declare class PumpMessage {
     static decodePumpStatus(msg: Inbound): SLPumpStatusData;
     static decodeSetPumpSpeed(msg: Inbound): SLSimpleBoolData;
 }
+export declare namespace PumpMessage {
+    enum ResponseIDs {
+        PumpStatus = 12585,
+        SetPumpSpeed = 12587
+    }
+}
 export interface SLPumpStatusData extends SLData {
     pumpCircuits: SLPumpCircuitData[];
     pumpType: PumpTypes;

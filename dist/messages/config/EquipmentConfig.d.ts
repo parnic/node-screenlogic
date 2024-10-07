@@ -30,6 +30,24 @@ export declare class EquipmentConfigurationMessage {
     static decodeCustomNames(msg: Inbound): SLGetCustomNamesData;
     static decodeSetCustomNameAck(msg: Inbound): SLSimpleBoolData;
 }
+export declare namespace EquipmentConfigurationMessage {
+    enum ResponseIDs {
+        WeatherForecastChanged = 9806,
+        WeatherForecastAck = 9808,
+        GetHistoryData = 12502,
+        GetCircuitDefinitions = 12511,
+        GetControllerConfig = 12533,
+        HistoryDataPending = 12535,
+        NumCircuitNames = 12559,
+        AsyncCircuitNames = 12560,
+        GetCircuitNames = 12562,
+        GetCustomNamesAck = 12563,
+        SetCustomNameAck = 12565,
+        GetEquipmentConfiguration = 12567,
+        SetEquipmentConfiguration = 12568,
+        SetEquipmentConfigurationAck = 12569
+    }
+}
 export interface SLControllerConfigData extends SLData {
     controllerId: number;
     minSetPoint: number[];

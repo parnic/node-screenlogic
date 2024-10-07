@@ -4,6 +4,13 @@ export declare class ChlorMessage {
     static decodeSetIntellichlorConfig(msg: Inbound): SLSimpleBoolData;
     static decodeSetEnableIntellichlorConfig(msg: Inbound): SLSimpleBoolData;
 }
+export declare namespace ChlorMessage {
+    enum ResponseIDs {
+        GetIntellichlorConfig = 12573,
+        SetIntellichlorEnabled = 12575,
+        SetIntellichlorConfig = 12577
+    }
+}
 export interface SLIntellichlorData extends SLData {
     installed: boolean;
     status: number;

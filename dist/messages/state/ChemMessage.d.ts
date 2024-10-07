@@ -3,6 +3,14 @@ export declare class ChemMessage {
     static decodeChemDataMessage(msg: Inbound): SLChemData;
     static decodecChemHistoryMessage(msg: Inbound): SLChemHistory;
 }
+export declare namespace ChemMessage {
+    enum ResponseIDs {
+        AsyncChemicalData = 12505,
+        ChemicalHistoryData = 12506,
+        HistoryDataPending = 12597,
+        GetChemicalData = 12593
+    }
+}
 export interface SLChemData extends SLData {
     isValid: boolean;
     pH: number;

@@ -5,6 +5,15 @@ export declare class ScheduleMessage {
     static decodeDeleteSchedule(msg: Inbound): SLSimpleBoolData;
     static decodeSetSchedule(msg: Inbound): SLSimpleBoolData;
 }
+export declare namespace ScheduleMessage {
+    enum ResponseIDs {
+        ScheduleChanged = 12501,
+        GetSchedule = 12543,
+        AddSchedule = 12545,
+        DeleteSchedule = 12547,
+        SetSchedule = 12549
+    }
+}
 export interface SLScheduleDatum {
     scheduleId: number;
     circuitId: number;
