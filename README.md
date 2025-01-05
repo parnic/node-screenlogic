@@ -6,7 +6,10 @@ Tested with a Pentair ScreenLogic system on firmware versions 5.2 Build 736.0 Re
 
 See the [Wiki](https://github.com/parnic/node-screenlogic/wiki/2.0) for information on migrating from v1 to v2.
 
-Table of Contents:
+> [!IMPORTANT]
+> I no longer have a ScreenLogic system as I've upgraded to Pentair's newest controller, IntelliCenter. As such, I won't be able to maintain the library any longer. Please see <https://github.com/parnic/node-intellicenter> for the IntelliCenter version of this library.
+
+## Table of Contents
 
 * [Usage](#usage)
 * [Notes](#notes)
@@ -75,7 +78,7 @@ Table of Contents:
 See example.ts for an example of interfacing with the library. Broadly, import the library with
 
 ```javascript
-import * as Screenlogic from "./index";
+import * as Screenlogic from "node-screenlogic";
 ```
 
 Individual named imports can also be used. Then for local connections create a new ScreenLogic unit finder with
@@ -89,7 +92,7 @@ return Promise.resolve(localUnit);
 If you prefer to use an event-based approach, you can hook the `serverFound` event with:
 
 ```javascript
-.on('serverFound', function(server) { })
+finder.on('serverFound', function(server) { console.log(server); });
 await finder.searchAsync();
 ```
 
