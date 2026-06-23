@@ -27,6 +27,10 @@
         "mocha": "^11.1.0",
         "typescript": "^4.9.5"
     },
+    "overrides": {
+        "serialize-javascript": "^7.0.6",
+        "diff": "^8.0.4"
+    },
     "scripts": {
         "test": "mocha test/*.spec.js",
         "pretest": "eslint . ",
