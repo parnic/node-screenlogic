@@ -3,12 +3,24 @@
 const ScreenLogic = require('../dist/index');
 var assert = require('assert');
 
-// you'll need a ScreenLogic-enabled device on your network for this to succeed
+// A ScreenLogic device must answer the broadcast for these to run; without one
+// on the network the suite skips itself rather than failing (and leaking the
+// finder's UDP socket, which would otherwise keep the process alive).
+const discoveryMs = 4000;
+
 describe('Unit', function() {
   let unit;
   before(function(done) {
+    this.timeout(discoveryMs + 5000);
     let finder = new ScreenLogic.FindUnits();
+
+    const skipTimer = setTimeout(() => {
+      finder.close();
+      this.skip();
+    }, discoveryMs);
+
     finder.on('serverFound', async server => {
+      clearTimeout(skipTimer);
       finder.close();
 
       unit = new ScreenLogic.UnitConnection();
@@ -31,7 +43,9 @@ describe('Unit', function() {
   });
 
   after(async function() {
-    await unit.closeAsync();
+    if (unit) {
+      await unit.closeAsync();
+    }
   });
 
   it('gets pool status', function(done) {
